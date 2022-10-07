@@ -51,6 +51,8 @@ namespace SuperBarber.Controllers
                 && b.DistrictId == barberShopData.DistrictId
                  && b.Street == barberShopData.Street))
             {
+                this.ModelState.AddModelError(nameof(barberShop.Name), "This Barbershop already exist");
+
                 return View(barberShop);
             }
 

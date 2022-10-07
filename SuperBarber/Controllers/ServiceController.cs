@@ -23,6 +23,11 @@ namespace SuperBarber.Controllers
             if (!this.data.Categories.Any(c => c.Id == service.CategoryId))
             {
                 this.ModelState.AddModelError(nameof(service.CategoryId), "Category does not exist");
+            } 
+            
+            if (this.data.Services.Any(s => s.Name == service.Name && s.CategoryId == service.CategoryId))
+            {
+                this.ModelState.AddModelError(nameof(service.Name), "This service already exists");
             }
 
             if(!ModelState.IsValid)
