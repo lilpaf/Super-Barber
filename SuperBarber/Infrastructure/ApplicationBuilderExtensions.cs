@@ -14,6 +14,8 @@ namespace SuperBarber.Infrastructure
 
             data.Database.Migrate();
 
+            SeedCategories(data);
+
             return app;
         }
 

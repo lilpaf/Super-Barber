@@ -39,8 +39,8 @@ namespace SuperBarber.Models
         public string Street { get; init; }
 
         [Required]
-        [Url]
         [Display(Name = "Image URL")]
+        [Url]
         public string? ImageUrl { get; init; }
     }
 }

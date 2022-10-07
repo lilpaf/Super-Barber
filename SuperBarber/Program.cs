@@ -19,7 +19,7 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
     })
     .AddEntityFrameworkStores<SuperBarberDbContext>();
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options => options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true);
 
 var app = builder.Build();
 

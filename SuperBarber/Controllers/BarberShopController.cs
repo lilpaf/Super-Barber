@@ -9,10 +9,8 @@ namespace SuperBarber.Controllers
     {
         private readonly SuperBarberDbContext data;
 
-        public BarberShopController(SuperBarberDbContext data)
-        {
-            this.data = data;
-        }
+        public BarberShopController(SuperBarberDbContext data) 
+            => this.data = data;
 
         public IActionResult Add() => View();
 
@@ -24,13 +22,13 @@ namespace SuperBarber.Controllers
                 return View(barberShop);
             }
 
-            if (!this.data.Cities.Any(x => x.Name.ToLower() == barberShop.City.ToLower()))
+            if (!this.data.Cities.Any(c => c.Name.ToLower() == barberShop.City.ToLower()))
             {
                 this.data.Cities.Add(new City { Name = barberShop.City });
                 this.data.SaveChanges();
             }
             
-            if (!this.data.Districts.Any(x => x.Name.ToLower() == barberShop.District.ToLower()))
+            if (!this.data.Districts.Any(d => d.Name.ToLower() == barberShop.District.ToLower()))
             {
                 this.data.Districts.Add(new District { Name = barberShop.District });
                 this.data.SaveChanges();
@@ -40,18 +38,18 @@ namespace SuperBarber.Controllers
             {
                 Name = barberShop.Name,
                 CityId = this.data.Cities
-                .First(x => x.Name.ToLower() == barberShop.City.ToLower()).Id,
+                .First(c => c.Name.ToLower() == barberShop.City.ToLower()).Id,
                 DistrictId = this.data.Districts
-                .First(x => x.Name.ToLower() == barberShop.District.ToLower()).Id,
+                .First(d => d.Name.ToLower() == barberShop.District.ToLower()).Id,
                 Street = barberShop.Street,
                 ImageUrl = barberShop.ImageUrl
             };
 
             if (this.data.BarberShops
-                .Any(x => x.Name == barberShopData.Name 
-                && x.CityId == barberShopData.CityId
-                && x.DistrictId == barberShopData.DistrictId
-                 && x.Street == barberShopData.Street))
+                .Any(b => b.Name == barberShopData.Name 
+                && b.CityId == barberShopData.CityId
+                && b.DistrictId == barberShopData.DistrictId
+                 && b.Street == barberShopData.Street))
             {
                 return View(barberShop);
             }
