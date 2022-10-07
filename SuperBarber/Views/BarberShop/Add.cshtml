@@ -1,0 +1,40 @@
+﻿@model AddBarberShopFormModel
+
+@{
+    ViewData["Title"] = "Add Barbershop";
+}
+
+<div class="row">
+    <div class="col-sm-12 offset-lg-2 col-lg-8 offset-xl-3 col-xl-6">
+        <h2 class="heading-margin text-center">Add Barbershop</h2>
+        <form method="post">
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label">Barbershop name</label>
+                <input asp-for="Name" class="form-control">
+                <span asp-validation-for="Name" class="small text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="City" class="form-label">City</label>
+                <input asp-for="City" class="form-control" placeholder="Sofia, Varna, etc...">
+                <span asp-validation-for="City" class="small text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="District" class="form-label">District</label>
+                <input asp-for="District" class="form-control" placeholder="Lozenets, Serdika, etc...">
+                <span asp-validation-for="District" class="small text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Street" class="form-label">Street name and number</label>
+                <input asp-for="Street" class="form-control" placeholder="st. Srebarna 2А">
+                <span asp-validation-for="Street" class="small text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="ImageUrl" class="form-label">Your image URL</label>
+                <input asp-for="ImageUrl" class="form-control">
+                <span asp-validation-for="ImageUrl" class="small text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn-add-barbershop">Add</button>
+        </form>
+    </div>
+</div>
