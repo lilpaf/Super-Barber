@@ -1,0 +1,23 @@
+﻿@model IEnumerable<BarberShopListingViewModel>
+
+@{
+    ViewData["Title"] = "Barbershops";
+}
+
+<div class="row">
+    @foreach (var barbershop in Model)
+    {
+        <div class="col-md-6 col-lg-4">
+            <div class="card" style="width: 20rem;">
+                <img src="@barbershop.ImageUrl" class="card-img-top" alt="Barbershop image">
+                <div class="card-body">
+                    <h5 class="card-title">@barbershop.Name</h5>
+                    <p class="card-text">@barbershop.City, @barbershop.District</p>
+                    <p class="card-text">@barbershop.Street</p>
+                    <a asp-controller="BarberShop" asp-action="Services" asp-route-id="@barbershop.Id" class="btn btn-primary">See all the services</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+

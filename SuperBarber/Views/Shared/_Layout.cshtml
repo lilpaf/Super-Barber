@@ -20,10 +20,14 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="BarberShop" asp-action="Add">Add Barbershop</a>
+                            <a class="nav-link text-dark" asp-controller="BarberShop" asp-action="Add">Add Barbershop</a>
                         </li> 
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Service" asp-action="Add">Add Services</a>
+                            <a class="nav-link text-dark" asp-controller="Service" asp-action="Add">Add Services</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="BarberShop" asp-action="All">All Barbershops</a>
                         </li>
                     </ul>
                     <partial name="_LoginPartial" />

@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using static SuperBarber.Data.DataConstraints;
 
-namespace SuperBarber.Models
+namespace SuperBarber.Models.Service
 {
     public class AddServiceFormModel
     {
@@ -15,7 +15,7 @@ namespace SuperBarber.Models
         public string Name { get; init; }
 
         [Range(
-            PriceMinRange, 
+            PriceMinRange,
             PriceMaxRange,
             ErrorMessage = "Price should be in the range of {1} to {2} and can have only 2 nubmers after the decimal point")]
         public decimal Price { get; init; }

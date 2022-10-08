@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SuperBarber.Data;
 using SuperBarber.Data.Models;
-using SuperBarber.Models;
+using SuperBarber.Models.BarberShop;
 
 namespace SuperBarber.Controllers
 {
@@ -13,6 +13,23 @@ namespace SuperBarber.Controllers
             => this.data = data;
 
         public IActionResult Add() => View();
+
+        public IActionResult All()
+        {
+            var barberShops = this.data.BarberShops
+                .Select(b => new BarberShopListingViewModel
+                {
+                    Id = b.Id,
+                    Name = b.Name,
+                    City = b.City.Name,
+                    District = b.District.Name,
+                    Street = b.Street,
+                    ImageUrl = b.ImageUrl
+                })
+                .ToList();
+
+            return View(barberShops);
+        }
 
         [HttpPost]
         public IActionResult Add(AddBarberShopFormModel barberShop)
@@ -59,7 +76,7 @@ namespace SuperBarber.Controllers
             this.data.BarberShops.Add(barberShopData);
             this.data.SaveChanges();
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction(nameof(All));
         }
         
     }

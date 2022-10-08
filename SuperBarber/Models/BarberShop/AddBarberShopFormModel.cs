@@ -1,18 +1,18 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using static SuperBarber.Data.DataConstraints;
 
-namespace SuperBarber.Models
+namespace SuperBarber.Models.BarberShop
 {
     public class AddBarberShopFormModel
     {
         [Required]
         [StringLength(
-            ShopNameMaxLength, 
+            ShopNameMaxLength,
             MinimumLength = DefaultMinLength,
             ErrorMessage = "{0} should have a length between {2} and {1}"
             )]
         public string Name { get; init; }
-        
+
         [Required]
         [StringLength(
              AddressMaxLength,
