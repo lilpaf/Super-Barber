@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SuperBarber.Data;
 using SuperBarber.Data.Models;
-using SuperBarber.Models;
 using SuperBarber.Models.Service;
 
 namespace SuperBarber.Controllers

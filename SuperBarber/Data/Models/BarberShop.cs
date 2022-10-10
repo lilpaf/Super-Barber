@@ -22,6 +22,10 @@ namespace SuperBarber.Data.Models
         [MaxLength(AddressMaxLength)]
         public string Street { get; set; }
 
+        public TimeSpan StartHour { get; set; }
+
+        public TimeSpan FinishHour { get; set; }
+
         [Required]
         public string ImageUrl { get; set; }
 

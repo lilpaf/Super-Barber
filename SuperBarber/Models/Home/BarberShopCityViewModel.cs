@@ -1,6 +1,6 @@
-﻿namespace SuperBarber.Models
+﻿namespace SuperBarber.Models.Home
 {
-    public class ServiceCategoryViewModel
+    public class BarberShopCityViewModel
     {
         public int Id { get; init; }
 

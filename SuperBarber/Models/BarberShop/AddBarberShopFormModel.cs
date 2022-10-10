@@ -39,8 +39,14 @@ namespace SuperBarber.Models.BarberShop
         public string Street { get; init; }
 
         [Required]
+        public string StartHour { get; init; }
+
+        [Required]
+        public string FinishHour { get; init; }
+
+        [Required]
         [Display(Name = "Image URL")]
         [Url]
-        public string? ImageUrl { get; init; }
+        public string ImageUrl { get; init; }
     }
 }

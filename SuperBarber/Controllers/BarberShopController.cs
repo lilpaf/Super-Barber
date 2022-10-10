@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Humanizer;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using SuperBarber.Data;
 using SuperBarber.Data.Models;
 using SuperBarber.Models.BarberShop;
@@ -16,17 +18,29 @@ namespace SuperBarber.Controllers
 
         public IActionResult All()
         {
-            var barberShops = this.data.BarberShops
-                .Select(b => new BarberShopListingViewModel
-                {
-                    Id = b.Id,
-                    Name = b.Name,
-                    City = b.City.Name,
-                    District = b.District.Name,
-                    Street = b.Street,
-                    ImageUrl = b.ImageUrl
-                })
-                .ToList();
+            List<BarberShopListingViewModel> barberShops;
+            
+            if (TempData.ContainsKey("list"))
+            {
+                barberShops = JsonConvert.DeserializeObject<List<BarberShopListingViewModel>>((string) TempData["list"]);
+                TempData.Clear();
+            }
+            else
+            {
+                barberShops = this.data.BarberShops
+                    .Select(b => new BarberShopListingViewModel
+                    {
+                        Id = b.Id,
+                        Name = b.Name,
+                        City = b.City.Name,
+                        District = b.District.Name,
+                        Street = b.Street,
+                        StartHour = b.StartHour.ToString(@"hh\:mm"),
+                        FinishHour = b.FinishHour.ToString(@"hh\:mm"),
+                        ImageUrl = b.ImageUrl
+                    })
+                    .ToList();
+            }
 
             return View(barberShops);
         }
@@ -50,6 +64,20 @@ namespace SuperBarber.Controllers
                 this.data.Districts.Add(new District { Name = barberShop.District });
                 this.data.SaveChanges();
             }
+            
+            var startHourArr = barberShop.StartHour.Split(':');
+            var finishHourArr = barberShop.FinishHour.Split(':');
+
+            var startHour = new TimeSpan(int.Parse(startHourArr[0]), int.Parse(startHourArr[1]), 0);
+            
+            var finishHour = new TimeSpan(int.Parse(finishHourArr[0]), int.Parse(finishHourArr[1]), 0);
+
+            if (startHour >= finishHour)
+            {
+                this.ModelState.AddModelError(nameof(barberShop.StartHour), "Work start hour must be smaller that the finish hour. And can not be the same as the finish hour");
+
+                return View(barberShop);
+            }
 
             var barberShopData = new BarberShop
             {
@@ -59,6 +87,8 @@ namespace SuperBarber.Controllers
                 DistrictId = this.data.Districts
                 .First(d => d.Name.ToLower() == barberShop.District.ToLower()).Id,
                 Street = barberShop.Street,
+                StartHour = startHour,
+                FinishHour = finishHour,
                 ImageUrl = barberShop.ImageUrl
             };
 

@@ -14,7 +14,10 @@
                     <h5 class="card-title">@barbershop.Name</h5>
                     <p class="card-text">@barbershop.City, @barbershop.District</p>
                     <p class="card-text">@barbershop.Street</p>
-                    <a asp-controller="BarberShop" asp-action="Services" asp-route-id="@barbershop.Id" class="btn btn-primary">See all the services</a>
+                    <p class="card-text d-inline">Working hours:</p>
+                    <p class="card-text d-inline">@barbershop.StartHour</p>
+                    <p class="card-text d-inline">- @barbershop.FinishHour</p>
+                    <a asp-controller="BarberShop" asp-action="Services" asp-route-id="@barbershop.Id" class="btn btn-primary d-block mt-2">See all the services</a>
                 </div>
             </div>
         </div>
