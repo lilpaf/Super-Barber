@@ -11,13 +11,13 @@
 <div class="row">
     <div class="col-sm-12 offset-lg-2 col-lg-8 offset-xl-3 col-xl-6">
         <h2 class="heading-margin text-center">Find the nearest avalible Barbershop</h2>
-        <form method="post">
+        <form method="get">
             <div class="mb-3">
                 <label asp-for="City" class="form-label">City</label>
                 <select asp-for="City" class="form-select">
                     @foreach (var city in Model.Cities)
                     {
-                        <option value="@city.Id">@city.Name</option>
+                        <option value="@city">@city</option>
                     }
                 </select>
             </div>
@@ -26,7 +26,7 @@
                 <select asp-for="District" class="form-select">
                     @foreach (var district in Model.Districts)
                     {
-                        <option value="@district.Id">@district.Name</option>
+                        <option value="@district">@district</option>
                     }
                 </select>
             </div>

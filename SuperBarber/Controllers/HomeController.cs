@@ -15,30 +15,31 @@ namespace SuperBarber.Controllers
         public HomeController(SuperBarberDbContext data)
             => this.data = data;
 
-        public IActionResult Index() => View(new FilterBarberShopsViewModel
+        public IActionResult Index(string city, string district, string date, string time)
         {
-            Cities = GetBarberShopCities(),
-            Districts = GetBarberShopDistricts()
-        });
+            if (string.IsNullOrWhiteSpace(city) || string.IsNullOrWhiteSpace(district) || string.IsNullOrWhiteSpace(date) || string.IsNullOrWhiteSpace(time))
+            {
+                return View(new FilterBarberShopsViewModel
+                {
+                    Cities = this.data.Cities.Select(c => c.Name).OrderBy(c => c).ToList(),
+                    Districts = this.data.Districts.Select(d => d.Name).OrderBy(c => c).ToList()
+                });
+            }
+            var dateParsed = DateTime.Parse(date);
 
-        [HttpPost]
-        public IActionResult Index(FilterBarberShopsViewModel filterCiteria)
-        {
-            var date = DateTime.Parse(filterCiteria.Date);
+            var timeArr = time.Split(':');
 
-            var time = filterCiteria.Time.Split(':');
+            var ts = new TimeSpan(int.Parse(timeArr[0]), int.Parse(timeArr[1]), 0);
 
-            var ts = new TimeSpan(int.Parse(time[0]), int.Parse(time[1]), 0);
-
-            date = date.Date + ts;
+            dateParsed = dateParsed.Date + ts;
 
             var barberShopsData = data
                 .BarberShops
-                .Where(b => b.City.Id == filterCiteria.City &&
-                b.District.Id == filterCiteria.District &&
-                b.StartHour <= date.TimeOfDay &&
-                b.FinishHour >= date.TimeOfDay &&
-                b.Orders.Count(o => o.Date == date) == 0)
+                .Where(b => b.City.Name.ToLower().Trim() == city.ToLower().Trim() &&
+                b.District.Name.ToLower().Trim() == district.ToLower().Trim() &&
+                b.StartHour <= dateParsed.TimeOfDay &&
+                b.FinishHour >= dateParsed.TimeOfDay &&
+                b.Orders.Count(o => o.Date == dateParsed) == 0)
                 .Select(b => new BarberShopListingViewModel
                 {
                     Id = b.Id,
@@ -56,29 +57,7 @@ namespace SuperBarber.Controllers
 
             return RedirectToAction("All", "BarberShop");
         }
-        
-        private IEnumerable<BarberShopCityViewModel> GetBarberShopCities()
-            => this.data
-            .Cities
-            .Select(c => new BarberShopCityViewModel
-            {
-                Id = c.Id,
-                Name = c.Name
-            })
-            .ToList();
-        
-        private IEnumerable<BarberShopDistrictViewModel> GetBarberShopDistricts()
-            => this.data
-            .Districts
-            .Select(c => new BarberShopDistrictViewModel
-            {
-                Id = c.Id,
-                Name = c.Name
-            })
-            .ToList();
-
-
-
+       
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error() => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }

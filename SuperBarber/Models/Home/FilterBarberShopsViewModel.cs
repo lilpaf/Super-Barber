@@ -4,13 +4,15 @@ namespace SuperBarber.Models.Home
 {
     public class FilterBarberShopsViewModel
     {
-        public int City { get; init; }
+        [Required]
+        public string City { get; init; }
         
-        public IEnumerable<BarberShopCityViewModel> Cities { get; set; }
+        public IEnumerable<string> Cities { get; init; }
 
-        public int District { get; init; }
+        [Required]
+        public string District { get; init; }
 
-        public IEnumerable<BarberShopDistrictViewModel> Districts { get; set; }
+        public IEnumerable<string> Districts { get; init; }
 
         [Required]
         public string Date { get; init; }

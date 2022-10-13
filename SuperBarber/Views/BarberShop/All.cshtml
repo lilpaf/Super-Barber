@@ -1,26 +1,58 @@
-﻿@model IEnumerable<BarberShopListingViewModel>
+﻿@model AllBarberShopQueryModel
 
 @{
     ViewData["Title"] = "Barbershops";
 }
 
-<div class="row">
-    @foreach (var barbershop in Model)
-    {
-        <div class="col-md-6 col-lg-4">
-            <div class="card" style="width: 20rem;">
-                <img src="@barbershop.ImageUrl" class="card-img-top" alt="Barbershop image">
-                <div class="card-body">
-                    <h5 class="card-title">@barbershop.Name</h5>
-                    <p class="card-text">@barbershop.City, @barbershop.District</p>
-                    <p class="card-text">@barbershop.Street</p>
-                    <p class="card-text d-inline">Working hours:</p>
-                    <p class="card-text d-inline">@barbershop.StartHour</p>
-                    <p class="card-text d-inline">- @barbershop.FinishHour</p>
-                    <a asp-controller="BarberShop" asp-action="Services" asp-route-id="@barbershop.Id" class="btn btn-primary d-block mt-2">See all the services</a>
-                </div>
+@if (Model.BarberShops.Count() == 0)
+{
+    <div class="container-fluid py-5 text-center">
+        <h1 class="display-5 fw-bold">Welcome to Super Barber</h1>
+        <p class="fs-3">Right now we do not have any avalible barbershops.</p>
+        <a asp-controller="Home" asp-action="Index" button class="btn btn-primary btn-lg" type="button">Back to home</a>
+    </div>
+}
+else
+{
+        <form method="get">
+        <div class="row mb-5">
+            <div class="mb-3 col-md-4">
+                <label asp-for="SearchTerm" class="form-label">Search by name</label>
+                <input asp-for="SearchTerm" class="form-control">
+            </div>
+            <div class="mb-3 col-md-4">
+                <label asp-for="City" class="form-label">Search by city</label>
+                <select asp-for="City" class="form-select">
+                    @foreach (var city in Model.Cities)
+                    {
+                        <option value="@city">@city</option>
+                    }
+                </select>
+            </div>
+            <div class="mb-3 col-md-3 btn-search-margin">
+                <button type="submit" class="btn btn-primary">Search</button>
             </div>
         </div>
-    }
-</div>
+        </form>
+
+    <div class="row">
+        @foreach (var barbershop in Model.BarberShops)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card" style="width: 20rem;">
+                    <img src="@barbershop.ImageUrl" class="card-img-top" alt="Barbershop image">
+                    <div class="card-body">
+                        <h5 class="card-title">@barbershop.Name</h5>
+                        <p class="card-text">@barbershop.City, @barbershop.District</p>
+                        <p class="card-text">@barbershop.Street</p>
+                        <p class="card-text d-inline">Working hours:</p>
+                        <p class="card-text d-inline">@barbershop.StartHour</p>
+                        <p class="card-text d-inline">- @barbershop.FinishHour</p>
+                        <a asp-controller="BarberShop" asp-action="Services" asp-route-id="@barbershop.Id" class="btn btn-primary d-block mt-2">See all the services</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
 

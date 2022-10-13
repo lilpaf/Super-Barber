@@ -16,9 +16,26 @@ namespace SuperBarber.Controllers
 
         public IActionResult Add() => View();
 
-        public IActionResult All()
+        public IActionResult All(string searchTerm, string city)
         {
+            var barberShopQuery = this.data.BarberShops.AsQueryable();
+
             List<BarberShopListingViewModel> barberShops;
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                barberShopQuery = barberShopQuery
+                    .Where(b => b.Name
+                    .ToLower()
+                    .Trim()
+                    .Contains(searchTerm.ToLower().Trim()));
+            }
+            
+            if (!string.IsNullOrEmpty(city))
+            {
+                barberShopQuery = barberShopQuery
+                    .Where(b => b.City.Name == city);
+            }
             
             if (TempData.ContainsKey("list"))
             {
@@ -27,7 +44,7 @@ namespace SuperBarber.Controllers
             }
             else
             {
-                barberShops = this.data.BarberShops
+                barberShops = barberShopQuery
                     .Select(b => new BarberShopListingViewModel
                     {
                         Id = b.Id,
@@ -42,7 +59,18 @@ namespace SuperBarber.Controllers
                     .ToList();
             }
 
-            return View(barberShops);
+            var cities = this.data.Cities
+                .Select(c => c.Name)
+                .OrderBy(c => c)
+                .ToList();
+
+            return View(new AllBarberShopQueryModel
+            {
+                BarberShops = barberShops,
+                SearchTerm = searchTerm,
+                Cities = cities,
+                //Districts = districts
+            });
         }
 
         [HttpPost]
@@ -53,13 +81,15 @@ namespace SuperBarber.Controllers
                 return View(barberShop);
             }
 
-            if (!this.data.Cities.Any(c => c.Name.ToLower() == barberShop.City.ToLower()))
+            if (!this.data.Cities
+                .Any(c => c.Name.ToLower().Trim() == barberShop.City.ToLower().Trim()))
             {
                 this.data.Cities.Add(new City { Name = barberShop.City });
                 this.data.SaveChanges();
             }
             
-            if (!this.data.Districts.Any(d => d.Name.ToLower() == barberShop.District.ToLower()))
+            if (!this.data.Districts
+                .Any(d => d.Name.ToLower().Trim() == barberShop.District.ToLower().Trim()))
             {
                 this.data.Districts.Add(new District { Name = barberShop.District });
                 this.data.SaveChanges();
@@ -74,7 +104,7 @@ namespace SuperBarber.Controllers
 
             if (startHour >= finishHour)
             {
-                this.ModelState.AddModelError(nameof(barberShop.StartHour), "Work start hour must be smaller that the finish hour. And can not be the same as the finish hour");
+                this.ModelState.AddModelError(nameof(barberShop.StartHour), "Opening hour must be smaller that the closing hour. And can not be the same as the closing hour");
 
                 return View(barberShop);
             }
@@ -83,9 +113,9 @@ namespace SuperBarber.Controllers
             {
                 Name = barberShop.Name,
                 CityId = this.data.Cities
-                .First(c => c.Name.ToLower() == barberShop.City.ToLower()).Id,
+                .First(c => c.Name.ToLower().Trim() == barberShop.City.ToLower().Trim()).Id,
                 DistrictId = this.data.Districts
-                .First(d => d.Name.ToLower() == barberShop.District.ToLower()).Id,
+                .First(d => d.Name.ToLower().Trim() == barberShop.District.ToLower().Trim()).Id,
                 Street = barberShop.Street,
                 StartHour = startHour,
                 FinishHour = finishHour,
@@ -93,7 +123,7 @@ namespace SuperBarber.Controllers
             };
 
             if (this.data.BarberShops
-                .Any(b => b.Name == barberShopData.Name 
+                .Any(b => b.Name.ToLower().Trim() == barberShopData.Name.ToLower().Trim()
                 && b.CityId == barberShopData.CityId
                 && b.DistrictId == barberShopData.DistrictId
                  && b.Street == barberShopData.Street))
