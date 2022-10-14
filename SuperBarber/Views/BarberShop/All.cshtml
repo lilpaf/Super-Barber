@@ -16,17 +16,26 @@ else
 {
         <form method="get">
         <div class="row mb-5">
-            <div class="mb-3 col-md-4">
+            <div class="mb-3 col-md-3">
                 <label asp-for="SearchTerm" class="form-label">Search by name</label>
                 <input asp-for="SearchTerm" class="form-control">
             </div>
-            <div class="mb-3 col-md-4">
+            <div class="mb-3 col-md-3">
                 <label asp-for="City" class="form-label">Search by city</label>
                 <select asp-for="City" class="form-select">
+                    <option value="">All</option>
+
                     @foreach (var city in Model.Cities)
                     {
                         <option value="@city">@city</option>
                     }
+                </select>
+            </div>
+            <div class="mb-3 col-md-3">
+                <label asp-for="Sorting" class="form-label">Sort by</label>
+                <select asp-for="Sorting" class="form-select">
+                        <option value="0" selected>Name</option>
+                        <option value="1">City</option>
                 </select>
             </div>
             <div class="mb-3 col-md-3 btn-search-margin">
@@ -38,8 +47,8 @@ else
     <div class="row">
         @foreach (var barbershop in Model.BarberShops)
         {
-            <div class="col-md-6 col-lg-4">
-                <div class="card" style="width: 20rem;">
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100" style="width: 20rem;">
                     <img src="@barbershop.ImageUrl" class="card-img-top" alt="Barbershop image">
                     <div class="card-body">
                         <h5 class="card-title">@barbershop.Name</h5>

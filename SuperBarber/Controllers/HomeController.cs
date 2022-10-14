@@ -17,12 +17,25 @@ namespace SuperBarber.Controllers
 
         public IActionResult Index(string city, string district, string date, string time)
         {
+            var barberShopQuery = this.data.BarberShops.AsQueryable();
+
             if (string.IsNullOrWhiteSpace(city) || string.IsNullOrWhiteSpace(district) || string.IsNullOrWhiteSpace(date) || string.IsNullOrWhiteSpace(time))
             {
+                var cities = this.data.Cities
+                    .Select(c => c.Name)
+                    .OrderBy(c => c)
+                    .ToList();
+                
+                var districts = this.data.Districts
+                    .Select(d => d.Name)
+                    .OrderBy(d => d)
+                    .ToList();
+
                 return View(new FilterBarberShopsViewModel
                 {
-                    Cities = this.data.Cities.Select(c => c.Name).OrderBy(c => c).ToList(),
-                    Districts = this.data.Districts.Select(d => d.Name).OrderBy(c => c).ToList()
+                    Cities = cities,
+                    Districts = districts,
+                    IsFound = true
                 });
             }
             var dateParsed = DateTime.Parse(date);
@@ -33,13 +46,25 @@ namespace SuperBarber.Controllers
 
             dateParsed = dateParsed.Date + ts;
 
-            var barberShopsData = data
-                .BarberShops
+            if (district == "All")
+            {
+                barberShopQuery = barberShopQuery
+                .Where(b => b.City.Name.ToLower().Trim() == city.ToLower().Trim() &&
+                b.StartHour <= dateParsed.TimeOfDay &&
+                b.FinishHour >= dateParsed.TimeOfDay &&
+                b.Orders.Count(o => o.Date == dateParsed) == 0);
+            }
+            else 
+            {
+                barberShopQuery = barberShopQuery
                 .Where(b => b.City.Name.ToLower().Trim() == city.ToLower().Trim() &&
                 b.District.Name.ToLower().Trim() == district.ToLower().Trim() &&
                 b.StartHour <= dateParsed.TimeOfDay &&
                 b.FinishHour >= dateParsed.TimeOfDay &&
-                b.Orders.Count(o => o.Date == dateParsed) == 0)
+                b.Orders.Count(o => o.Date == dateParsed) == 0);
+            }
+
+            var barberShopsData = barberShopQuery
                 .Select(b => new BarberShopListingViewModel
                 {
                     Id = b.Id,
@@ -52,6 +77,26 @@ namespace SuperBarber.Controllers
                     ImageUrl = b.ImageUrl
                 })
                 .ToList();
+
+            if (barberShopsData.Count() == 0)
+            {
+                var cities = this.data.Cities
+                    .Select(c => c.Name)
+                    .OrderBy(c => c)
+                    .ToList();
+
+                var districts = this.data.Districts
+                    .Select(d => d.Name)
+                    .OrderBy(d => d)
+                    .ToList();
+
+                return View(new FilterBarberShopsViewModel
+                {
+                    Cities = cities,
+                    Districts = districts,
+                    IsFound = false
+                });
+            }
 
             TempData["list"] = JsonConvert.SerializeObject(barberShopsData);
 

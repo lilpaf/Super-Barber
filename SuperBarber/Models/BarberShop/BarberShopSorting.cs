@@ -1,6 +1,6 @@
 ﻿namespace SuperBarber.Models.BarberShop
 {
-    public enum BatberShopSorting
+    public enum BarberShopSorting
     {
         Name = 0,
         City = 1,

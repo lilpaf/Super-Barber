@@ -19,5 +19,7 @@ namespace SuperBarber.Models.Home
 
         [Required]
         public string Time { get; init; }
+        
+        public bool IsFound { get; init; }
     }
 }

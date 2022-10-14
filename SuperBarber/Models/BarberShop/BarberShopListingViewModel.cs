@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace SuperBarber.Models.BarberShop
+﻿namespace SuperBarber.Models.BarberShop
 {
     public class BarberShopListingViewModel
     {

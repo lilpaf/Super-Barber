@@ -1,9 +1,9 @@
-﻿using SuperBarber.Models.Home;
-
-namespace SuperBarber.Models.BarberShop
+﻿namespace SuperBarber.Models.BarberShop
 {
     public class AllBarberShopQueryModel
     {
+        //public const int BarberShopPerPage = 3;
+
         public string City { get; init; }
 
         public IEnumerable<string> Cities { get; init; }
@@ -14,8 +14,8 @@ namespace SuperBarber.Models.BarberShop
 
         public string SearchTerm { get; init; }
 
-        public BatberShopSorting Sorting { get; init; }
-
+        public BarberShopSorting Sorting { get; init; }
+        
         public IEnumerable<BarberShopListingViewModel> BarberShops { get; init; }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Humanizer;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using SuperBarber.Data;
 using SuperBarber.Data.Models;
@@ -14,28 +13,32 @@ namespace SuperBarber.Controllers
         public BarberShopController(SuperBarberDbContext data) 
             => this.data = data;
 
-        public IActionResult Add() => View();
-
-        public IActionResult All(string searchTerm, string city)
+        public IActionResult All([FromQuery]AllBarberShopQueryModel query)
         {
             var barberShopQuery = this.data.BarberShops.AsQueryable();
 
             List<BarberShopListingViewModel> barberShops;
 
-            if (!string.IsNullOrEmpty(searchTerm))
+            if (!string.IsNullOrEmpty(query.SearchTerm))
             {
                 barberShopQuery = barberShopQuery
                     .Where(b => b.Name
                     .ToLower()
                     .Trim()
-                    .Contains(searchTerm.ToLower().Trim()));
+                    .Contains(query.SearchTerm.ToLower().Trim()));
             }
             
-            if (!string.IsNullOrEmpty(city))
+            if (!string.IsNullOrEmpty(query.City))
             {
                 barberShopQuery = barberShopQuery
-                    .Where(b => b.City.Name == city);
+                    .Where(b => b.City.Name == query.City);
             }
+
+            barberShopQuery = query.Sorting switch
+            {
+                BarberShopSorting.City => barberShopQuery.OrderBy(b => b.City.Name),
+                BarberShopSorting.Name or _ => barberShopQuery.OrderBy(b => b.Name)
+            };
             
             if (TempData.ContainsKey("list"))
             {
@@ -67,11 +70,14 @@ namespace SuperBarber.Controllers
             return View(new AllBarberShopQueryModel
             {
                 BarberShops = barberShops,
-                SearchTerm = searchTerm,
+                SearchTerm = query.SearchTerm,
                 Cities = cities,
+                Sorting = query.Sorting,
                 //Districts = districts
             });
         }
+
+        public IActionResult Add() => View();
 
         [HttpPost]
         public IActionResult Add(AddBarberShopFormModel barberShop)
