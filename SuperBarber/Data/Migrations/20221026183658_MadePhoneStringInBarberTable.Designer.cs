@@ -12,8 +12,8 @@ using SuperBarber.Data;
 namespace SuperBarber.Data.Migrations
 {
     [DbContext(typeof(SuperBarberDbContext))]
-    [Migration("20221010141513_AddedWorkinHoursInTableBarberShop")]
-    partial class AddedWorkinHoursInTableBarberShop
+    [Migration("20221026183658_MadePhoneStringInBarberTable")]
+    partial class MadePhoneStringInBarberTable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -74,71 +74,6 @@ namespace SuperBarber.Data.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetRoleClaims", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
-
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.ToTable("AspNetUsers", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -228,12 +163,14 @@ namespace SuperBarber.Data.Migrations
 
             modelBuilder.Entity("SuperBarber.Data.Models.Barber", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
 
-                    b.Property<Guid>("BarberShopId")
-                        .HasColumnType("uniqueidentifier");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int?>("BarberShopId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -245,25 +182,31 @@ namespace SuperBarber.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Password")
+                    b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
-                    b.Property<int>("PhoneNumber")
-                        .HasColumnType("int");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("BarberShopId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Barbers");
                 });
 
             modelBuilder.Entity("SuperBarber.Data.Models.BarberShop", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<int>("CityId")
                         .HasColumnType("int");
@@ -305,8 +248,8 @@ namespace SuperBarber.Data.Migrations
                     b.Property<int>("ServiceId")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("BarberShopId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("BarberShopId")
+                        .HasColumnType("int");
 
                     b.HasKey("ServiceId", "BarberShopId");
 
@@ -375,17 +318,21 @@ namespace SuperBarber.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("BarberId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("BarberId")
+                        .HasColumnType("int");
 
-                    b.Property<Guid>("BarberShopId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("BarberShopId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("ServiceId")
                         .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -394,6 +341,8 @@ namespace SuperBarber.Data.Migrations
                     b.HasIndex("BarberShopId");
 
                     b.HasIndex("ServiceId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Orders");
                 });
@@ -426,45 +375,67 @@ namespace SuperBarber.Data.Migrations
 
             modelBuilder.Entity("SuperBarber.Data.Models.User", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(62)
-                        .HasColumnType("nvarchar(62)");
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
 
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PhoneNumber")
-                        .HasColumnType("int");
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
-                });
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
 
-            modelBuilder.Entity("SuperBarber.Data.Models.UserOrder", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("UserId", "OrderId");
-
-                    b.HasIndex("OrderId");
-
-                    b.ToTable("UserOrders");
+                    b.ToTable("AspNetUsers", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -478,7 +449,7 @@ namespace SuperBarber.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("SuperBarber.Data.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -487,7 +458,7 @@ namespace SuperBarber.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("SuperBarber.Data.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -502,7 +473,7 @@ namespace SuperBarber.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("SuperBarber.Data.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -511,7 +482,7 @@ namespace SuperBarber.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("SuperBarber.Data.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -522,11 +493,17 @@ namespace SuperBarber.Data.Migrations
                 {
                     b.HasOne("SuperBarber.Data.Models.BarberShop", "BarberShop")
                         .WithMany("Barbers")
-                        .HasForeignKey("BarberShopId")
+                        .HasForeignKey("BarberShopId");
+
+                    b.HasOne("SuperBarber.Data.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("BarberShop");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SuperBarber.Data.Models.BarberShop", b =>
@@ -569,13 +546,13 @@ namespace SuperBarber.Data.Migrations
 
             modelBuilder.Entity("SuperBarber.Data.Models.Order", b =>
                 {
-                    b.HasOne("SuperBarber.Data.Models.Barber", null)
+                    b.HasOne("SuperBarber.Data.Models.Barber", "Barber")
                         .WithMany("Orders")
                         .HasForeignKey("BarberId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("SuperBarber.Data.Models.BarberShop", null)
+                    b.HasOne("SuperBarber.Data.Models.BarberShop", "BarberShop")
                         .WithMany("Orders")
                         .HasForeignKey("BarberShopId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -587,7 +564,19 @@ namespace SuperBarber.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("SuperBarber.Data.Models.User", "User")
+                        .WithMany("Orders")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Barber");
+
+                    b.Navigation("BarberShop");
+
                     b.Navigation("Service");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SuperBarber.Data.Models.Service", b =>
@@ -599,25 +588,6 @@ namespace SuperBarber.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Category");
-                });
-
-            modelBuilder.Entity("SuperBarber.Data.Models.UserOrder", b =>
-                {
-                    b.HasOne("SuperBarber.Data.Models.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SuperBarber.Data.Models.User", "User")
-                        .WithMany("Orders")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Order");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SuperBarber.Data.Models.Barber", b =>

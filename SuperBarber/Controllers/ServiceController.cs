@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SuperBarber.Data;
 using SuperBarber.Data.Models;
 using SuperBarber.Models.Service;
 
 namespace SuperBarber.Controllers
 {
+    [Authorize]
     public class ServiceController : Controller
     {
         private readonly SuperBarberDbContext data;
@@ -12,47 +15,47 @@ namespace SuperBarber.Controllers
         public ServiceController(SuperBarberDbContext data)
         => this.data = data;
 
-        public IActionResult Add() => View(new AddServiceFormModel
+        public async Task<IActionResult> Add() => View(new AddServiceFormModel
         {
-            Categories = this.GetServiceCategories()
+            Categories = await this.GetServiceCategoriesAsync()
         });
 
         [HttpPost]
-        public IActionResult Add(AddServiceFormModel service)
+        public async Task<IActionResult> Add(AddServiceFormModel model)
         {
-            if (!this.data.Categories.Any(c => c.Id == service.CategoryId))
+            if (!this.data.Categories.Any(c => c.Id == model.CategoryId))
             {
-                this.ModelState.AddModelError(nameof(service.CategoryId), "Category does not exist");
+                this.ModelState.AddModelError(nameof(model.CategoryId), "Category does not exist");
             } 
             
-            if (this.data.Services.Any(s => s.Name.ToLower().Trim() == service.Name.ToLower().Trim() && s.CategoryId == service.CategoryId))
+            if (this.data.Services.Any(s => s.Name.ToLower().Trim() == model.Name.ToLower().Trim() && s.CategoryId == model.CategoryId))
             {
-                this.ModelState.AddModelError(nameof(service.Name), "This service already exists");
+                this.ModelState.AddModelError(nameof(model.Name), "This service already exists");
             }
 
             if(!ModelState.IsValid)
             {
-                service.Categories = this.GetServiceCategories();
+                model.Categories = await this.GetServiceCategoriesAsync();
 
-                return View(service);
+                return View(model);
             }
 
-            var serviceData = new Service
+            var service = new Service
             {
-                Name = service.Name,
-                Price = service.Price,
-                CategoryId = service.CategoryId
+                Name = model.Name,
+                Price = model.Price,
+                CategoryId = model.CategoryId
             };
 
-            this.data.Services.Add(serviceData);
+            await this.data.Services.AddAsync(service);
 
-            this.data.SaveChanges();
+            await this.data.SaveChangesAsync();
 
             return RedirectToAction("Index", "Home");
         }
 
-        private IEnumerable<ServiceCategoryViewModel> GetServiceCategories()
-            => this.data
+        private async Task<IEnumerable<ServiceCategoryViewModel>> GetServiceCategoriesAsync()
+            => await this.data
             .Categories
             .Select(c => new ServiceCategoryViewModel
             {
@@ -60,6 +63,6 @@ namespace SuperBarber.Controllers
                 Name = c.Name
             })
             .OrderBy(c => c.Name)
-            .ToList();
+            .ToListAsync();
     }
 }

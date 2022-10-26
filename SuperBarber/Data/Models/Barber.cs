@@ -1,28 +1,35 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using static SuperBarber.Data.DataConstraints;
 
 namespace SuperBarber.Data.Models
 {
     public class Barber
     {
-        [Key]
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         
         [Required]
         [MaxLength(FullNameMaxLength)]
         public string FullName { get; set; }
 
         [Required]
-        public string Password { get; set; }
-
-        public int PhoneNumber { get; set; }
+        [MaxLength(PhoneNumberMaxLength)]
+        public string PhoneNumber { get; set; }
 
         [Required]
         [MaxLength(EmailMaxLength)]
         public string Email { get; set; }
 
-        public Guid BarberShopId { get; set; }
-        public BarberShop BarberShop { get; set; }
+        public int? BarberShopId { get; set; }
+
+        [ForeignKey(nameof(BarberShopId))]
+        public BarberShop? BarberShop { get; set; }
+
+        [Required]
+        public string UserId { get; set; }
+        
+        [ForeignKey(nameof(UserId))]
+        public User User { get; set; }
 
         public ICollection<Order> Orders { get; set; } = new HashSet<Order>();
     }

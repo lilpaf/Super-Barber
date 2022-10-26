@@ -1,10 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace SuperBarber.Data.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class AddedSupeBarberTables : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -48,21 +49,6 @@ namespace SuperBarber.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Users",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PhoneNumber = table.Column<int>(type: "int", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(62)", maxLength: 62, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Users", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Services",
                 columns: table => new
                 {
@@ -87,11 +73,14 @@ namespace SuperBarber.Data.Migrations
                 name: "BarberShops",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     CityId = table.Column<int>(type: "int", nullable: false),
                     DistrictId = table.Column<int>(type: "int", nullable: false),
                     Street = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    StartHour = table.Column<TimeSpan>(type: "time", nullable: false),
+                    FinishHour = table.Column<TimeSpan>(type: "time", nullable: false),
                     ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
@@ -115,16 +104,23 @@ namespace SuperBarber.Data.Migrations
                 name: "Barbers",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     FullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PhoneNumber = table.Column<int>(type: "int", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(62)", maxLength: 62, nullable: false),
-                    BarberShopId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    BarberShopId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Barbers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Barbers_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Barbers_BarberShops_BarberShopId",
                         column: x => x.BarberShopId,
@@ -137,7 +133,7 @@ namespace SuperBarber.Data.Migrations
                 name: "BarberShopServices",
                 columns: table => new
                 {
-                    BarberShopId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BarberShopId = table.Column<int>(type: "int", nullable: false),
                     ServiceId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -162,8 +158,9 @@ namespace SuperBarber.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    BarberShopId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    BarberId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    BarberShopId = table.Column<int>(type: "int", nullable: false),
+                    BarberId = table.Column<int>(type: "int", nullable: false),
                     Date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ServiceId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -171,11 +168,17 @@ namespace SuperBarber.Data.Migrations
                 {
                     table.PrimaryKey("PK_Orders", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_Orders_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
                         name: "FK_Orders_Barbers_BarberId",
                         column: x => x.BarberId,
                         principalTable: "Barbers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Orders_BarberShops_BarberShopId",
                         column: x => x.BarberShopId,
@@ -190,34 +193,15 @@ namespace SuperBarber.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "UserOrders",
-                columns: table => new
-                {
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserOrders", x => new { x.UserId, x.OrderId });
-                    table.ForeignKey(
-                        name: "FK_UserOrders_Orders_OrderId",
-                        column: x => x.OrderId,
-                        principalTable: "Orders",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UserOrders_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_Barbers_BarberShopId",
                 table: "Barbers",
                 column: "BarberShopId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Barbers_UserId",
+                table: "Barbers",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BarberShops_CityId",
@@ -250,14 +234,14 @@ namespace SuperBarber.Data.Migrations
                 column: "ServiceId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Orders_UserId",
+                table: "Orders",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Services_CategoryId",
                 table: "Services",
                 column: "CategoryId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserOrders_OrderId",
-                table: "UserOrders",
-                column: "OrderId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -266,13 +250,7 @@ namespace SuperBarber.Data.Migrations
                 name: "BarberShopServices");
 
             migrationBuilder.DropTable(
-                name: "UserOrders");
-
-            migrationBuilder.DropTable(
                 name: "Orders");
-
-            migrationBuilder.DropTable(
-                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "Barbers");

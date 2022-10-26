@@ -1,21 +1,25 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using static SuperBarber.Data.DataConstraints;
 
 namespace SuperBarber.Data.Models
 {
     public class BarberShop
     {
-        [Key]
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         [Required]
         [MaxLength(ShopNameMaxLength)]
         public string Name { get; set; }
         
         public int CityId { get; set; }
+
+        [ForeignKey(nameof(CityId))]
         public City City { get; set; }
 
         public int DistrictId { get; set; }
+
+        [ForeignKey(nameof(DistrictId))]
         public District District { get; set; }
 
         [Required]

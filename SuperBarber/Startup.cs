@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SuperBarber.Data;
+using SuperBarber.Data.Models;
 using static SuperBarber.Infrastructure.ApplicationBuilderExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<SuperBarberDbContext>(options => options
@@ -13,9 +13,13 @@ builder.Services.AddDbContext<SuperBarberDbContext>(options => options
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+builder.Services.AddDefaultIdentity<User>(options =>
     {
-        options.SignIn.RequireConfirmedAccount = true;
+        //options.SignIn.RequireConfirmedAccount = true;
+        options.Password.RequireDigit = false;
+        options.Password.RequireLowercase = false;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireUppercase = false;
     })
     .AddEntityFrameworkStores<SuperBarberDbContext>();
 

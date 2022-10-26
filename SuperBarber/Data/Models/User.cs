@@ -1,26 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-using static SuperBarber.Data.DataConstraints;
+﻿using Microsoft.AspNetCore.Identity;
 
 namespace SuperBarber.Data.Models
 {
-    public class User
+    public class User : IdentityUser
     {
-        [Key]
-        public Guid Id { get; set; }
-
-        [Required]
-        [MaxLength(FullNameMaxLength)]
-        public string FullName { get; set; }
-
-        [Required]
-        public string Password { get; set; }
-
-        public int PhoneNumber { get; set; }
-
-        [Required]
-        [MaxLength(EmailMaxLength)]
-        public string Email { get; set; }
-
-        public ICollection<UserOrder> Orders { get; set; } = new HashSet<UserOrder>();
+        public ICollection<Order> Orders { get; set; } = new HashSet<Order>();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using SuperBarber.Data;
 using SuperBarber.Models;
@@ -15,21 +16,21 @@ namespace SuperBarber.Controllers
         public HomeController(SuperBarberDbContext data)
             => this.data = data;
 
-        public IActionResult Index(string city, string district, string date, string time)
+        public async Task<IActionResult> Index(string city, string district, string date, string time)
         {
             var barberShopQuery = this.data.BarberShops.AsQueryable();
 
             if (string.IsNullOrWhiteSpace(city) || string.IsNullOrWhiteSpace(district) || string.IsNullOrWhiteSpace(date) || string.IsNullOrWhiteSpace(time))
             {
-                var cities = this.data.Cities
+                var cities = await this.data.Cities
                     .Select(c => c.Name)
                     .OrderBy(c => c)
-                    .ToList();
+                    .ToListAsync();
                 
-                var districts = this.data.Districts
+                var districts = await this.data.Districts
                     .Select(d => d.Name)
                     .OrderBy(d => d)
-                    .ToList();
+                    .ToListAsync();
 
                 return View(new FilterBarberShopsViewModel
                 {
@@ -64,7 +65,7 @@ namespace SuperBarber.Controllers
                 b.Orders.Count(o => o.Date == dateParsed) == 0);
             }
 
-            var barberShopsData = barberShopQuery
+            var barberShopsData = await barberShopQuery
                 .Select(b => new BarberShopListingViewModel
                 {
                     Id = b.Id,
@@ -76,19 +77,19 @@ namespace SuperBarber.Controllers
                     FinishHour = b.FinishHour.ToString(@"hh\:mm"),
                     ImageUrl = b.ImageUrl
                 })
-                .ToList();
+                .ToListAsync();
 
             if (barberShopsData.Count() == 0)
             {
-                var cities = this.data.Cities
+                var cities = await this.data.Cities
                     .Select(c => c.Name)
                     .OrderBy(c => c)
-                    .ToList();
+                    .ToListAsync();
 
-                var districts = this.data.Districts
+                var districts = await this.data.Districts
                     .Select(d => d.Name)
                     .OrderBy(d => d)
-                    .ToList();
+                    .ToListAsync();
 
                 return View(new FilterBarberShopsViewModel
                 {
