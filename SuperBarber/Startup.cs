@@ -1,7 +1,9 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SuperBarber.Data;
 using SuperBarber.Data.Models;
+using SuperBarber.Services.Barbers;
+using SuperBarber.Services.BarberShops;
+using SuperBarber.Services.Service;
 using static SuperBarber.Infrastructure.ApplicationBuilderExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +26,10 @@ builder.Services.AddDefaultIdentity<User>(options =>
     .AddEntityFrameworkStores<SuperBarberDbContext>();
 
 builder.Services.AddControllersWithViews(options => options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true);
+
+builder.Services.AddTransient<IBarberShopService, BarberShopService>();
+builder.Services.AddTransient<IBarberService, BarberService>();
+builder.Services.AddTransient<IServiceService, ServiceService>();
 
 var app = builder.Build();
 

@@ -1,68 +1,46 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SuperBarber.Data;
-using SuperBarber.Data.Models;
 using SuperBarber.Models.Service;
+using SuperBarber.Services.CutomException;
+using SuperBarber.Services.Service;
 
 namespace SuperBarber.Controllers
 {
     [Authorize]
     public class ServiceController : Controller
     {
-        private readonly SuperBarberDbContext data;
+        private readonly IServiceService serviceService;
 
-        public ServiceController(SuperBarberDbContext data)
-        => this.data = data;
+        public ServiceController(IServiceService serviceService)
+        => this.serviceService = serviceService;
 
         public async Task<IActionResult> Add() => View(new AddServiceFormModel
         {
-            Categories = await this.GetServiceCategoriesAsync()
+            Categories = await serviceService.GetServiceCategoriesAsync()
         });
 
         [HttpPost]
         public async Task<IActionResult> Add(AddServiceFormModel model)
         {
-            if (!this.data.Categories.Any(c => c.Id == model.CategoryId))
+            try
             {
-                this.ModelState.AddModelError(nameof(model.CategoryId), "Category does not exist");
-            } 
-            
-            if (this.data.Services.Any(s => s.Name.ToLower().Trim() == model.Name.ToLower().Trim() && s.CategoryId == model.CategoryId))
-            {
-                this.ModelState.AddModelError(nameof(model.Name), "This service already exists");
-            }
+                if (!ModelState.IsValid)
+                {
+                    model.Categories = await serviceService.GetServiceCategoriesAsync();
 
-            if(!ModelState.IsValid)
+                    return View(model);
+                }
+
+                await serviceService.AddService(model);
+
+                return RedirectToAction("Index", "Home");
+            }
+            catch (ModelStateCustomException ex)
             {
-                model.Categories = await this.GetServiceCategoriesAsync();
+                this.ModelState.AddModelError(ex.Key, ex.Message);
 
                 return View(model);
             }
-
-            var service = new Service
-            {
-                Name = model.Name,
-                Price = model.Price,
-                CategoryId = model.CategoryId
-            };
-
-            await this.data.Services.AddAsync(service);
-
-            await this.data.SaveChangesAsync();
-
-            return RedirectToAction("Index", "Home");
         }
-
-        private async Task<IEnumerable<ServiceCategoryViewModel>> GetServiceCategoriesAsync()
-            => await this.data
-            .Categories
-            .Select(c => new ServiceCategoryViewModel
-            {
-                Id = c.Id,
-                Name = c.Name
-            })
-            .OrderBy(c => c.Name)
-            .ToListAsync();
     }
 }

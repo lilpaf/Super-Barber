@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SuperBarber.Data;
-using SuperBarber.Data.Models;
 using SuperBarber.Models.Barber;
-using SuperBarber.Services;
+using SuperBarber.Services.Barbers;
+using SuperBarber.Services.CutomException;
 using System.Security.Claims;
 
 namespace SuperBarber.Controllers
@@ -11,10 +10,10 @@ namespace SuperBarber.Controllers
     [Authorize]
     public class BarberController : Controller
     {
-        private readonly SuperBarberDbContext data;
+        private readonly IBarberService barberService;
 
-        public BarberController(SuperBarberDbContext data)
-            => this.data = data;
+        public BarberController(IBarberService barberService)
+            => this.barberService = barberService;
 
         public IActionResult Add()
             => View();
@@ -22,35 +21,27 @@ namespace SuperBarber.Controllers
         [HttpPost]
         public async Task<IActionResult> Add(AddBarberFormModel model)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (!ModelState.IsValid)
+            try
             {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (!ModelState.IsValid)
+                {
+                    return View(model);
+                }
+
+                var userEmail = User.FindFirstValue(ClaimTypes.Email);
+
+                await barberService.AddBarber(userId, userEmail, model);
+
+                return RedirectToAction("All", "BarberShop");
+            }
+            catch (ModelStateCustomException ex)
+            {
+                this.ModelState.AddModelError(ex.Key, ex.Message);
+
                 return View(model);
             }
-
-            if (this.data.Barbers.Any(b => b.UserId == userId))
-            {
-                this.ModelState.AddModelError(nameof(model.FullName), "User is already a barber");
-
-                return View(model);
-            }
-
-            var userEmail = User.FindFirstValue(ClaimTypes.Email);
-
-            var barber = new Barber
-            {
-                FullName = model.FullName,
-                PhoneNumber = model.PhoneNumber,
-                Email = userEmail,
-                UserId = userId,
-            };
-
-            await data.Barbers.AddAsync(barber);
-            
-            await data.SaveChangesAsync();
-
-            return RedirectToAction("All", "BarberShop");
         }
 
     }
