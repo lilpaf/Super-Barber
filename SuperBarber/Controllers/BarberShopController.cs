@@ -23,10 +23,10 @@ namespace SuperBarber.Controllers
                 var barberShops = JsonConvert.DeserializeObject<List<BarberShopListingViewModel>>((string) TempData["list"]);
                 TempData.Clear();
 
-                return View(await barberShopService.AllBarberShops(query, barberShops));
+                return View(await barberShopService.AllBarberShopsAsync(query, barberShops));
             }
 
-            return View(await barberShopService.AllBarberShops(query));
+            return View(await barberShopService.AllBarberShopsAsync(query));
         }
 
         public IActionResult Add() => View();
@@ -41,7 +41,7 @@ namespace SuperBarber.Controllers
                     return View(model);
                 }
 
-                await barberShopService.AddBarberShop(model);
+                await barberShopService.AddBarberShopAsync(model);
 
                 return RedirectToAction(nameof(All));
             }

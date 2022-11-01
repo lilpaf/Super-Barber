@@ -7,7 +7,7 @@ namespace SuperBarber.Models.Service
     {
         [Required]
         [StringLength(
-            FullNameMaxLength,
+            ServiceNameMaxLength,
             MinimumLength = DefaultMinLength,
             ErrorMessage = "The name of the service should have a length between {2} and {1}"
             )]

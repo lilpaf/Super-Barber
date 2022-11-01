@@ -53,3 +53,11 @@ body {
     height: 15vw;
     object-fit: cover;
 }
+
+.list-error ul {
+    list-style-type: none;
+}
+
+.first-last-name-width {
+    width: 50%;
+}

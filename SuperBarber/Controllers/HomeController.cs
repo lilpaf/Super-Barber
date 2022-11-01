@@ -1,109 +1,53 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using SuperBarber.Data;
 using SuperBarber.Models;
-using SuperBarber.Models.BarberShop;
 using SuperBarber.Models.Home;
+using SuperBarber.Services.CutomException;
+using SuperBarber.Services.Home;
 using System.Diagnostics;
 
 namespace SuperBarber.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly SuperBarberDbContext data;
+        private readonly IHomeService homeService;
 
-        public HomeController(SuperBarberDbContext data)
-            => this.data = data;
+        public HomeController(IHomeService homeService)
+            => this.homeService = homeService;
 
         public async Task<IActionResult> Index(string city, string district, string date, string time)
         {
-            var barberShopQuery = this.data.BarberShops.AsQueryable();
-
-            if (string.IsNullOrWhiteSpace(city) || string.IsNullOrWhiteSpace(district) || string.IsNullOrWhiteSpace(date) || string.IsNullOrWhiteSpace(time))
+            try
             {
-                var cities = await this.data.Cities
-                    .Select(c => c.Name)
-                    .OrderBy(c => c)
-                    .ToListAsync();
-                
-                var districts = await this.data.Districts
-                    .Select(d => d.Name)
-                    .OrderBy(d => d)
-                    .ToListAsync();
+                if (string.IsNullOrWhiteSpace(city) || string.IsNullOrWhiteSpace(district) || string.IsNullOrWhiteSpace(date) || string.IsNullOrWhiteSpace(time))
+                {
+                    //ModelState.AddModelError("", "Invalid search criteria");
+
+                    return View(new FilterBarberShopsViewModel
+                    {
+                        Cities = await homeService.GetCitiesAsync(),
+                        Districts = await homeService.GetDistrictsAsync(),
+                    });
+                }
+
+                var barberShops = await homeService.SearchAvalibleBarbershopAsync(city, district, date, time);
+
+                TempData["list"] = JsonConvert.SerializeObject(barberShops);
+
+                return RedirectToAction("All", "BarberShop");
+            }
+            catch (ModelStateCustomException ex)
+            {
+                this.ModelState.AddModelError(ex.Key, ex.Message);
 
                 return View(new FilterBarberShopsViewModel
                 {
-                    Cities = cities,
-                    Districts = districts,
-                    IsFound = true
+                    Cities = await homeService.GetCitiesAsync(),
+                    Districts = await homeService.GetDistrictsAsync(),
                 });
             }
-            var dateParsed = DateTime.Parse(date);
-
-            var timeArr = time.Split(':');
-
-            var ts = new TimeSpan(int.Parse(timeArr[0]), int.Parse(timeArr[1]), 0);
-
-            dateParsed = dateParsed.Date + ts;
-
-            if (district == "All")
-            {
-                barberShopQuery = barberShopQuery
-                .Where(b => b.City.Name.ToLower().Trim() == city.ToLower().Trim() &&
-                b.StartHour <= dateParsed.TimeOfDay &&
-                b.FinishHour >= dateParsed.TimeOfDay &&
-                b.Orders.Count(o => o.Date == dateParsed) == 0);
-            }
-            else 
-            {
-                barberShopQuery = barberShopQuery
-                .Where(b => b.City.Name.ToLower().Trim() == city.ToLower().Trim() &&
-                b.District.Name.ToLower().Trim() == district.ToLower().Trim() &&
-                b.StartHour <= dateParsed.TimeOfDay &&
-                b.FinishHour >= dateParsed.TimeOfDay &&
-                b.Orders.Count(o => o.Date == dateParsed) == 0);
-            }
-
-            var barberShopsData = await barberShopQuery
-                .Select(b => new BarberShopListingViewModel
-                {
-                    Id = b.Id,
-                    Name = b.Name,
-                    City = b.City.Name,
-                    District = b.District.Name,
-                    Street = b.Street,
-                    StartHour = b.StartHour.ToString(@"hh\:mm"),
-                    FinishHour = b.FinishHour.ToString(@"hh\:mm"),
-                    ImageUrl = b.ImageUrl
-                })
-                .ToListAsync();
-
-            if (barberShopsData.Count() == 0)
-            {
-                var cities = await this.data.Cities
-                    .Select(c => c.Name)
-                    .OrderBy(c => c)
-                    .ToListAsync();
-
-                var districts = await this.data.Districts
-                    .Select(d => d.Name)
-                    .OrderBy(d => d)
-                    .ToListAsync();
-
-                return View(new FilterBarberShopsViewModel
-                {
-                    Cities = cities,
-                    Districts = districts,
-                    IsFound = false
-                });
-            }
-
-            TempData["list"] = JsonConvert.SerializeObject(barberShopsData);
-
-            return RedirectToAction("All", "BarberShop");
         }
-       
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error() => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }

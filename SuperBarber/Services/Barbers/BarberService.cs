@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Design;
-using SuperBarber.Data;
+﻿using SuperBarber.Data;
 using SuperBarber.Data.Models;
 using SuperBarber.Models.Barber;
 using SuperBarber.Services.CutomException;
@@ -13,18 +12,21 @@ namespace SuperBarber.Services.Barbers
         public BarberService(SuperBarberDbContext data)
             => this.data = data;
 
-        public async Task AddBarber(string userId, string userEmail, AddBarberFormModel model)
+        public async Task AddBarberAsync(string userId)
         {
             if (this.data.Barbers.Any(b => b.UserId == userId))
             {
-                throw new ModelStateCustomException(nameof(model.FullName), "User is already a barber");
+                throw new ModelStateCustomException("", "User is already a barber");
             }
+
+            var user = await this.data.Users.FindAsync(userId);
 
             var barber = new Barber
             {
-                FullName = model.FullName,
-                PhoneNumber = model.PhoneNumber,
-                Email = userEmail,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                PhoneNumber = user.PhoneNumber,
+                Email = user.Email,
                 UserId = userId,
             };
 

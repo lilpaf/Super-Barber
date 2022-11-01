@@ -26,12 +26,13 @@ namespace SuperBarber.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    model.Categories = await serviceService.GetServiceCategoriesAsync();
-
-                    return View(model);
+                    return View(new AddServiceFormModel
+                    {
+                        Categories = await serviceService.GetServiceCategoriesAsync()
+                    });
                 }
 
-                await serviceService.AddService(model);
+                await serviceService.AddServiceAsync(model);
 
                 return RedirectToAction("Index", "Home");
             }

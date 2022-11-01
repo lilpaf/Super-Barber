@@ -23,7 +23,7 @@ namespace SuperBarber.Services.Service
             .OrderBy(c => c.Name)
             .ToListAsync();
 
-        public async Task AddService(AddServiceFormModel model)
+        public async Task AddServiceAsync(AddServiceFormModel model)
         {
             if (!this.data.Categories.Any(c => c.Id == model.CategoryId))
             {

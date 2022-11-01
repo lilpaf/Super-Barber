@@ -1,25 +1,55 @@
-﻿@model AddBarberFormModel
-
-@{
+﻿@{
     ViewBag.Title = "Become Barber";
 }
 
 <div class="row">
     <div class="col-sm-12 offset-lg-2 col-lg-8 offset-xl-3 col-xl-6">
         <h2 class="heading-margin text-center">@ViewBag.Title</h2>
-        <form method="post">
-            <div class="mb-3">
-                <label asp-for="FullName" class="form-label">Full Name</label>
-                <input asp-for="FullName" class="form-control">
-                <span asp-validation-for="FullName" class="small text-danger"></span>
+        <h3 class="heading-margin text-center">Terms and conditions</h3>
+        <p class="mb-2">
+            In order to become a barber you need to be employed as barber or own a barbershop. If you own a barbershop you should have registered store accourding to the coressponding law in your country.
+        </p>
+        <p class="mb-3">
+            By agreeing to the terms and condutions you confirm that you are liable if your services or barbershop do not meet the requirements of the coressponding law in your country.
+        </p>
+        
+        <form class="row g-3 needs-validation" novalidate method="post">
+            
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" value="true" id="invalidCheck" required>
+                <label class="form-check-label" for="invalidCheck">
+                    Agree to terms and conditions
+                </label>
+                <div class="invalid-feedback">
+                    You must agree before submitting.
+                </div>
             </div>
-            <div class="mb-3">
-                <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
-                <input asp-for="PhoneNumber" class="form-control" placeholder="+359 2 304 0010">
-                <span asp-validation-for="PhoneNumber" class="small text-danger"></span>
-            </div>
-           
-            <button type="submit" class="btn-submit-big">Add</button>
+            
+            <button type="submit" class="btn-submit-big">Register as barber</button>
+
+            <div asp-validation-summary="ModelOnly" class="text-danger text-center list-error"></div>
         </form>
     </div>
 </div>
+
+<script>
+    (function () {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>

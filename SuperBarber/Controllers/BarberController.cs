@@ -15,34 +15,27 @@ namespace SuperBarber.Controllers
         public BarberController(IBarberService barberService)
             => this.barberService = barberService;
 
-        public IActionResult Add()
-            => View();
+        [HttpGet]
+        public IActionResult Add() => View();
 
         [HttpPost]
-        public async Task<IActionResult> Add(AddBarberFormModel model)
+        [ActionName("Add")]
+        public async Task<IActionResult> AddBarber()
         {
             try
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-                if (!ModelState.IsValid)
-                {
-                    return View(model);
-                }
+                    await barberService.AddBarberAsync(userId);
 
-                var userEmail = User.FindFirstValue(ClaimTypes.Email);
-
-                await barberService.AddBarber(userId, userEmail, model);
-
-                return RedirectToAction("All", "BarberShop");
+                    return RedirectToAction("All", "BarberShop");
             }
             catch (ModelStateCustomException ex)
             {
                 this.ModelState.AddModelError(ex.Key, ex.Message);
 
-                return View(model);
+                return View();
             }
         }
-
     }
 }

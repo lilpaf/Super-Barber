@@ -1,12 +1,12 @@
 ﻿@model AddServiceFormModel
 
 @{
-    ViewData["Title"] = "Add Barbershop";
+    ViewData["Title"] = "Add Service";
 }
 
 <div class="row">
     <div class="col-sm-12 offset-lg-2 col-lg-8 offset-xl-3 col-xl-6">
-        <h2 class="heading-margin text-center">Add Service</h2>
+        <h2 class="heading-margin text-center">@ViewBag.Title</h2>
         <form method="post">
             <div class="mb-3">
                 <label asp-for="Name" class="form-label">Service name</label>

@@ -5,8 +5,8 @@ namespace SuperBarber.Services.BarberShops
 {
     public interface IBarberShopService
     {
-        Task<AllBarberShopQueryModel> AllBarberShops([FromQuery] AllBarberShopQueryModel query, List<BarberShopListingViewModel> barberShops = null);
+        Task<AllBarberShopQueryModel> AllBarberShopsAsync([FromQuery] AllBarberShopQueryModel query, List<BarberShopListingViewModel> barberShops = null);
 
-        Task AddBarberShop(AddBarberShopFormModel model);
+        Task AddBarberShopAsync(AddBarberShopFormModel model);
     }
 }

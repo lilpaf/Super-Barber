@@ -4,6 +4,6 @@ namespace SuperBarber.Services.Barbers
 {
     public interface IBarberService
     {
-        Task AddBarber(string userId, string userEmail, AddBarberFormModel model);
+        Task AddBarberAsync(string userId);
     }
 }

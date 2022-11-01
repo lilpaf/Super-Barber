@@ -14,7 +14,7 @@ namespace SuperBarber.Services.BarberShops
         public BarberShopService(SuperBarberDbContext data)
             => this.data = data;
 
-        public async Task<AllBarberShopQueryModel> AllBarberShops([FromQuery] AllBarberShopQueryModel query, List<BarberShopListingViewModel> barberShops = null)
+        public async Task<AllBarberShopQueryModel> AllBarberShopsAsync([FromQuery] AllBarberShopQueryModel query, List<BarberShopListingViewModel> barberShops = null)
         {
             var barberShopQuery = this.data.BarberShops.AsQueryable();
 
@@ -53,7 +53,7 @@ namespace SuperBarber.Services.BarberShops
                      })
                      .ToListAsync();
 
-            var cities = await GetCities();
+            var cities = await GetCitiesAsync();
 
             return new AllBarberShopQueryModel
             {
@@ -65,14 +65,14 @@ namespace SuperBarber.Services.BarberShops
             };
         }
 
-        private async Task<IEnumerable<string>> GetCities()
+        private async Task<IEnumerable<string>> GetCitiesAsync()
             => await this.data.Cities
                 .Select(c => c.Name)
                 .OrderBy(c => c)
                 .ToListAsync();
 
 
-        public async Task AddBarberShop(AddBarberShopFormModel model)
+        public async Task AddBarberShopAsync(AddBarberShopFormModel model)
         {
             if (!this.data.Cities
                 .Any(c => c.Name.ToLower().Trim() == model.City.ToLower().Trim()))

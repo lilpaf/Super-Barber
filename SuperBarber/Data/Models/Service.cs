@@ -10,7 +10,7 @@ namespace SuperBarber.Data.Models
         public int Id { get; set; }
 
         [Required]
-        [MaxLength(FullNameMaxLength)]
+        [MaxLength(ServiceNameMaxLength)]
         public string Name { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]

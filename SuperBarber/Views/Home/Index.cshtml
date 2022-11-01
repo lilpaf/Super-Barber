@@ -11,13 +11,8 @@
 <div class="row">
     <div class="col-sm-12 offset-lg-2 col-lg-8 offset-xl-3 col-xl-6">
         <h2 class="heading-margin text-center">Find the nearest avalible Barbershop</h2>
+        <div asp-validation-summary="ModelOnly" class="text-danger text-center list-error"></div>
         <form method="get">
-            @if (!Model.IsFound)
-            {
-                <div>
-                    <p class="text-sm-center text-danger">Right now we do not have any avalible barbershops matching your criteria.</p>
-                </div>
-            }
             <div class="mb-3">
                 <label asp-for="City" class="form-label">City</label>
                 <select asp-for="City" class="form-select">
