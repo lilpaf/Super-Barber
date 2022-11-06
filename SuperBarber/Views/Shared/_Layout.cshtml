@@ -8,6 +8,10 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/SuperBarber.styles.css" asp-append-version="true" />
 </head>
+
+@{
+    var userIsBarber = User.IsInRole(CustomRoles.BarberRoleName);
+}
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
@@ -22,13 +26,16 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="BarberShop" asp-action="All">All Barbershops</a>
                         </li>
-                        @if (User?.Identity?.IsAuthenticated ?? false)
+                        @if (userIsBarber)
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="BarberShop" asp-action="Add">Add Barbershop</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="Service" asp-action="Add">Add Service</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="BarberShop" asp-action="Mine">My Barbershops</a>
                             </li>
                         }
                     </ul>

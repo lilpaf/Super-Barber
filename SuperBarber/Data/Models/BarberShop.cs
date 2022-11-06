@@ -37,6 +37,6 @@ namespace SuperBarber.Data.Models
         
         public ICollection<Order> Orders { get; set; } = new HashSet<Order>();
         
-        public ICollection<Barber> Barbers { get; set; } = new HashSet<Barber>();
+        public ICollection<Barber> Barbers { get; set; } = new HashSet<Barber>(); 
     }
 }

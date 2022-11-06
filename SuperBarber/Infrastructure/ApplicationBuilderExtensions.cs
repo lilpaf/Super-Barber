@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using SuperBarber.Data;
 using SuperBarber.Data.Models;
+using static SuperBarber.CustomRoles;
 
 namespace SuperBarber.Infrastructure
 {
@@ -8,13 +10,18 @@ namespace SuperBarber.Infrastructure
     {
         public static IApplicationBuilder PrepareDataBase(this IApplicationBuilder app)
         {
-            using var scopedServices = app.ApplicationServices.CreateScope();
-
-            var data = scopedServices.ServiceProvider.GetService<SuperBarberDbContext>();
+            using var serviceScope = app.ApplicationServices.CreateScope();
+            
+            var services = serviceScope.ServiceProvider;
+            
+            var data = services.GetRequiredService<SuperBarberDbContext>();
 
             data.Database.Migrate();
 
             SeedCategories(data);
+            SeedAdministrotor(services);
+            SeedBarberRole(services);
+            SeedBarberShopOwnerRole(services);
 
             return app;
         }
@@ -26,7 +33,7 @@ namespace SuperBarber.Infrastructure
                 return;
             }
 
-            data.Categories.AddRange(new[] 
+            data.Categories.AddRange(new[]
             {
                 new Category{ Name = "Hair" },
                 new Category{ Name = "Face" },
@@ -34,6 +41,81 @@ namespace SuperBarber.Infrastructure
             });
 
             data.SaveChanges();
+        }
+
+        private static void SeedAdministrotor(IServiceProvider services)
+        {
+            var userManager = services.GetRequiredService<UserManager<User>>();
+            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+
+            Task.Run(async () =>
+            {
+                if (await roleManager.RoleExistsAsync(AdministratorRoleName))
+                {
+                    return;
+                }
+
+                var role = new IdentityRole { Name = AdministratorRoleName };
+
+                await roleManager.CreateAsync(role);
+
+                const string adminEmail = "admin@barbers.com";
+                const string adminPassword = "admin!23";
+                const string adminFirstName = "AdminFirstName";
+                const string adminLastName = "AdminLastName";
+
+                var user = new User
+                {
+                    Email = adminEmail,
+                    UserName = adminEmail,
+                    FirstName = adminFirstName,
+                    LastName = adminLastName,
+                };
+
+                await userManager.CreateAsync(user);
+
+                await userManager.AddToRoleAsync(user, role.Name);
+            })
+            .GetAwaiter()
+            .GetResult();
+        }
+        
+        private static void SeedBarberRole(IServiceProvider services)
+        {
+            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+
+            Task.Run(async () =>
+            {
+                if (await roleManager.RoleExistsAsync(BarberRoleName))
+                {
+                    return;
+                }
+
+                var role = new IdentityRole { Name = BarberRoleName };
+
+                await roleManager.CreateAsync(role);
+            })
+            .GetAwaiter()
+            .GetResult();
+        }
+        
+        private static void SeedBarberShopOwnerRole(IServiceProvider services)
+        {
+            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+
+            Task.Run(async () =>
+            {
+                if (await roleManager.RoleExistsAsync(BarberShopOwnerRoleName))
+                {
+                    return;
+                }
+
+                var role = new IdentityRole { Name = BarberShopOwnerRoleName };
+
+                await roleManager.CreateAsync(role);
+            })
+            .GetAwaiter()
+            .GetResult();
         }
     }
 }

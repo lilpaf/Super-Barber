@@ -3,7 +3,7 @@ using static SuperBarber.Data.DataConstraints;
 
 namespace SuperBarber.Models.BarberShop
 {
-    public class AddBarberShopFormModel
+    public class BarberShopFormModel
     {
         [Required]
         [StringLength(

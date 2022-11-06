@@ -1,7 +1,7 @@
 ﻿@model AllBarberShopQueryModel
 
 @{
-    ViewData["Title"] = "Barbershops";
+    ViewBag.Title = "Barbershops";
 }
 
 @if (Model.BarberShops.Count() == 0)
@@ -44,24 +44,8 @@ else
         </div>
         </form>
 
-    <div class="row">
-        @foreach (var barbershop in Model.BarberShops)
-        {
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100" style="width: 20rem;">
-                    <img src="@barbershop.ImageUrl" class="card-img-top" alt="Barbershop image">
-                    <div class="card-body">
-                        <h5 class="card-title">@barbershop.Name</h5>
-                        <p class="card-text">@barbershop.City, @barbershop.District</p>
-                        <p class="card-text">@barbershop.Street</p>
-                        <p class="card-text d-inline">Working hours:</p>
-                        <p class="card-text d-inline">@barbershop.StartHour</p>
-                        <p class="card-text d-inline">- @barbershop.FinishHour</p>
-                        <a asp-controller="BarberShop" asp-action="Services" asp-route-id="@barbershop.Id" class="btn btn-primary d-block mt-2">See all the services</a>
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
+    <div asp-validation-summary="ModelOnly" class="text-danger text-center list-error"></div>
+
+    <partial name="_BarberShopsPartial" model="@Model.BarberShops" />
 }
 

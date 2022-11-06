@@ -1,16 +1,21 @@
-﻿using SuperBarber.Data;
+﻿using Microsoft.AspNetCore.Identity;
+using SuperBarber.Data;
 using SuperBarber.Data.Models;
-using SuperBarber.Models.Barber;
 using SuperBarber.Services.CutomException;
+using static SuperBarber.CustomRoles;
 
 namespace SuperBarber.Services.Barbers
 {
     public class BarberService : IBarberService
     {
         private readonly SuperBarberDbContext data;
+        private readonly UserManager<User> userManager;
 
-        public BarberService(SuperBarberDbContext data)
-            => this.data = data;
+        public BarberService(SuperBarberDbContext data, UserManager<User> userManager)
+        {
+            this.data = data;
+            this.userManager = userManager;
+        }
 
         public async Task AddBarberAsync(string userId)
         {
@@ -29,6 +34,8 @@ namespace SuperBarber.Services.Barbers
                 Email = user.Email,
                 UserId = userId,
             };
+
+            await userManager.AddToRoleAsync(user, BarberRoleName);
 
             await data.Barbers.AddAsync(barber);
 

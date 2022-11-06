@@ -1,9 +1,11 @@
 ﻿@model BarberShopFormModel
 
 @{
-    ViewBag.Title = "Add Barbershop";
-    ViewBag.Button = "Add";
+    ViewBag.Title = "Edit Barbershop";
+    ViewBag.Button = "Edit";
 }
+
+<div asp-validation-summary="ModelOnly" class="text-danger text-center list-error"></div>
 
 <partial name="_BarberShopFormPartial" model="@Model" />
 

@@ -1,6 +1,4 @@
-﻿using SuperBarber.Models.Barber;
-
-namespace SuperBarber.Services.Barbers
+﻿namespace SuperBarber.Services.Barbers
 {
     public interface IBarberService
     {

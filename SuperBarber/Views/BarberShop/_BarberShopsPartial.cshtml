@@ -1,0 +1,30 @@
+﻿@model IEnumerable<BarberShopListingViewModel>
+
+<div class="row">
+    @foreach (var barbershop in Model)
+    {
+        var userIsAdmin = User.IsInRole(CustomRoles.AdministratorRoleName);
+
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100" style="width: 20rem;">
+                <img src="@barbershop.ImageUrl" class="card-img-top" alt="Barbershop image">
+                <div class="card-body">
+                    <h5 class="card-title">@barbershop.Name</h5>
+                    <p class="card-text">@barbershop.City, @barbershop.District</p>
+                    <p class="card-text">@barbershop.Street</p>
+                    <p class="card-text d-inline">Working hours:</p>
+                    <p class="card-text d-inline">@barbershop.StartHour</p>
+                    <p class="card-text d-inline">- @barbershop.FinishHour</p>
+
+                    <a asp-controller="Service" asp-action="All" asp-route-id="@barbershop.Id" class="btn btn-primary d-block mt-2">See all the services</a>
+
+                    @if (userIsAdmin || ViewBag.CanEdit == true)
+                    {
+                        <a asp-controller="BarberShop" asp-action="Edit" asp-route-id="@barbershop.Id" class="btn btn-warning d-block mt-2">Edit</a>
+                        <a asp-controller="BarberShop" asp-action="Delete" asp-route-id="@barbershop.Id" class="btn btn-danger d-block mt-2">Delete</a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>

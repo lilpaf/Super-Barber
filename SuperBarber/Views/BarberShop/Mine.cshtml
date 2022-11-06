@@ -1,0 +1,17 @@
+﻿@model IEnumerable<BarberShopListingViewModel>
+
+@{
+    ViewBag.Title = "My barber shops";
+    ViewBag.CanEdit = true;
+}
+
+<div asp-validation-summary="ModelOnly" class="text-danger text-center list-error"></div>
+
+@if (!Model.Any())
+{
+    <h2 class="text-center">You do not own any barber shops yet!</h2>
+}
+else
+{
+    <partial name="_BarberShopsPartial" model="@Model" />
+}

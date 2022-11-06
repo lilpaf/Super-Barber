@@ -1,12 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SuperBarber.Infrastructure;
 using SuperBarber.Models.Service;
 using SuperBarber.Services.CutomException;
 using SuperBarber.Services.Service;
+using static SuperBarber.CustomRoles;
 
 namespace SuperBarber.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = BarberShopOwnerRoleName)]
     public class ServiceController : Controller
     {
         private readonly IServiceService serviceService;
@@ -32,7 +34,9 @@ namespace SuperBarber.Controllers
                     });
                 }
 
-                await serviceService.AddServiceAsync(model);
+                var userId = User.Id();
+
+                await serviceService.AddServiceAsync(model, userId);
 
                 return RedirectToAction("Index", "Home");
             }
@@ -42,6 +46,26 @@ namespace SuperBarber.Controllers
 
                 return View(model);
             }
+        }
+
+        public async Task<IActionResult> All(int Id)
+        {
+            try
+            {
+                return View(await serviceService.ShowServicesAsync(Id));
+            }
+            catch (ModelStateCustomException ex)
+            {
+                this.ModelState.AddModelError(ex.Key, ex.Message);
+
+                return RedirectToAction("BarberShop", "All");
+            }
+        }
+
+        public async Task<IActionResult> Book(string Name)
+        {
+            ;
+            return View();
         }
     }
 }

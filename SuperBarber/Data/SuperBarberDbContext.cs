@@ -33,6 +33,11 @@ namespace SuperBarber.Data
                 .HasOne(o => o.Barber)
                 .WithMany(b => b.Orders)
                 .OnDelete(DeleteBehavior.Restrict);
+             
+            modelBuilder.Entity<BarberShop>()
+                .HasMany(bs => bs.Barbers)
+                .WithOne(b => b.BarberShop)
+                .OnDelete(DeleteBehavior.Restrict);
 
             base.OnModelCreating(modelBuilder);
 

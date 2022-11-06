@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SuperBarber.Models.Barber;
+using SuperBarber.Infrastructure;
 using SuperBarber.Services.Barbers;
 using SuperBarber.Services.CutomException;
-using System.Security.Claims;
 
 namespace SuperBarber.Controllers
 {
@@ -24,11 +23,11 @@ namespace SuperBarber.Controllers
         {
             try
             {
-                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var userId = User.Id();
 
-                    await barberService.AddBarberAsync(userId);
+                await barberService.AddBarberAsync(userId);
 
-                    return RedirectToAction("All", "BarberShop");
+                return RedirectToAction("All", "BarberShop");
             }
             catch (ModelStateCustomException ex)
             {

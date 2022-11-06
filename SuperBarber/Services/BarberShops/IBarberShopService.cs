@@ -7,6 +7,14 @@ namespace SuperBarber.Services.BarberShops
     {
         Task<AllBarberShopQueryModel> AllBarberShopsAsync([FromQuery] AllBarberShopQueryModel query, List<BarberShopListingViewModel> barberShops = null);
 
-        Task AddBarberShopAsync(AddBarberShopFormModel model);
+        Task AddBarberShopAsync(BarberShopFormModel model, string userId);
+
+        Task<IEnumerable<BarberShopListingViewModel>> MineBarberShopsAsync(string userId);
+
+        Task EditBarberShopAsync(BarberShopFormModel model, int barberShopId, string userId, bool userIsAdmin);
+
+        Task DeleteBarberShopAsync(int barberShopId, string userId, bool userIsAdmin);
+
+        Task<BarberShopFormModel> DisplayBarberShopInfoAsync(int barberShopId);
     }
 }

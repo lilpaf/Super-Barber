@@ -1,0 +1,56 @@
+﻿@model IEnumerable<ServiceListingViewModel>
+
+@{
+    ViewBag.Title = "Services";
+}
+
+
+<div class="row">
+    <div class="col-sm-12 offset-lg-2 col-lg-8 offset-xl-3 col-xl-6">
+        <form method="post">
+
+            @if (Model.Any(s => s.Category == "Hair"))
+            {
+                <h4 class="text-center mb-3 fw-bold">Hair</h4>
+                <hr />
+                @foreach (var service in Model.Where(s => s.Category == "Hair"))
+                {
+                    <div class="form-check form-check-inline">
+                        <h5 class="fw-bold d-inline me-3">@service.Name - @service.Price lv.</h5>
+                        <a asp-controller="Service" asp-action="Book" asp-route-id="@service.Name" class="btn btn-primary d-inline">Book</a>
+                    </div>
+                }
+            }
+
+            @if (Model.Any(s => s.Category == "Face"))
+            {
+                <h4 class="text-center mb-3">Face</h4>
+                <hr />
+                @foreach (var service in Model.Where(s => s.Category == "Face"))
+                {
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1">
+                        <label class="form-check-label h6" asp-for="@service.Name">@service.Name - @service.Price lv.</label>
+                    </div>
+                }
+            }
+
+            @if (Model.Any(s => s.Category == "Epilation"))
+            {
+                <h4 class="text-center mb-3">Epilation</h4>
+                <hr />
+                @foreach (var service in Model.Where(s => s.Category == "Epilation"))
+                {
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" asp-for="@service.Name" type="checkbox" id="inlineCheckbox1" value="@service.Name">
+                        <label class="form-check-label h6" asp-for="@service.Name">@service.Name - @service.Price lv.</label>
+                    </div>
+                }
+            }
+
+            <button type="submit" class="btn-submit-big-services mt-3">Book</button>
+        </form>
+    </div>
+</div> 
+
+
