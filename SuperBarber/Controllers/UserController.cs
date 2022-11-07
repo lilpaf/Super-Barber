@@ -70,6 +70,7 @@ namespace SuperBarber.Controllers
 
 
         [AllowAnonymous]
+        [HttpGet]
         public IActionResult Login()
         {
             if (User?.Identity?.IsAuthenticated ?? false)
@@ -80,8 +81,9 @@ namespace SuperBarber.Controllers
             return View();
         }
         
-        [AllowAnonymous]
+        
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Login(UserLoginFormModel model)
         {
             if (!ModelState.IsValid)

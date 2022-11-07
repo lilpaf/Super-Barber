@@ -1,7 +1,7 @@
-﻿@model FilterBarberShopsViewModel
+﻿@model BookServiceFormModel
 
 @{
-    ViewData["Title"] = "Home Page";
+    ViewBag.Title = "Book";
 }
 
 <head>
@@ -10,36 +10,16 @@
 
 <div class="row">
     <div class="col-sm-12 offset-lg-2 col-lg-8 offset-xl-3 col-xl-6">
-        <h2 class="heading-margin text-center">Find the nearest avalible Barbershop</h2>
+        <h2 class="heading-margin text-center">@ViewBag.Title</h2>
         <div asp-validation-summary="ModelOnly" class="text-danger text-center list-error"></div>
-        <form method="get">
+        <form method="post">
             <div class="mb-3">
-                <label asp-for="City" class="form-label">City</label>
-                <select asp-for="City" class="form-select">
-                    @foreach (var city in Model.Cities)
-                    {
-                        <option value="@city">@city</option>
-                    }
-                </select>
-            </div>
-            <div class="mb-3">
-                <label asp-for="District" class="form-label">District</label>
-                <select asp-for="District" class="form-select">
-                    <option value="All">All</option>
-
-                    @foreach (var district in Model.Districts)
-                    {
-                        <option value="@district">@district</option>
-                    }
-                </select>
-            </div>
-            <div class="mb-3 w-75 d-inline-block">
                 <ng-form>
                     <label asp-for="Date" class="form-label">Date</label>
                     <input asp-for="Date" class="form-control" type="datetime-local" placeholder="Select Date" required />
                 </ng-form>
             </div>
-            <div class="mb-3 d-inline-block ms-2">
+            <div class="mb-3">
                 <label asp-for="Time" class="form-label">Hour</label>
                 <select asp-for="Time" class="form-select">
                     <option value="08:00">08:00</option>
@@ -76,7 +56,7 @@
                 </select>
             </div>
 
-            <button type="submit" class="btn-submit-big">Search</button>
+            <button type="submit" class="btn-submit-big">Book</button>
         </form>
     </div>
 </div>

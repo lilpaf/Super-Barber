@@ -1,0 +1,36 @@
+﻿@model CartViewModel
+
+@{
+    ViewBag.Title = "Cart";
+}
+
+<div class="row">
+    <div class="col-sm-12 offset-lg-2 col-lg-8 offset-xl-3 col-xl-6">
+        <h2 class="heading-margin text-center">@ViewBag.Title</h2>
+        @if (!Model.Services.Any())
+        {
+            <h2 class="text-center">Your cart is empty!</h2>
+        }
+        else
+        {
+                <div class="cart-col">
+                    @foreach (var service in Model.Services)
+                    {
+                        <div class="row">
+                            <div class="d-inline mb-5">
+                                <div class="d-inline me-3">
+                                    <a asp-controller="Cart" asp-action="Remove" asp-route-Id="@service.ServiceId" class="btn btn-danger d-inline text-center">Remove</a>
+                                </div>
+                                <div class="d-inline">
+                                    <h5 class="fw-bold d-inline">@service.Name - @service.Price lv.</h5>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <h5 class="fw-bold mb-3 text-center">Total Price: @Model.TotalPrice lv.</h5>
+
+                <a asp-controller="Cart" asp-action="Book" class="btn-submit-big anchor-book">Book</a>
+        }
+    </div>
+</div>

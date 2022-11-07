@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using SuperBarber.Data;
 using SuperBarber.Data.Models;
 using SuperBarber.Services.Barbers;
@@ -19,6 +18,10 @@ builder.Services.AddDbContext<SuperBarberDbContext>(options => options
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddSession();
+
 builder.Services.AddDefaultIdentity<User>(options =>
     {
         //options.SignIn.RequireConfirmedAccount = true;
@@ -31,6 +34,11 @@ builder.Services.AddDefaultIdentity<User>(options =>
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<SuperBarberDbContext>();
 
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/User/Login";
+});
+
 builder.Services.AddControllersWithViews(options =>
 {
     options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
@@ -41,6 +49,7 @@ builder.Services.AddTransient<IBarberShopService, BarberShopService>();
 builder.Services.AddTransient<IBarberService, BarberService>();
 builder.Services.AddTransient<IServiceService, ServiceService>();
 builder.Services.AddTransient<IHomeService, HomeService>();
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
@@ -60,7 +69,8 @@ app.UseHttpsRedirection()
    .UseStaticFiles()
    .UseRouting()
    .UseAuthentication()
-   .UseAuthorization();
+   .UseAuthorization()
+   .UseSession();
 
 app.MapDefaultControllerRoute();
 app.MapRazorPages();

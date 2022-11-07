@@ -1,11 +1,30 @@
 ﻿@using SuperBarber.Data.Models
 @using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Http
 @inject SignInManager<User> SignInManager
 @inject UserManager<User> UserManager
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
 
 <ul class="navbar-nav">
     @if (SignInManager.IsSignedIn(User))
     {
+        if (HttpContextAccessor.HttpContext.Session.Get<List<ServiceListingViewModel>>(SessionName) != null
+        && HttpContextAccessor.HttpContext.Session.Get<List<ServiceListingViewModel>>(SessionName).Any())
+        {
+            var items = HttpContextAccessor.HttpContext.Session.Get<List<ServiceListingViewModel>>(SessionName).ToList();
+
+                <li class="nav-item">
+                    <a class="nav-link text-dark" asp-controller="Cart" asp-action="All">Cart (@items.Count)</a>
+                </li>
+        }
+        else
+        {
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-controller="Cart" asp-action="All">Cart</a>
+            </li>
+        }
+
         var userIsAdmin = User.IsInRole(CustomRoles.AdministratorRoleName);
         var userIsBarber = User.IsInRole(CustomRoles.BarberRoleName);
 

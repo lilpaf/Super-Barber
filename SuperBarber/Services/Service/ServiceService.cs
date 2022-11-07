@@ -92,6 +92,8 @@ namespace SuperBarber.Services.Service
             return barberShop.Services
                 .Select(s => new ServiceListingViewModel
                 {
+                    BarberShopId = barberShop.Id,
+                    ServiceId = s.Service.Id,
                     Name = s.Service.Name,
                     Price = s.Service.Price,
                     Category = s.Service.Category.Name

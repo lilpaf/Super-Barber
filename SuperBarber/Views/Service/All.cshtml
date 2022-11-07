@@ -4,53 +4,71 @@
     ViewBag.Title = "Services";
 }
 
-
 <div class="row">
     <div class="col-sm-12 offset-lg-2 col-lg-8 offset-xl-3 col-xl-6">
         <form method="post">
 
             @if (Model.Any(s => s.Category == "Hair"))
             {
-                <h4 class="text-center mb-3 fw-bold">Hair</h4>
-                <hr />
-                @foreach (var service in Model.Where(s => s.Category == "Hair"))
-                {
-                    <div class="form-check form-check-inline">
-                        <h5 class="fw-bold d-inline me-3">@service.Name - @service.Price lv.</h5>
-                        <a asp-controller="Service" asp-action="Book" asp-route-id="@service.Name" class="btn btn-primary d-inline">Book</a>
-                    </div>
-                }
+                <div class="row mb-5">
+                    <h4 class="text-center mb-3 fw-bold">Hair</h4>
+                    <hr class="mb-5" />
+                    @foreach (var service in Model.Where(s => s.Category == "Hair"))
+                    {
+                        <div class="cart-col">
+                            <a asp-controller="Cart" asp-action="Add" asp-route-BarbershopId="@service.BarberShopId" asp-route-ServiceId="@service.ServiceId" class="btn btn-primary d-inline me-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16">
+                                    <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+                                </svg>
+                                Add to cart
+                            </a>
+                            <h5 class="fw-bold d-inline">@service.Name - @service.Price lv.</h5>
+                        </div>
+                    }
+                </div>
             }
 
             @if (Model.Any(s => s.Category == "Face"))
             {
-                <h4 class="text-center mb-3">Face</h4>
-                <hr />
-                @foreach (var service in Model.Where(s => s.Category == "Face"))
-                {
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1">
-                        <label class="form-check-label h6" asp-for="@service.Name">@service.Name - @service.Price lv.</label>
-                    </div>
-                }
+                <div class="row mb-5">
+                    <h4 class="text-center mb-3 fw-bold">Face</h4>
+                    <hr class="mb-5" />
+                    @foreach (var service in Model.Where(s => s.Category == "Face"))
+                    {
+                        <div class="cart-col">
+                            <a asp-controller="Cart" asp-action="Add" asp-route-BarbershopId="@service.BarberShopId" asp-route-ServiceId="@service.ServiceId" class="btn btn-primary d-inline me-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16">
+                                    <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+                                </svg>
+                                Add to cart
+                            </a>
+                            <h5 class="fw-bold d-inline">@service.Name - @service.Price lv.</h5>
+                        </div>
+                    }
+                </div>
             }
 
             @if (Model.Any(s => s.Category == "Epilation"))
             {
-                <h4 class="text-center mb-3">Epilation</h4>
-                <hr />
-                @foreach (var service in Model.Where(s => s.Category == "Epilation"))
-                {
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" asp-for="@service.Name" type="checkbox" id="inlineCheckbox1" value="@service.Name">
-                        <label class="form-check-label h6" asp-for="@service.Name">@service.Name - @service.Price lv.</label>
-                    </div>
-                }
+                <div class="row mb-5">
+                    <h4 class="text-center mb-3 fw-bold">Epilation</h4>
+                    <hr class="mb-5" />
+                    @foreach (var service in Model.Where(s => s.Category == "Epilation"))
+                    {
+                        <div class="cart-col">
+                            <a asp-controller="Cart" asp-action="Add" asp-route-BarbershopId="@service.BarberShopId" asp-route-ServiceId="@service.ServiceId" class="btn btn-primary d-inline me-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16">
+                                    <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+                                </svg>
+                                Add to cart
+                            </a>
+                            <h5 class="fw-bold d-inline">@service.Name - @service.Price lv.</h5>
+                        </div>
+                    }
+                </div>
             }
-
-            <button type="submit" class="btn-submit-big-services mt-3">Book</button>
         </form>
     </div>
-</div> 
+</div>
 
 

@@ -13,8 +13,8 @@ namespace SuperBarber.Controllers
     {
         private readonly IServiceService serviceService;
 
-        public ServiceController(IServiceService serviceService)
-        => this.serviceService = serviceService;
+        public ServiceController(IServiceService serviceService) 
+            => this.serviceService = serviceService;
 
         public async Task<IActionResult> Add() => View(new AddServiceFormModel
         {
@@ -58,14 +58,8 @@ namespace SuperBarber.Controllers
             {
                 this.ModelState.AddModelError(ex.Key, ex.Message);
 
-                return RedirectToAction("BarberShop", "All");
+                return RedirectToAction("All", "BarberShop");
             }
-        }
-
-        public async Task<IActionResult> Book(string Name)
-        {
-            ;
-            return View();
         }
     }
 }
