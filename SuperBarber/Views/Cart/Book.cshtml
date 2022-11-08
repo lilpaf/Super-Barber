@@ -13,13 +13,13 @@
         <h2 class="heading-margin text-center">@ViewBag.Title</h2>
         <div asp-validation-summary="ModelOnly" class="text-danger text-center list-error"></div>
         <form method="post">
-            <div class="mb-3">
+            <div class="mb-3 text-center fw-bold">
                 <ng-form>
                     <label asp-for="Date" class="form-label">Date</label>
                     <input asp-for="Date" class="form-control" type="datetime-local" placeholder="Select Date" required />
                 </ng-form>
             </div>
-            <div class="mb-3">
+            <div class="mb-3 text-center fw-bold">
                 <label asp-for="Time" class="form-label">Hour</label>
                 <select asp-for="Time" class="form-select">
                     <option value="08:00">08:00</option>

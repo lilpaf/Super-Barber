@@ -7,9 +7,14 @@
 <div class="row">
     <div class="col-sm-12 offset-lg-2 col-lg-8 offset-xl-3 col-xl-6">
         <h2 class="heading-margin text-center">@ViewBag.Title</h2>
+        <div asp-validation-summary="ModelOnly" class="text-danger text-center list-error"></div>
         @if (!Model.Services.Any())
         {
-            <h2 class="text-center">Your cart is empty!</h2>
+            <div class="container-fluid py-3 text-center">
+                <h2 class="display-7 fw-bold mb-4">Your cart is empty</h2>
+                <p class="fs-5">Check all the Barbershops and find the best one for you</p>
+                <a asp-controller="BarberShop" asp-action="All" button class="btn btn-primary btn-lg" type="button">All Barbershops</a>
+            </div>
         }
         else
         {

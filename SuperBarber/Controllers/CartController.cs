@@ -1,11 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SuperBarber.Data;
-using SuperBarber.Data.Models;
 using SuperBarber.Infrastructure;
 using SuperBarber.Models.Cart;
 using SuperBarber.Models.Service;
+using SuperBarber.Services.Cart;
+using SuperBarber.Services.CutomException;
 using static SuperBarber.Infrastructure.SessionExtensions;
 
 namespace SuperBarber.Controllers
@@ -13,12 +12,10 @@ namespace SuperBarber.Controllers
     [Authorize]
     public class CartController : Controller
     {
-        private readonly SuperBarberDbContext data;
+        private readonly ICartService cartService;
 
-        public CartController(SuperBarberDbContext data)
-        {
-            this.data = data;
-        }
+        public CartController(ICartService cartService)
+            => this.cartService = cartService;
 
         public IActionResult All()
         {
@@ -36,16 +33,18 @@ namespace SuperBarber.Controllers
             return View(new CartViewModel { Services = new List<ServiceListingViewModel>() });
         }
 
-        public IActionResult Add(int BarberShopId, int ServiceId)
+        public async Task<IActionResult> Add(int BarberShopId, int ServiceId)
         {
             List<ServiceListingViewModel> cartList;
 
-            var service = this.data.Services
-                .Include(s => s.Category)
-                .FirstOrDefault(s => s.Id == ServiceId);
+            var service = await cartService.GetServiceAsync(ServiceId);
 
-            if (service == null)
+            var barberShop = cartService.CheckBarberShopId(BarberShopId);
+
+            if (service == null || !barberShop)
             {
+                this.ModelState.AddModelError("", "Invalid service or barbershop");
+
                 return RedirectToAction("All", "Service", new { id = BarberShopId });
             }
 
@@ -82,7 +81,6 @@ namespace SuperBarber.Controllers
             HttpContext.Session.Set<List<ServiceListingViewModel>>(SessionName, cartList);
 
             return RedirectToAction("All", "Service", new { id = BarberShopId });
-
         }
 
         public IActionResult Remove(int Id)
@@ -95,87 +93,57 @@ namespace SuperBarber.Controllers
 
                 var service = cartList.FirstOrDefault(s => s.ServiceId == Id);
 
-                if (service != null)
+                if (service == null)
                 {
-                    cartList.Remove(service);
+                    this.ModelState.AddModelError("", "Invalid service");
 
-                    HttpContext.Session.Set<List<ServiceListingViewModel>>(SessionName, cartList);
+                    return RedirectToAction("All", "Cart");
                 }
+
+                cartList.Remove(service);
+
+                HttpContext.Session.Set<List<ServiceListingViewModel>>(SessionName, cartList);
             }
 
             return RedirectToAction("All", "Cart");
-
         }
 
         public IActionResult Book() => View();
 
         [HttpPost]
-        public IActionResult Book(BookServiceFormModel model)
+        public async Task<IActionResult> Book(BookServiceFormModel model)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return View();
-            }
-
-            if (HttpContext.Session.Get<List<ServiceListingViewModel>>(SessionName) != null
-                && HttpContext.Session.Get<List<ServiceListingViewModel>>(SessionName).ToList().Any())
-            {
-
-                var cartList = HttpContext.Session.Get<List<ServiceListingViewModel>>(SessionName).ToList();
-
-                var dateParsed = DateTime.Parse(model.Date);
-
-                var timeArr = model.Time.Split(':');
-
-                var ts = new TimeSpan(int.Parse(timeArr[0]), int.Parse(timeArr[1]), 0);
-
-                dateParsed = dateParsed.Date + ts;
-
-                var barberShop = this.data.BarberShops
-                    .Include(bs => bs.Barbers)
-                    .FirstOrDefault(bs => bs.Id == cartList.First().BarberShopId
-                    && bs.StartHour < ts
-                    && bs.FinishHour > ts
-                    && bs.Barbers.Any(b => !b.Orders.Any(o => o.Date == dateParsed)));
-
-                if (barberShop == null)
+                if (!ModelState.IsValid)
                 {
-                    return RedirectToAction("All", "Cart"); // break
+                    return View(model);
                 }
 
-
-                var barber = barberShop.Barbers
-                    .Where(b => !b.Orders.Any(o => o.Date == dateParsed))
-                    .First();
-
-                List<Order> orders = new List<Order>();
-
-                foreach (var item in cartList)
+                if (HttpContext.Session.Get<List<ServiceListingViewModel>>(SessionName) != null
+                    && HttpContext.Session.Get<List<ServiceListingViewModel>>(SessionName).ToList().Any())
                 {
-                    var order = new Order
-                    {
-                        BarberShopId = barberShop.Id,
-                        BarberId = barber.Id,
-                        Date = dateParsed,
-                        ServiceId = item.ServiceId,
-                        UserId = User.Id()
-                    };
 
-                    orders.Add(order);
+                    var cartList = HttpContext.Session.Get<List<ServiceListingViewModel>>(SessionName).ToList();
+
+                    var userId = User.Id();
+
+                    await cartService.AddOrderAsync(model, cartList, userId);
+
+                    cartList.RemoveRange(0, cartList.Count);
+
+                    HttpContext.Session.Set<List<ServiceListingViewModel>>(SessionName, cartList);
+
                 }
 
-                this.data.Orders.AddRange(orders);
-
-                this.data.SaveChanges();
-
-                cartList.RemoveRange(0, cartList.Count);
-
-                HttpContext.Session.Set<List<ServiceListingViewModel>>(SessionName, cartList);
-
+                return RedirectToAction("All", "BarberShop");
             }
+            catch (ModelStateCustomException ex)
+            {
+                this.ModelState.AddModelError(ex.Key, ex.Message);
 
-            return RedirectToAction("All", "BarberShop");
-
+                return View(model);
+            }
         }
     }
 }
