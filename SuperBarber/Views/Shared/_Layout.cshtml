@@ -22,10 +22,7 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="BarberShop" asp-action="All">All Barbershops</a>
                         </li>
-                        @{
-                            var userIsBarber = User.IsInRole(CustomRoles.BarberRoleName);
-                        }
-                        @if (userIsBarber)
+                        @if (User.IsInRole(CustomRoles.BarberRoleName))
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="BarberShop" asp-action="Add">Add Barbershop</a>

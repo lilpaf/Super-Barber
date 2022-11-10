@@ -1,0 +1,19 @@
+﻿<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+
+<div class="col-md-3" id="myMenu">
+    <ul class="nav nav-pills flex-column">
+        <li class="nav-item"><a class="nav-link account-menu" asp-controller="Account" asp-action="Manage">Profile</a></li>
+        <li class="nav-item"><a class="nav-link account-menu" asp-controller="Account" asp-action="Barber">Barber info</a></li>
+        <li class="nav-item"><a class="nav-link account-menu" asp-controller="Account" asp-action="ChangeEmail">Email</a></li>
+        <li class="nav-item"><a class="nav-link account-menu" asp-controller="Account" asp-action="ChangePassword">Password</a></li>
+        <li class="nav-item"><a class="nav-link account-menu" asp-controller="Account" asp-action="PersonalData">Personal data</a></li>
+    </ul>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('a[href = "' + window.location.pathname + '"]').addClass('active')
+    })
+</script>

@@ -10,11 +10,15 @@ namespace SuperBarber.Services.Barbers
     {
         private readonly SuperBarberDbContext data;
         private readonly UserManager<User> userManager;
+        private readonly SignInManager<User> signInManager;
 
-        public BarberService(SuperBarberDbContext data, UserManager<User> userManager)
+        public BarberService(SuperBarberDbContext data, 
+            UserManager<User> userManager,
+            SignInManager<User> signInManager)
         {
             this.data = data;
             this.userManager = userManager;
+            this.signInManager = signInManager;
         }
 
         public async Task AddBarberAsync(string userId)
@@ -40,6 +44,8 @@ namespace SuperBarber.Services.Barbers
             await data.Barbers.AddAsync(barber);
 
             await data.SaveChangesAsync();
+
+            await signInManager.SignInAsync(user, isPersistent: false);
         }
     }
 }

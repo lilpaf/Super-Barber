@@ -1,0 +1,39 @@
+﻿@model List<BarberOrdersListingViewModel>
+
+@{
+    ViewBag.Title = "Barber info";
+}
+
+<div class="row">
+    <h2 class="heading-margin text-center">@ViewBag.Title</h2>
+    <partial name="_AccountMenuPartial" />
+    <div class="col">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th class="table-text" scope="col">#</th>
+                    <th class="table-text" scope="col">Client first name</th>
+                    <th class="table-text" scope="col">Client last name</th>
+                    <th class="table-text" scope="col">Service name</th>
+                    <th class="table-text" scope="col">Price</th>
+                    <th class="table-text" scope="col">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < Model.Count(); i++)
+                {
+                    var rowNumber = i + 1;
+                    <tr>
+                        <th scope="row">@rowNumber</th>
+                        <td class="table-text">@Model[i].ClientFirstName</td>
+                        <td class="table-text">@Model[i].ClientLastName</td>
+                        <td class="table-text">@Model[i].ServiceName</td>
+                        <td class="table-text">@Model[i].Price</td>
+                        <td class="table-text">@Model[i].Date</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+

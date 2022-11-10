@@ -72,7 +72,7 @@ namespace SuperBarber.Infrastructure
                     LastName = adminLastName,
                 };
 
-                await userManager.CreateAsync(user);
+                await userManager.CreateAsync(user, adminPassword);
 
                 await userManager.AddToRoleAsync(user, role.Name);
             })

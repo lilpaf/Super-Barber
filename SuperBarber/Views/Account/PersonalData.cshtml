@@ -1,0 +1,32 @@
+﻿@model List<BarberOrdersListingViewModel>
+
+@{
+    ViewBag.Title = "Personal data";
+}
+
+
+<div class="row">
+    <h2 class="heading-margin text-center">@ViewBag.Title</h2>
+
+    <partial name="_AccountMenuPartial" />
+
+    <div class="col-md-6">
+        @if (User.IsInRole(CustomRoles.BarberRoleName))
+        {
+            <p>You are registered as barber now. If you want to become just a regular user press the button: "Become User".</p>
+            <p>
+                <strong>Becomeing a regular user will delete the barbershops that you are the only owner and all your orders from clients.</strong>
+            </p>
+            <p>
+                <a class="btn btn-danger" asp-controller="Account" asp-action="DeleteBarber">Become User</a>
+            </p>
+        }
+        <p>Your account contains personal data that you have given us. This page allows you to delete that data.</p>
+        <p>
+            <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
+        </p>
+        <p>
+            <a class="btn btn-danger" asp-controller="Account" asp-action="Delete">Delete</a>
+        </p>
+    </div>
+</div>

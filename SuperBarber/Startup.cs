@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SuperBarber.Data;
 using SuperBarber.Data.Models;
+using SuperBarber.Services.Account;
 using SuperBarber.Services.Barbers;
 using SuperBarber.Services.BarberShops;
 using SuperBarber.Services.Cart;
@@ -51,6 +52,7 @@ builder.Services.AddTransient<IBarberService, BarberService>();
 builder.Services.AddTransient<IServiceService, ServiceService>();
 builder.Services.AddTransient<IHomeService, HomeService>();
 builder.Services.AddTransient<ICartService, CartService>();
+builder.Services.AddTransient<IAccountService, AccountService>();
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();

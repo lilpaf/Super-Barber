@@ -13,11 +13,15 @@ namespace SuperBarber.Services.BarberShops
     {
         private readonly SuperBarberDbContext data;
         private readonly UserManager<User> userManager;
+        private readonly SignInManager<User> signInManager;
 
-        public BarberShopService(SuperBarberDbContext data, UserManager<User> userManager)
+        public BarberShopService(SuperBarberDbContext data, 
+            UserManager<User> userManager, 
+            SignInManager<User> signInManager)
         {
             this.data = data;
             this.userManager = userManager;
+            this.signInManager = signInManager;
         }
 
         public async Task<AllBarberShopQueryModel> AllBarberShopsAsync([FromQuery] AllBarberShopQueryModel query, List<BarberShopListingViewModel> barberShops = null)
@@ -129,9 +133,9 @@ namespace SuperBarber.Services.BarberShops
 
             await this.data.BarberShops.AddAsync(barberShop);
 
-            //barber.BarberShopId = barberShop.Id;
-
             await this.data.SaveChangesAsync();
+
+            await signInManager.SignInAsync(user, isPersistent: false);
         }
 
         public async Task<IEnumerable<BarberShopListingViewModel>> MineBarberShopsAsync(string userId)
