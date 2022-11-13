@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SuperBarber.Models.Service;
+﻿using SuperBarber.Models.Service;
 
 namespace SuperBarber.Services.Service
 {

@@ -78,12 +78,16 @@ body {
     text-decoration: none
 }
 
-.account-menu:hover {
+.account-menu {
     margin-bottom: 1px;
     margin-top: 1px;
+}
+
+.account-menu:hover {
     color: white;
     background-color: #0d6efd;
 }
+
 .table-text {
     overflow: auto;
     white-space: nowrap;

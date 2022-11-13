@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SuperBarber.Data.Models;
-using static SuperBarber.Data.DataConstraints;
 
 namespace SuperBarber.Data
 {

@@ -1,0 +1,50 @@
+﻿@page
+@model RegisterModel
+@{
+    ViewBag.Title = "Register";
+}
+
+<div class="row">
+    <div class="col-sm-12 offset-lg-2 col-lg-8 offset-xl-3 col-xl-6">
+        <h2 class="heading-margin text-center">@ViewBag.Title</h2>
+        <div asp-validation-summary="ModelOnly" class="text-danger text-center list-error"></div>
+        <form method="post">
+            <div class="mb-3">
+                <label asp-for="Input.FirstName" class="form-label">First name</label>
+                <input asp-for="Input.FirstName" class="form-control">
+                <span asp-validation-for="Input.FirstName" class="small text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Input.LastName" class="form-label">Last name</label>
+                <input asp-for="Input.LastName" class="form-control">
+                <span asp-validation-for="Input.LastName" class="small text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Input.Email" class="form-label">Email</label>
+                <input asp-for="Input.Email" class="form-control" placeholder="user@gmail.com">
+                <span asp-validation-for="Input.Email" class="small text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Input.PhoneNumber" class="form-label">Phone number</label>
+                <input asp-for="Input.PhoneNumber" class="form-control" placeholder="+359 2 304 0010">
+                <span asp-validation-for="Input.PhoneNumber" class="small text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Input.Password" class="form-label">Password</label>
+                <input asp-for="Input.Password" class="form-control">
+                <span asp-validation-for="Input.Password" class="small text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Input.ConfirmPassword" class="form-label">Confirm password</label>
+                <input asp-for="Input.ConfirmPassword" class="form-control">
+                <span asp-validation-for="Input.ConfirmPassword" class="small text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn-submit-big">Register</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,38 @@
+﻿@page
+@model PersonalDataModel
+@{
+    ViewData["Title"] = "Personal Data";
+    ViewData["ActivePage"] = ManageNavPages.PersonalData;
+}
+
+<h3 class="text-center mb-3">@ViewData["Title"]</h3>
+
+<div class="row">
+    <h5 class ="text-center mb-4">Your account contains personal data that you have given us. This page allows you to become regular user or delete your account.</h5>
+    @if (User.IsInRole(CustomRoles.BarberRoleName))
+    {
+        <div class="col-md-6 text-center">
+
+            <p>You are registered as barber now. If you want to become just a regular user press the button: "Become User".</p>
+            <p>
+                <strong>Becomeing a regular user will delete the barbershops that you are the only owner and all your orders from clients.</strong>
+            </p>
+            <p>
+                <a class="btn btn-danger" asp-controller="Account" asp-action="DeleteBarber">Become User</a>
+            </p>
+        </div>
+    }
+    <div class="col-md-6 text-center">
+        <p>
+            <strong>Deleting your account will permanently remove all your data, and this cannot be recovered.</strong>
+        </p>
+        <p>
+            <a id="delete" asp-page="DeletePersonalData" class="btn btn-danger text-center">Delete Account</a>
+        </p>
+    </div>
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    }

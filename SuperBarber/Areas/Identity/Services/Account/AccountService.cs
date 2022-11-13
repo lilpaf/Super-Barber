@@ -1,0 +1,90 @@
+﻿using Microsoft.AspNetCore.Identity;
+using SuperBarber.Data.Models;
+using SuperBarber.Data;
+using SuperBarber.Models.Account;
+using SuperBarber.Services.CutomException;
+using Microsoft.EntityFrameworkCore;
+using static SuperBarber.CustomRoles;
+using System.Xml.Linq;
+
+namespace SuperBarber.Areas.Identity.Services.Account
+{
+    public class AccountService : IAccountService
+    {
+        private readonly SuperBarberDbContext _data;
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
+
+
+        public AccountService(SuperBarberDbContext data, UserManager<User> userManager, SignInManager<User> signInManager)
+        {
+            _data = data;
+            _userManager = userManager;
+            _signInManager = signInManager;
+        }
+
+        public async Task SetFirstAndLastNameAsync(User user, string firstName, string lastName)
+        {
+            if (firstName != user.FirstName)
+            {
+                user.FirstName = firstName;
+
+                _data.Users.Update(user);
+
+                await _data.SaveChangesAsync();
+            }
+            else if (lastName != user.LastName)
+            {
+                user.LastName = lastName;
+
+                _data.Users.Update(user);
+
+                await _data.SaveChangesAsync();
+            }
+        }
+
+        public async Task<IEnumerable<BarberOrdersListingViewModel>> GetBarberOrdersAsync(User user)
+            => await _data.Orders
+                .Where(o => o.Barber.UserId == user.Id)
+                .OrderByDescending(o => o.Date)
+                .Select(o => new BarberOrdersListingViewModel
+                {
+                    ClientFirstName = o.User.FirstName,
+                    ClientLastName = o.User.LastName,
+                    ServiceName = o.Service.Name,
+                    Price = o.Service.Price,
+                    Date = o.Date.ToString(@"MM/dd/yy H:mm")
+                })
+                .ToListAsync();
+
+        public async Task DeleteBarberAsync(User user)
+        {
+            var barber = await _data.Barbers.FirstAsync(b => b.UserId == user.Id);
+
+            var orders = await _data.Orders.Where(o => o.BarberId == barber.Id).ToListAsync();
+
+            if (orders.Any())
+            {
+                _data.Orders.RemoveRange(orders);
+            }
+
+            var barberShop = await _data.BarberShops
+                .FirstOrDefaultAsync(bs => bs.Barbers.Any(b => b.Id == barber.Id));
+
+            if (barberShop != null && barberShop.Barbers.Count == 1)
+            {
+                await _userManager.RemoveFromRoleAsync(user, BarberShopOwnerRoleName);
+
+                _data.BarberShops.Remove(barberShop);
+            }
+
+            await _userManager.RemoveFromRoleAsync(user, BarberRoleName);
+
+            _data.Barbers.Remove(barber);
+
+            await _data.SaveChangesAsync();
+
+            await _signInManager.RefreshSignInAsync(user);
+        }
+    }
+}

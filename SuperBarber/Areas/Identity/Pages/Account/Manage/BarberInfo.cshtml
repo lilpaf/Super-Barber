@@ -1,12 +1,11 @@
-﻿@model List<BarberOrdersListingViewModel>
-
+﻿@page
+@model BarberInfoModel
 @{
     ViewBag.Title = "Barber info";
 }
 
 <div class="row">
     <h2 class="heading-margin text-center">@ViewBag.Title</h2>
-    <partial name="_AccountMenuPartial" />
     <div class="col">
         <table class="table">
             <thead>
@@ -20,20 +19,19 @@
                 </tr>
             </thead>
             <tbody>
-                @for (var i = 0; i < Model.Count(); i++)
+                @for (var i = 0; i < Model.BarberOrders.Count(); i++)
                 {
                     var rowNumber = i + 1;
                     <tr>
                         <th scope="row">@rowNumber</th>
-                        <td class="table-text">@Model[i].ClientFirstName</td>
-                        <td class="table-text">@Model[i].ClientLastName</td>
-                        <td class="table-text">@Model[i].ServiceName</td>
-                        <td class="table-text">@Model[i].Price</td>
-                        <td class="table-text">@Model[i].Date</td>
+                        <td class="table-text">@Model.BarberOrders[i].ClientFirstName</td>
+                        <td class="table-text">@Model.BarberOrders[i].ClientLastName</td>
+                        <td class="table-text">@Model.BarberOrders[i].ServiceName</td>
+                        <td class="table-text">@Model.BarberOrders[i].Price</td>
+                        <td class="table-text">@Model.BarberOrders[i].Date</td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
-</div>
-
+</div

@@ -45,7 +45,7 @@ namespace SuperBarber.Services.Barbers
 
             await data.SaveChangesAsync();
 
-            await signInManager.SignInAsync(user, isPersistent: false);
+            await signInManager.RefreshSignInAsync(user);
         }
     }
 }

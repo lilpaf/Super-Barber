@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SuperBarber.Areas.Identity.Services.Account;
 using SuperBarber.Data;
 using SuperBarber.Data.Models;
-using SuperBarber.Services.Account;
 using SuperBarber.Services.Barbers;
 using SuperBarber.Services.BarberShops;
 using SuperBarber.Services.Cart;
@@ -74,14 +74,14 @@ app.UseHttpsRedirection()
    .UseRouting()
    .UseAuthentication()
    .UseAuthorization()
-   .UseSession();
-
-app.MapDefaultControllerRoute();
-app.MapRazorPages();
+   .UseSession()
+   .UseEndpoints(endpoints =>
+   {
+       endpoints.MapControllerRoute(
+           name: "Admin",
+           pattern: "{area:exists}/{controller=User}/{action=Login}/{id?}");
+       endpoints.MapDefaultControllerRoute();
+       endpoints.MapRazorPages();
+   });
 
 app.Run();
-
-//app.MapControllerRoute(
-//    name: "default",
-//    pattern: "{controller=Home}/{action=Index}/{id?}");
-

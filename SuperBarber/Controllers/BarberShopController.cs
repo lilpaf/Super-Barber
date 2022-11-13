@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using SuperBarber.Data.Models;
 using SuperBarber.Infrastructure;
 using SuperBarber.Models.BarberShop;
 using SuperBarber.Services.BarberShops;

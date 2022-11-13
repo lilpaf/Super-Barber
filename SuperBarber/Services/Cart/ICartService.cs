@@ -1,6 +1,4 @@
-﻿using SuperBarber.Data;
-using SuperBarber.Data.Models;
-using SuperBarber.Models.Cart;
+﻿using SuperBarber.Models.Cart;
 using SuperBarber.Models.Service;
 
 namespace SuperBarber.Services.Cart

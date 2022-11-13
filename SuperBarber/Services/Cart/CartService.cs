@@ -4,7 +4,6 @@ using SuperBarber.Data.Models;
 using SuperBarber.Models.Cart;
 using SuperBarber.Models.Service;
 using SuperBarber.Services.CutomException;
-using System.Linq;
 
 namespace SuperBarber.Services.Cart
 {
