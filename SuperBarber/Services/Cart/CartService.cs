@@ -1,9 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SuperBarber.Data;
 using SuperBarber.Data.Models;
+using SuperBarber.Infrastructure;
 using SuperBarber.Models.Cart;
 using SuperBarber.Models.Service;
-using SuperBarber.Services.CutomException;
+using System.Drawing;
 
 namespace SuperBarber.Services.Cart
 {
@@ -26,61 +27,70 @@ namespace SuperBarber.Services.Cart
 
         public async Task AddOrderAsync(BookServiceFormModel model, List<ServiceListingViewModel> cartList, string userId)
         {
-            var dateParsed = DateTime.Parse(model.Date);
-
-            if (!CheckIfTimeIsCorrect(model.Time))
-            {
-                throw new ModelStateCustomException("", "Hour input is incorect.");
-            }
-
-            var timeArr = model.Time.Split(':');
-
-            var ts = new TimeSpan(int.Parse(timeArr[0]), int.Parse(timeArr[1]), 0);
-
-            dateParsed = dateParsed.Date + ts;
-
-            var barberShop = await this.data.BarberShops
-                .Include(bs => bs.Barbers)
-                .FirstOrDefaultAsync(bs => bs.Id == cartList.First().BarberShopId
-                && bs.StartHour < ts
-                && bs.FinishHour > ts
-                && bs.Barbers.Any(b => !b.Orders.Any(o => o.Date == dateParsed)));
-
-            if (barberShop == null)
-            {
-                throw new ModelStateCustomException("", "There are no avalible barbers for the desired time right now.");
-            }
-
-
-            var barber = barberShop.Barbers
-                .Where(b => !b.Orders.Any(o => o.Date == dateParsed))
-                .FirstOrDefault();
-
-            if (barber == null)
-            {
-                throw new ModelStateCustomException("", "There are no avalible barbers for the desired time right now.");
-            }
-
-            List<Order> orders = new List<Order>();
+            var newCartList = new List<ServiceListingViewModel>(cartList);
 
             foreach (var item in cartList)
             {
+                var dateParsed = DateTime.Parse(model.Date);
+
+                if (!CheckIfTimeIsCorrect(model.Time))
+                {
+                    throw new ModelStateCustomException("", "Hour input is incorect.", newCartList);
+                }
+
+                var timeArr = model.Time.Split(':');
+
+                var ts = new TimeSpan(int.Parse(timeArr[0]), int.Parse(timeArr[1]), 0);
+
+                dateParsed = dateParsed.Date + ts;
+
+                //var dateFormated = dateParsed.ToString("yyyy-MM-dd HH:mm:ss.fff");
+
+                var barberShop = await this.data.BarberShops
+                .Include(bs => bs.Barbers)
+                .ThenInclude(b => b.Barber)
+                .ThenInclude(o => o.Orders)
+                .FirstOrDefaultAsync(bs => bs.Id == item.BarberShopId
+                && bs.StartHour < ts
+                && bs.FinishHour > ts);
+
+
+                if (barberShop == null)
+                {
+                    throw new ModelStateCustomException("", $"Your desired book hour for {item.ServiceName} in {item.BarberShopName} is out of the working time of the barbershop. Remove the item from the cart to continue.", newCartList);
+                }
+
+                var barber = barberShop.Barbers
+                    .Where(b => b.Barber.Orders.All(o => o.Date != dateParsed))
+                    .FirstOrDefault();
+
+                if (barber == null)
+                {
+                    throw new ModelStateCustomException("", $"There are no avalible barbers at {barberShop.Name} for the desired time right now.", newCartList);
+                }
+
                 var order = new Order
                 {
                     BarberShopId = barberShop.Id,
-                    BarberId = barber.Id,
+                    BarberId = barber.BarberId,
                     Date = dateParsed,
                     ServiceId = item.ServiceId,
                     UserId = userId
                 };
 
-                orders.Add(order);
+                await this.data.Orders.AddAsync(order);
+
+                newCartList.Remove(item);
+
+                await this.data.SaveChangesAsync();
             }
-
-            await this.data.Orders.AddRangeAsync(orders);
-
-            await this.data.SaveChangesAsync();
         }
+
+        public async Task<string> GetBarberShopNameAsync(int id)
+            => await this.data.BarberShops.Where(bs => bs.Id == id).Select(bs => bs.Name).FirstOrDefaultAsync(); 
+        
+        public string GetBarberShopNameToFriendlyUrl(string name)
+            => name.Replace(' ', '-');
 
         private bool CheckIfTimeIsCorrect(string time)
         {
@@ -94,6 +104,5 @@ namespace SuperBarber.Services.Cart
 
             return correctTimes.Any(t => t.Equals(time));
         }
-
     }
 }

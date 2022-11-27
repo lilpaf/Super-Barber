@@ -5,8 +5,10 @@
         public int ServiceId { get; init; }
         
         public int BarberShopId { get; init; }
+        
+        public string BarberShopName { get; init; }
 
-        public string Name { get; init; }
+        public string ServiceName { get; init; }
         
         public decimal Price { get; init; }
 

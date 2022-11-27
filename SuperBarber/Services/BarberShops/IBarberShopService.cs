@@ -16,5 +16,7 @@ namespace SuperBarber.Services.BarberShops
         Task DeleteBarberShopAsync(int barberShopId, string userId, bool userIsAdmin);
 
         Task<BarberShopFormModel> DisplayBarberShopInfoAsync(int barberShopId);
+
+        Task<ManageBarberShopViewModel> BarberShopInformationAsync(string userId, int barberShopId);
     }
 }

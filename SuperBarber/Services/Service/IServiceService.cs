@@ -6,7 +6,7 @@ namespace SuperBarber.Services.Service
     {
         Task<IEnumerable<ServiceCategoryViewModel>> GetServiceCategoriesAsync();
 
-        Task AddServiceAsync(AddServiceFormModel model, string userId);
+        Task AddServiceAsync(AddServiceFormModel model, string userId, int barberShopId);
 
         Task<IEnumerable<ServiceListingViewModel>> ShowServicesAsync(int barberShopId);
     }

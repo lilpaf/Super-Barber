@@ -4,7 +4,6 @@ using SuperBarber.Infrastructure;
 using SuperBarber.Models.Cart;
 using SuperBarber.Models.Service;
 using SuperBarber.Services.Cart;
-using SuperBarber.Services.CutomException;
 using static SuperBarber.Infrastructure.SessionExtensions;
 
 namespace SuperBarber.Controllers
@@ -17,6 +16,7 @@ namespace SuperBarber.Controllers
         public CartController(ICartService cartService)
             => this.cartService = cartService;
 
+        [RestoreModelStateFromTempData]
         public IActionResult All()
         {
             if (HttpContext.Session.Get<List<ServiceListingViewModel>>(SessionName) != null)
@@ -33,19 +33,21 @@ namespace SuperBarber.Controllers
             return View(new CartViewModel { Services = new List<ServiceListingViewModel>() });
         }
 
-        public async Task<IActionResult> Add(int BarberShopId, int ServiceId)
+        public async Task<IActionResult> Add(int barbershopId, int serviceId)
         {
             List<ServiceListingViewModel> cartList;
 
-            var service = await cartService.GetServiceAsync(ServiceId);
+            var service = await cartService.GetServiceAsync(serviceId);
 
-            var barberShop = cartService.CheckBarberShopId(BarberShopId);
+            var barberShopExists = cartService.CheckBarberShopId(barbershopId);
 
-            if (service == null || !barberShop)
+            var barberShopName = await cartService.GetBarberShopNameAsync(barbershopId);
+
+            if (service == null || !barberShopExists || barberShopName == null)
             {
-                this.ModelState.AddModelError("", "Invalid service or barbershop");
+                SetTempDataModelStateExtension.SetTempData(this, "", "Invalid service or barbershop");
 
-                return RedirectToAction("All", "Service", new { id = BarberShopId });
+                return RedirectToAction("All", "BarberShop");
             }
 
             if (HttpContext.Session.Get<List<ServiceListingViewModel>>(SessionName) != null
@@ -56,34 +58,37 @@ namespace SuperBarber.Controllers
                 cartList.Add(new ServiceListingViewModel
                 {
                     ServiceId = service.Id,
-                    BarberShopId = BarberShopId,
+                    BarberShopId = barbershopId,
+                    BarberShopName = barberShopName,
                     Price = service.Price,
-                    Name = service.Name,
+                    ServiceName = service.Name,
                     Category = service.Category.Name
                 });
 
                 HttpContext.Session.Set<List<ServiceListingViewModel>>(SessionName, cartList);
 
-                return RedirectToAction("All", "Service", new { id = BarberShopId });
+                return RedirectToAction("All", "Service", new { barbershopId, information = cartService.GetBarberShopNameToFriendlyUrl(barberShopName)});
             }
 
-            cartList = new List<ServiceListingViewModel>();
-
-            cartList.Add(new ServiceListingViewModel
+            cartList = new List<ServiceListingViewModel>
             {
-                ServiceId = service.Id,
-                BarberShopId = BarberShopId,
-                Price = service.Price,
-                Name = service.Name,
-                Category = service.Category.Name
-            });
+                new ServiceListingViewModel
+                {
+                    ServiceId = service.Id,
+                    BarberShopId = barbershopId,
+                    BarberShopName = barberShopName,
+                    Price = service.Price,
+                    ServiceName = service.Name,
+                    Category = service.Category.Name
+                }
+            };
 
-            HttpContext.Session.Set<List<ServiceListingViewModel>>(SessionName, cartList);
+            HttpContext.Session.Set(SessionName, cartList);
 
-            return RedirectToAction("All", "Service", new { id = BarberShopId });
+            return RedirectToAction("All", "Service", new { barbershopId, information = barberShopName });
         }
 
-        public IActionResult Remove(int Id)
+        public IActionResult Remove(int serviceid)
         {
             if (HttpContext.Session.Get<List<ServiceListingViewModel>>(SessionName) != null
                 && HttpContext.Session.Get<List<ServiceListingViewModel>>(SessionName).ToList().Any())
@@ -91,11 +96,11 @@ namespace SuperBarber.Controllers
 
                 var cartList = HttpContext.Session.Get<List<ServiceListingViewModel>>(SessionName).ToList();
 
-                var service = cartList.FirstOrDefault(s => s.ServiceId == Id);
+                var service = cartList.FirstOrDefault(s => s.ServiceId == serviceid);
 
                 if (service == null)
                 {
-                    this.ModelState.AddModelError("", "Invalid service");
+                    SetTempDataModelStateExtension.SetTempData(this, "", "Invalid service");
 
                     return RedirectToAction("All", "Cart");
                 }
@@ -141,6 +146,8 @@ namespace SuperBarber.Controllers
             catch (ModelStateCustomException ex)
             {
                 this.ModelState.AddModelError(ex.Key, ex.Message);
+                
+                HttpContext.Session.Set<List<ServiceListingViewModel>>(SessionName, ex.CartList);
 
                 return View(model);
             }

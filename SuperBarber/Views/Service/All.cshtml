@@ -6,69 +6,59 @@
 
 <div class="row">
     <div class="col-sm-12 offset-lg-2 col-lg-8 offset-xl-3 col-xl-6">
+
+        <h2 class="heading-margin text-center">@ViewBag.Title</h2>
+
         <div asp-validation-summary="ModelOnly" class="text-danger text-center list-error"></div>
-        <form method="post">
 
-            @if (Model.Any(s => s.Category == "Hair"))
-            {
-                <div class="row mb-5">
-                    <h4 class="text-center mb-3 fw-bold">Hair</h4>
-                    <hr class="mb-5" />
-                    @foreach (var service in Model.Where(s => s.Category == "Hair"))
-                    {
-                        <div class="cart-col">
-                            <a asp-controller="Cart" asp-action="Add" asp-route-BarbershopId="@service.BarberShopId" asp-route-ServiceId="@service.ServiceId" class="btn btn-primary d-inline me-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16">
-                                    <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
-                                </svg>
-                                Add to cart
-                            </a>
-                            <h5 class="fw-bold d-inline">@service.Name - @service.Price lv.</h5>
-                        </div>
-                    }
-                </div>
-            }
+        @if (!Model.Any())
+        {
+            <div class="container-fluid py-3 text-center">
+                <h2 class="display-7 fw-bold mb-4">This barbershop dose not have any services</h2>
+                <p class="fs-5">Check out all the others barbershops and find the best one for you</p>
+                <a asp-controller="BarberShop" asp-action="All" button class="btn btn-primary btn-lg" type="button">All Barbershops</a>
+            </div>
+        }
+        <div class="col">
+            <form method="post">
 
-            @if (Model.Any(s => s.Category == "Face"))
-            {
-                <div class="row mb-5">
-                    <h4 class="text-center mb-3 fw-bold">Face</h4>
-                    <hr class="mb-5" />
-                    @foreach (var service in Model.Where(s => s.Category == "Face"))
-                    {
-                        <div class="cart-col">
-                            <a asp-controller="Cart" asp-action="Add" asp-route-BarbershopId="@service.BarberShopId" asp-route-ServiceId="@service.ServiceId" class="btn btn-primary d-inline me-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16">
-                                    <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
-                                </svg>
-                                Add to cart
-                            </a>
-                            <h5 class="fw-bold d-inline">@service.Name - @service.Price lv.</h5>
-                        </div>
-                    }
-                </div>
-            }
+                @if (Model.Any(s => s.Category == "Hair"))
+                {
+                    <div class="row mb-5">
+                        <h4 class="text-center mb-3 fw-bold">Hair</h4>
+                        <hr class="mb-5" />
+                        @foreach (var service in Model.Where(s => s.Category == "Hair"))
+                        {
+                            <partial name="_AddToCartPartial" model="service" />
+                        }
+                    </div>
+                }
 
-            @if (Model.Any(s => s.Category == "Epilation"))
-            {
-                <div class="row mb-5">
-                    <h4 class="text-center mb-3 fw-bold">Epilation</h4>
-                    <hr class="mb-5" />
-                    @foreach (var service in Model.Where(s => s.Category == "Epilation"))
-                    {
-                        <div class="cart-col">
-                            <a asp-controller="Cart" asp-action="Add" asp-route-BarbershopId="@service.BarberShopId" asp-route-ServiceId="@service.ServiceId" class="btn btn-primary d-inline me-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16">
-                                    <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
-                                </svg>
-                                Add to cart
-                            </a>
-                            <h5 class="fw-bold d-inline">@service.Name - @service.Price lv.</h5>
-                        </div>
-                    }
-                </div>
-            }
-        </form>
+                @if (Model.Any(s => s.Category == "Face"))
+                {
+                    <div class="row mb-5">
+                        <h4 class="text-center mb-3 fw-bold">Face</h4>
+                        <hr class="mb-5" />
+                        @foreach (var service in Model.Where(s => s.Category == "Face"))
+                        {
+                            <partial name="_AddToCartPartial" model="service" />
+                        }
+                    </div>
+                }
+
+                @if (Model.Any(s => s.Category == "Epilation"))
+                {
+                    <div class="row mb-5">
+                        <h4 class="text-center mb-3 fw-bold">Epilation</h4>
+                        <hr class="mb-5" />
+                        @foreach (var service in Model.Where(s => s.Category == "Epilation"))
+                        {
+                            <partial name="_AddToCartPartial" model="service" />
+                        }
+                    </div>
+                }
+            </form>
+        </div>
     </div>
 </div>
 

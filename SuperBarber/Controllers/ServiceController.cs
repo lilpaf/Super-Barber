@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SuperBarber.Infrastructure;
 using SuperBarber.Models.Service;
-using SuperBarber.Services.CutomException;
 using SuperBarber.Services.Service;
 using static SuperBarber.CustomRoles;
 
@@ -13,16 +12,24 @@ namespace SuperBarber.Controllers
     {
         private readonly IServiceService serviceService;
 
-        public ServiceController(IServiceService serviceService) 
+        public ServiceController(IServiceService serviceService)
             => this.serviceService = serviceService;
 
-        public async Task<IActionResult> Add() => View(new AddServiceFormModel
+        public async Task<IActionResult> Add(int barberShopId, string information)
         {
-            Categories = await serviceService.GetServiceCategoriesAsync()
-        });
+            if (barberShopId == 0 || information == null)
+            {
+                return BadRequest();
+            }
+
+            return View(new AddServiceFormModel
+            {
+                Categories = await serviceService.GetServiceCategoriesAsync()
+            });
+        }
 
         [HttpPost]
-        public async Task<IActionResult> Add(AddServiceFormModel model)
+        public async Task<IActionResult> Add(AddServiceFormModel model, int barberShopId)
         {
             try
             {
@@ -36,7 +43,7 @@ namespace SuperBarber.Controllers
 
                 var userId = User.Id();
 
-                await serviceService.AddServiceAsync(model, userId);
+                await serviceService.AddServiceAsync(model, userId, barberShopId);
 
                 return RedirectToAction("Index", "Home");
             }
@@ -48,15 +55,22 @@ namespace SuperBarber.Controllers
             }
         }
 
-        public async Task<IActionResult> All(int Id)
+        [AllowAnonymous]
+        [RestoreModelStateFromTempData]
+        public async Task<IActionResult> All(int barberShopId, string information)
         {
             try
             {
-                return View(await serviceService.ShowServicesAsync(Id));
+                if (barberShopId == 0 || information == null)
+                {
+                    return BadRequest();
+                }
+
+                return View(await serviceService.ShowServicesAsync(barberShopId));
             }
             catch (ModelStateCustomException ex)
             {
-                this.ModelState.AddModelError(ex.Key, ex.Message);
+                SetTempDataModelStateExtension.SetTempData(this, ex);
 
                 return RedirectToAction("All", "BarberShop");
             }

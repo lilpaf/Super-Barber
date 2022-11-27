@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SuperBarber.Data;
+using SuperBarber.Infrastructure;
 using SuperBarber.Models.BarberShop;
-using SuperBarber.Services.CutomException;
 
 namespace SuperBarber.Services.Home
 {

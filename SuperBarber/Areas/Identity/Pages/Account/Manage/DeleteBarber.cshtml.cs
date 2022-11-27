@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SuperBarber.Areas.Identity.Services.Account;
 using SuperBarber.Data.Models;
+using SuperBarber.Infrastructure;
 
 namespace SuperBarber.Areas.Identity.Pages.Account.Manage
 {
@@ -48,32 +49,42 @@ namespace SuperBarber.Areas.Identity.Pages.Account.Manage
 
         public async Task<IActionResult> OnPostAsync()
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
+            try
             {
-                return NotFound("Unable to load user.");
-            }
-
-            RequirePassword = await _userManager.HasPasswordAsync(user);
-            if (RequirePassword)
-            {
-                if (!await _userManager.CheckPasswordAsync(user, Input.Password))
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
                 {
-                    ModelState.AddModelError(string.Empty, "Incorrect password.");
-                    return Page();
+                    return NotFound("Unable to load user.");
                 }
-            }
-            
-            if (User.IsInRole(CustomRoles.BarberRoleName))
-            {
-                ModelState.AddModelError(string.Empty, "User in not a barber.");
+
+                RequirePassword = await _userManager.HasPasswordAsync(user);
+                if (RequirePassword)
+                {
+                    if (!await _userManager.CheckPasswordAsync(user, Input.Password))
+                    {
+                        ModelState.AddModelError(string.Empty, "Incorrect password.");
+                        return Page();
+                    }
+                }
+
+                if (!User.IsInRole(CustomRoles.BarberRoleName))
+                {
+                    ModelState.AddModelError(string.Empty, "User in not a barber.");
+
+                    return RedirectToPage("PersonalData");
+                }
+
+                await _accountService.DeleteBarberAsync(user);
 
                 return RedirectToPage("PersonalData");
             }
+            catch (ModelStateCustomException ex)
+            {
+                ModelState.AddModelError(ex.Key, ex.Message);
 
-            await _accountService.DeleteBarberAsync(user);
-
-            return RedirectToPage("PersonalData");
+                return RedirectToPage("PersonalData");
+            }
+            
         }
     }
 }

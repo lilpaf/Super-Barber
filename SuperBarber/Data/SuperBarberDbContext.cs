@@ -22,6 +22,9 @@ namespace SuperBarber.Data
         {
             modelBuilder.Entity<BarberShopServices>()
                 .HasKey(x => new { x.ServiceId, x.BarberShopId });
+            
+            modelBuilder.Entity<BarberShopBarbers>()
+                .HasKey(x => new { x.BarberId, x.BarberShopId });
 
             modelBuilder.Entity<Order>()
                 .HasOne(o => o.BarberShop)
@@ -33,10 +36,10 @@ namespace SuperBarber.Data
                 .WithMany(b => b.Orders)
                 .OnDelete(DeleteBehavior.Restrict);
              
-            modelBuilder.Entity<BarberShop>()
+            /*modelBuilder.Entity<BarberShop>()
                 .HasMany(bs => bs.Barbers)
                 .WithOne(b => b.BarberShop)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict);*/
 
             base.OnModelCreating(modelBuilder);
 

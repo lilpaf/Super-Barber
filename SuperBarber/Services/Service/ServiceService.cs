@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SuperBarber.Data;
 using SuperBarber.Data.Models;
+using SuperBarber.Infrastructure;
 using SuperBarber.Models.Service;
-using SuperBarber.Services.CutomException;
 
 namespace SuperBarber.Services.Service
 {
@@ -24,20 +24,26 @@ namespace SuperBarber.Services.Service
             .OrderBy(c => c.Name)
             .ToListAsync();
 
-        public async Task AddServiceAsync(AddServiceFormModel model, string userId)
+        public async Task AddServiceAsync(AddServiceFormModel model, string userId, int barberShopId)
         {
             if (!this.data.Categories.Any(c => c.Id == model.CategoryId))
             {
                 throw new ModelStateCustomException(nameof(model.CategoryId), "Category does not exist");
             }
 
+            var barberShop = await this.data.BarberShops
+                   .FirstOrDefaultAsync(bs => bs.Id == barberShopId 
+                        && bs.Barbers.Any(b => b.IsOwner && b.Barber.UserId == userId));
+
+            if (barberShop == null)
+            {
+                throw new ModelStateCustomException("", "You are not the owner of this barbershop");
+            }
+
             if (this.data.Services.Any(s => s.Name.ToLower().Trim() == model.Name.ToLower().Trim() && s.CategoryId == model.CategoryId))
             {
                 var service = await this.data.Services
                     .FirstAsync(s => s.Name.ToLower().Trim() == model.Name.ToLower().Trim() && s.CategoryId == model.CategoryId);
-
-                var barberShop = await this.data.BarberShops
-                    .FirstAsync(bs => bs.Barbers.Any(b => b.UserId == userId));
 
                 if (barberShop.Services.Any(s => s.ServiceId == service.Id))
                 {
@@ -62,9 +68,6 @@ namespace SuperBarber.Services.Service
                 };
 
                 await this.data.Services.AddAsync(service);
-
-                var barberShop = await this.data.BarberShops
-                    .FirstAsync(bs => bs.Barbers.Any(b => b.UserId == userId));
 
                 barberShop.Services.Add(new BarberShopServices
                 {
@@ -94,7 +97,7 @@ namespace SuperBarber.Services.Service
                 {
                     BarberShopId = barberShop.Id,
                     ServiceId = s.Service.Id,
-                    Name = s.Service.Name,
+                    ServiceName = s.Service.Name,
                     Price = s.Service.Price,
                     Category = s.Service.Category.Name
                 })

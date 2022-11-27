@@ -12,7 +12,7 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-controller="Home" asp-action="Index">Super Barber</a>
+                <a class="navbar-brand" asp-controller="Home" asp-area="" asp-action="Index">Super Barber</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -20,18 +20,15 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="BarberShop" asp-action="All">All Barbershops</a>
+                            <a class="nav-link text-dark" asp-controller="BarberShop" asp-area="" asp-action="All">All Barbershops</a>
                         </li>
                         @if (User.IsInRole(CustomRoles.BarberRoleName))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="BarberShop" asp-action="Add">Add Barbershop</a>
+                                <a class="nav-link text-dark" asp-controller="BarberShop" asp-area="" asp-action="Add">Add Barbershop</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Service" asp-action="Add">Add Service</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="BarberShop" asp-action="Mine">My Barbershops</a>
+                                <a class="nav-link text-dark" asp-controller="BarberShop" asp-area="" asp-action="Mine">My Barbershops</a>
                             </li>
                         }
                     </ul>

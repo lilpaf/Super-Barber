@@ -3,9 +3,10 @@ using SuperBarber.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SuperBarber.Data.Models;
-using SuperBarber.Services.CutomException;
 using Microsoft.AspNetCore.Identity;
 using static SuperBarber.CustomRoles;
+using SuperBarber.Infrastructure;
+using SuperBarber.Models.Barbers;
 
 namespace SuperBarber.Services.BarberShops
 {
@@ -15,8 +16,8 @@ namespace SuperBarber.Services.BarberShops
         private readonly UserManager<User> userManager;
         private readonly SignInManager<User> signInManager;
 
-        public BarberShopService(SuperBarberDbContext data, 
-            UserManager<User> userManager, 
+        public BarberShopService(SuperBarberDbContext data,
+            UserManager<User> userManager,
             SignInManager<User> signInManager)
         {
             this.data = data;
@@ -118,16 +119,21 @@ namespace SuperBarber.Services.BarberShops
                 && b.DistrictId == barberShop.DistrictId
                  && b.Street == barberShop.Street))
             {
-                throw new ModelStateCustomException(nameof(model.Name), "This Barbershop already exist");
+                throw new ModelStateCustomException(nameof(model.Name), "This barbershop already exist");
             }
 
-            var barber = await this.data.Barbers
+            var barber = await data.Barbers
                 .FirstAsync(b => b.UserId == userId);
-            
+
             var user = await this.data.Users
                 .FirstAsync(u => u.Id == userId);
 
-            barberShop.Barbers.Add(barber);
+            barberShop.Barbers.Add(new BarberShopBarbers
+            {
+                BarberShop = barberShop,
+                Barber = barber,
+                IsOwner = true
+            });
 
             await userManager.AddToRoleAsync(user, BarberShopOwnerRoleName);
 
@@ -135,12 +141,12 @@ namespace SuperBarber.Services.BarberShops
 
             await this.data.SaveChangesAsync();
 
-            await signInManager.SignInAsync(user, isPersistent: false);
+            await signInManager.RefreshSignInAsync(user);
         }
 
         public async Task<IEnumerable<BarberShopListingViewModel>> MineBarberShopsAsync(string userId)
             => await this.data.BarberShops
-               .Where(bs => bs.Barbers.Any(b => b.UserId == userId))
+               .Where(bs => bs.Barbers.Any(b => b.Barber.UserId == userId))
                .Select(b => new BarberShopListingViewModel
                {
                    Id = b.Id,
@@ -172,29 +178,38 @@ namespace SuperBarber.Services.BarberShops
 
             if (formModel == null)
             {
-                throw new ModelStateCustomException("", "This Barbershop does not exist");
+                throw new ModelStateCustomException("", "This barbershop does not exist");
             }
 
             return formModel;
         }
-        
+
         public async Task EditBarberShopAsync(BarberShopFormModel model, int barberShopId, string userId, bool userIsAdmin)
         {
             var barberShop = await this.data.BarberShops.FindAsync(barberShopId);
 
             if (barberShop == null)
             {
-                throw new ModelStateCustomException("", "This Barbershop does not exist");
+                throw new ModelStateCustomException("", "This barbershop does not exist");
             }
 
-            var barber = await this.data.Barbers
-                .FirstAsync(b => b.UserId == userId);
-
-            if (!barberShop.Barbers.Any(b => b.Id == barber.Id) || !userIsAdmin)
+            if (!userIsAdmin)
             {
-                throw new ModelStateCustomException("", "You can not delete this barber shop");
-            }
+                var barber = await this.data.Barbers
+                .FirstOrDefaultAsync(b => b.UserId == userId &&
+                        b.BarberShops.Any(bs => bs.BarberShopId == barberShop.Id && bs.IsOwner));
 
+                if (barber == null)
+                {
+                    throw new ModelStateCustomException("", "You have to be a owner to do this action");
+                }
+
+                if (!barberShop.Barbers.Any(b => b.BarberId == barber.Id))
+                {
+                    throw new ModelStateCustomException("", "You can not delete this barbershop");
+                }
+            }
+            
             await CityExists(model.City);
 
             barberShop.CityId = this.data.Cities
@@ -220,28 +235,55 @@ namespace SuperBarber.Services.BarberShops
             barberShop.FinishHour = finishHour;
             barberShop.Name = model.Name;
             barberShop.ImageUrl = model.ImageUrl;
-            
+
             await this.data.SaveChangesAsync();
         }
-        
+
         public async Task DeleteBarberShopAsync(int barberShopId, string userId, bool userIsAdmin)
         {
             var barberShop = await this.data.BarberShops.FindAsync(barberShopId);
 
             if (barberShop == null)
             {
-                throw new ModelStateCustomException("", "This barber shop does not exist");
+                throw new ModelStateCustomException("", "This barbershop does not exist");
             }
-            
-            var barber = await this.data.Barbers
-                .FirstAsync(b => b.UserId == userId);
 
-            if (!barberShop.Barbers.Any(b => b.Id == barber.Id) && !userIsAdmin)
+            if (barberShop.Orders.Any())
             {
-                throw new ModelStateCustomException("", "You can not delete this barber shop");
+                var orders = await this.data.Orders.Where(o => o.BarberShopId == barberShop.Id).ToListAsync();
+
+                this.data.Orders.RemoveRange(orders);
             }
 
-            barber.BarberShopId = null;
+            if (!userIsAdmin)
+            {
+                // In development
+                /*
+                if (barberShop.Barbers.Where(b => b.Owner).Count() > 1)
+                {
+                    throw new ModelStateCustomException("", "A message was sent to the other owners to confirm deleteing the barbershop. If you want to unasign only yourself as owner and barber from this shop press the 'I do not work here anymore' button");
+                }
+                */
+
+                var barber = await this.data.Barbers
+                .FirstOrDefaultAsync(b => b.UserId == userId &&
+                        b.BarberShops.Any(bs => bs.BarberShopId == barberShop.Id && bs.IsOwner));
+
+                if (barber == null)
+                {
+                    throw new ModelStateCustomException("", "You have to be owner to do this action");
+                }
+
+                if (!barberShop.Barbers.Any(b => b.BarberId == barber.Id))
+                {
+                    throw new ModelStateCustomException("", "You can not delete this barbershop");
+                }
+
+                barber.BarberShops
+                    .Remove(barber.BarberShops
+                            .Where(bs => bs.BarberShopId == barberShop.Id)
+                            .First());
+            }
 
             this.data.BarberShops.Remove(barberShop);
 
@@ -257,7 +299,7 @@ namespace SuperBarber.Services.BarberShops
                 await this.data.SaveChangesAsync();
             }
         }
-        
+
         private async Task DistrictExists(string district)
         {
             if (!this.data.Districts
@@ -267,7 +309,7 @@ namespace SuperBarber.Services.BarberShops
                 await this.data.SaveChangesAsync();
             }
         }
-        
+
         private Tuple<TimeSpan, TimeSpan> ParseHours(string startHour, string finishHour)
         {
             var startHourArr = startHour.Split(':');
@@ -278,6 +320,32 @@ namespace SuperBarber.Services.BarberShops
             var finishHourParsed = new TimeSpan(int.Parse(finishHourArr[0]), int.Parse(finishHourArr[1]), 0);
 
             return Tuple.Create(startHourParsed, finishHourParsed);
+        }
+
+        public async Task<ManageBarberShopViewModel> BarberShopInformationAsync(string userId, int barberShopId)
+        {
+            if (!this.data.BarberShops.Any(bs => bs.Id == barberShopId 
+                    && bs.Barbers.Any(b => b.IsOwner && b.Barber.UserId == userId)))
+            {
+                throw new ModelStateCustomException("", "You have to be owner to do this action");
+            }
+
+            return await this.data.BarberShops
+            .Where(bs => bs.Id == barberShopId)
+            .Select(bs => new ManageBarberShopViewModel
+            {
+                BarberShopId = bs.Id,
+                BarberShopName = bs.Name,
+                Barbers = bs.Barbers.Select(b => new BarberViewModel
+                {
+                    BarberId = b.BarberId,
+                    BarberName = b.Barber.FirstName + ' ' + b.Barber.LastName,
+                    IsOwner = b.IsOwner,
+                    UserId = b.Barber.UserId
+                })
+               .ToList()
+            })
+            .FirstOrDefaultAsync();
         }
     }
 }

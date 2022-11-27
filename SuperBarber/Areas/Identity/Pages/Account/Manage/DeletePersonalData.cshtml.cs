@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using SuperBarber.Areas.Identity.Services.Account;
 using SuperBarber.Data.Models;
 
 namespace SuperBarber.Areas.Identity.Pages.Account.Manage
@@ -18,13 +19,16 @@ namespace SuperBarber.Areas.Identity.Pages.Account.Manage
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         //private readonly ILogger<DeletePersonalDataModel> _logger;
+        private readonly IAccountService _accountService;
 
         public DeletePersonalDataModel(
             UserManager<User> userManager,
-            SignInManager<User> signInManager)
+            SignInManager<User> signInManager,
+            IAccountService accountService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _accountService = accountService;
         }
 
         [BindProperty]
@@ -56,7 +60,7 @@ namespace SuperBarber.Areas.Identity.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return NotFound("Unable to load user.");
             }
 
             RequirePassword = await _userManager.HasPasswordAsync(user);
@@ -67,6 +71,11 @@ namespace SuperBarber.Areas.Identity.Pages.Account.Manage
                     ModelState.AddModelError(string.Empty, "Incorrect password.");
                     return Page();
                 }
+            }
+
+            if (!User.IsInRole(CustomRoles.BarberRoleName))
+            {
+                await _accountService.DeleteBarberAsync(user);
             }
 
             var result = await _userManager.DeleteAsync(user);

@@ -5,9 +5,9 @@
     ViewData["ActivePage"] = ManageNavPages.PersonalData;
 }
 
-<h3>@ViewData["Title"]</h3>
+<h3 class="text-center">@ViewData["Title"]</h3>
 
-<div class="alert alert-warning" role="alert">
+<div class="alert alert-warning text-center" role="alert">
     <p>
         <strong>Becomeing a regular user will delete the barbershops that you are the only owner and all your orders from clients.</strong>
     </p>
@@ -18,7 +18,7 @@
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         @if (Model.RequirePassword)
         {
-                <div class="form-floating">
+                <div class="form-floating mb-3">
                     <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" />
                     <label asp-for="Input.Password" class="form-label"></label>
                     <span asp-validation-for="Input.Password" class="text-danger"></span>

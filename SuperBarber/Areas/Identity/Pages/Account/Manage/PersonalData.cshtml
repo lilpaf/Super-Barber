@@ -18,18 +18,30 @@
                 <strong>Becomeing a regular user will delete the barbershops that you are the only owner and all your orders from clients.</strong>
             </p>
             <p>
-                <a class="btn btn-danger" asp-controller="Account" asp-action="DeleteBarber">Become User</a>
+                <a class="btn btn-danger" id="delete-barber" asp-page="DeleteBarber">Become User</a>
+            </p>
+        </div>
+            <div class="col-md-6 text-center">
+            <p>
+                <strong>Deleting your account will permanently remove all your data, and this cannot be recovered.</strong>
+            </p>
+            <p>
+                <a id="delete" asp-page="DeletePersonalData" class="btn btn-danger text-center">Delete Account</a>
             </p>
         </div>
     }
-    <div class="col-md-6 text-center">
-        <p>
-            <strong>Deleting your account will permanently remove all your data, and this cannot be recovered.</strong>
-        </p>
-        <p>
-            <a id="delete" asp-page="DeletePersonalData" class="btn btn-danger text-center">Delete Account</a>
-        </p>
-    </div>
+    else
+    {
+        <div class="col-md-12 text-center">
+            <p>
+                <strong>Deleting your account will permanently remove all your data, and this cannot be recovered.</strong>
+            </p>
+            <p>
+                <a id="delete" asp-page="DeletePersonalData" class="btn btn-danger text-center">Delete Account</a>
+            </p>
+        </div>
+    }
+    
 </div>
 
 

@@ -1,0 +1,61 @@
+﻿@model ManageBarberShopViewModel
+
+@{
+    ViewBag.Title = "Manage your babrber shop";
+}
+
+<div class="row">
+    <div class="col-sm-12 offset-lg-2 col-lg-8 offset-xl-3 col-xl-6">
+        <h2 class="heading-margin text-center">@ViewBag.Title</h2>
+
+        <div asp-validation-summary="ModelOnly" class="text-danger text-center list-error"></div>
+
+        <div class="accordion" id="accordionExample">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingOne">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                        Services
+                    </button>
+                </h2>
+                <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                    <div class="accordion-body text-center">
+                        <a class="btn btn-primary d-inline btn-manage-padding" asp-controller="Service" asp-action="All" asp-route-barbershopid="@Model.BarberShopId" asp-route-information="@Model.BarberShopName">See all the services</a>
+                        <a class="btn btn-secondary d-inline btn-manage-padding" asp-controller="Service" asp-action="Add" asp-route-barbershopid="@Model.BarberShopId" asp-route-information="@Model.BarberShopName">Add Service</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingTwo">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    Employees
+                </button>
+            </h2>
+            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+                    <ul class="list-group">
+                        @foreach (var barber in Model.Barbers)
+                        {
+                            <li class="list-group-item text-center">
+                                <h6 class="me-3 d-inline">@barber.BarberName</h6>
+                                @if (User.Id() != barber.UserId)
+                                {
+                                    <a asp-controller="Barber" asp-action="FireBarber" asp-route-barbershopid="@Model.BarberShopId" asp-route-barberid="@barber.BarberId" asp-route-information="@barber.BarberName" class="btn btn-danger d-inline btn-manage-padding">Fire</a>
+                                    @if (barber.IsOwner)
+                                    {
+                                        <a asp-controller="Barber" asp-action="RemoveOwner" asp-route-barbershopid="@Model.BarberShopId" asp-route-barberid="@barber.BarberId" asp-route-information="@barber.BarberName" class="btn btn-success d-inline btn-manage-padding">Revoke ownership</a>
+                                    }
+                                    else
+                                    {
+                                        <a asp-controller="Barber" asp-action="MakeOwner" asp-route-barbershopid="@Model.BarberShopId" asp-route-barberid="@barber.BarberId" asp-route-information="@barber.BarberName" class="btn btn-success d-inline btn-manage-padding">Make owner</a>
+                                    }
+                                }
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

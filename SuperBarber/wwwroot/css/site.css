@@ -71,7 +71,7 @@ body {
     }
 
 .cart-col {
-    padding-left: 180px;
+    padding-left: 22%;
 }
 
 .anchor-register {
@@ -91,4 +91,9 @@ body {
 .table-text {
     overflow: auto;
     white-space: nowrap;
+}
+
+.btn-manage-padding {
+    padding-right: 60px;
+    padding-left: 60px;
 }

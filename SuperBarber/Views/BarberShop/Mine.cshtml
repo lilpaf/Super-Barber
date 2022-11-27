@@ -1,7 +1,6 @@
 ﻿@model IEnumerable<BarberShopListingViewModel>
 
 @{
-    ViewBag.Title = "My barber shops";
     ViewBag.CanEdit = true;
 }
 
@@ -9,7 +8,7 @@
 
 @if (!Model.Any())
 {
-    <h2 class="text-center">You do not own any barber shops yet!</h2>
+    <h2 class="text-center">You do not own or work at any barbershops yet!</h2>
 }
 else
 {

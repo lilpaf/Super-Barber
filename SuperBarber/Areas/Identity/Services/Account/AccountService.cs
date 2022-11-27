@@ -2,10 +2,10 @@
 using SuperBarber.Data.Models;
 using SuperBarber.Data;
 using SuperBarber.Models.Account;
-using SuperBarber.Services.CutomException;
 using Microsoft.EntityFrameworkCore;
 using static SuperBarber.CustomRoles;
 using System.Xml.Linq;
+using SuperBarber.Infrastructure;
 
 namespace SuperBarber.Areas.Identity.Services.Account
 {
@@ -69,8 +69,13 @@ namespace SuperBarber.Areas.Identity.Services.Account
             }
 
             var barberShop = await _data.BarberShops
-                .FirstOrDefaultAsync(bs => bs.Barbers.Any(b => b.Id == barber.Id));
+                .FirstOrDefaultAsync(bs => bs.Barbers.Any(b => b.BarberId == barber.Id));
 
+            if (barberShop != null && barberShop.Barbers.Where(b => b.IsOwner).Count() > 1)
+            {
+                throw new ModelStateCustomException("", "You have to transfer first the ownership of the barbershop that you own or delete it");
+            }
+            
             if (barberShop != null && barberShop.Barbers.Count == 1)
             {
                 await _userManager.RemoveFromRoleAsync(user, BarberShopOwnerRoleName);

@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using SuperBarber.Infrastructure;
 using SuperBarber.Models;
 using SuperBarber.Models.Home;
-using SuperBarber.Services.CutomException;
 using SuperBarber.Services.Home;
 using System.Diagnostics;
 

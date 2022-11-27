@@ -1,3 +1,4 @@
+using CarRentingSystem.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -36,11 +37,6 @@ builder.Services.AddDefaultIdentity<User>(options =>
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<SuperBarberDbContext>();
 
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.LoginPath = "/User/Login";
-});
-
 builder.Services.AddControllersWithViews(options =>
 {
     options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
@@ -77,10 +73,19 @@ app.UseHttpsRedirection()
    .UseSession()
    .UseEndpoints(endpoints =>
    {
-       endpoints.MapControllerRoute(
+       endpoints.MapDefaultAreaRoute();
+       
+       /*endpoints.MapControllerRoute(
            name: "Admin",
-           pattern: "{area:exists}/{controller=User}/{action=Login}/{id?}");
+           pattern: "{area:exists}/{controller=Home}/{action=Idex}/{id?}");*/
+       
+       endpoints.MapControllerRoute(
+           name: "Custom Route",
+           pattern: "/{controller}/{action}/{barbershopid}/{information}",
+           defaults: new {controller = "Service", action = "All" });
+       
        endpoints.MapDefaultControllerRoute();
+
        endpoints.MapRazorPages();
    });
 

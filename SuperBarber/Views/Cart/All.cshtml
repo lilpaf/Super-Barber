@@ -12,7 +12,7 @@
         {
             <div class="container-fluid py-3 text-center">
                 <h2 class="display-7 fw-bold mb-4">Your cart is empty</h2>
-                <p class="fs-5">Check all the Barbershops and find the best one for you</p>
+                <p class="fs-5">Check all the barbershops and find the best one for you</p>
                 <a asp-controller="BarberShop" asp-action="All" button class="btn btn-primary btn-lg" type="button">All Barbershops</a>
             </div>
         }
@@ -24,10 +24,10 @@
                         <div class="row">
                             <div class="d-inline mb-5">
                                 <div class="d-inline me-3">
-                                    <a asp-controller="Cart" asp-action="Remove" asp-route-Id="@service.ServiceId" class="btn btn-danger d-inline text-center">Remove</a>
+                                    <a asp-controller="Cart" asp-action="Remove" asp-route-serviceid="@service.ServiceId" class="btn btn-danger d-inline text-center">Remove</a>
                                 </div>
                                 <div class="d-inline">
-                                    <h5 class="fw-bold d-inline">@service.Name - @service.Price lv.</h5>
+                                    <h5 class="fw-bold d-inline">@service.ServiceName - @service.Price lv. at @service.BarberShopName</h5>
                                 </div>
                             </div>
                         </div>

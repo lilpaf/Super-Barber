@@ -10,5 +10,9 @@ namespace SuperBarber.Services.Cart
         bool CheckBarberShopId(int barberShopId);
 
         Task AddOrderAsync(BookServiceFormModel model, List<ServiceListingViewModel> cartList, string userId);
+
+        Task<string> GetBarberShopNameAsync(int id);
+
+        string GetBarberShopNameToFriendlyUrl(string name);
     }
 }

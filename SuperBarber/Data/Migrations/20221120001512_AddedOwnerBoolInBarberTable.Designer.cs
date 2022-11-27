@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SuperBarber.Data;
 
@@ -11,9 +12,10 @@ using SuperBarber.Data;
 namespace SuperBarber.Data.Migrations
 {
     [DbContext(typeof(SuperBarberDbContext))]
-    partial class SuperBarberDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221120001512_AddedOwnerBoolInBarberTable")]
+    partial class AddedOwnerBoolInBarberTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -167,6 +169,9 @@ namespace SuperBarber.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<int?>("BarberShopId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(62)
@@ -182,6 +187,9 @@ namespace SuperBarber.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<bool>("Owner")
+                        .HasColumnType("bit");
+
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasMaxLength(30)
@@ -192,6 +200,8 @@ namespace SuperBarber.Data.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BarberShopId");
 
                     b.HasIndex("UserId");
 
@@ -239,24 +249,6 @@ namespace SuperBarber.Data.Migrations
                     b.HasIndex("DistrictId");
 
                     b.ToTable("BarberShops");
-                });
-
-            modelBuilder.Entity("SuperBarber.Data.Models.BarberShopBarbers", b =>
-                {
-                    b.Property<int>("BarberId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("BarberShopId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsOwner")
-                        .HasColumnType("bit");
-
-                    b.HasKey("BarberId", "BarberShopId");
-
-                    b.HasIndex("BarberShopId");
-
-                    b.ToTable("BarberShopBarbers");
                 });
 
             modelBuilder.Entity("SuperBarber.Data.Models.BarberShopServices", b =>
@@ -517,11 +509,18 @@ namespace SuperBarber.Data.Migrations
 
             modelBuilder.Entity("SuperBarber.Data.Models.Barber", b =>
                 {
+                    b.HasOne("SuperBarber.Data.Models.BarberShop", "BarberShop")
+                        .WithMany("Barbers")
+                        .HasForeignKey("BarberShopId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("SuperBarber.Data.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("BarberShop");
 
                     b.Navigation("User");
                 });
@@ -543,25 +542,6 @@ namespace SuperBarber.Data.Migrations
                     b.Navigation("City");
 
                     b.Navigation("District");
-                });
-
-            modelBuilder.Entity("SuperBarber.Data.Models.BarberShopBarbers", b =>
-                {
-                    b.HasOne("SuperBarber.Data.Models.Barber", "Barber")
-                        .WithMany("BarberShops")
-                        .HasForeignKey("BarberId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SuperBarber.Data.Models.BarberShop", "BarberShop")
-                        .WithMany("Barbers")
-                        .HasForeignKey("BarberShopId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Barber");
-
-                    b.Navigation("BarberShop");
                 });
 
             modelBuilder.Entity("SuperBarber.Data.Models.BarberShopServices", b =>
@@ -631,8 +611,6 @@ namespace SuperBarber.Data.Migrations
 
             modelBuilder.Entity("SuperBarber.Data.Models.Barber", b =>
                 {
-                    b.Navigation("BarberShops");
-
                     b.Navigation("Orders");
                 });
 

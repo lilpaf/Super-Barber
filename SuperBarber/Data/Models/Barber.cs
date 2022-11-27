@@ -24,11 +24,6 @@ namespace SuperBarber.Data.Models
         [MaxLength(EmailMaxLength)]
         public string Email { get; set; }
 
-        public int? BarberShopId { get; set; }
-
-        [ForeignKey(nameof(BarberShopId))]
-        public BarberShop? BarberShop { get; set; }
-
         [Required]
         public string UserId { get; set; }
         
@@ -36,5 +31,7 @@ namespace SuperBarber.Data.Models
         public User User { get; set; }
 
         public ICollection<Order> Orders { get; set; } = new HashSet<Order>();
+
+        public ICollection<BarberShopBarbers> BarberShops { get; set; } = new HashSet<BarberShopBarbers>();
     }
 }
