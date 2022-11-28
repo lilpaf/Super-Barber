@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SuperBarber.Infrastructure;
 using SuperBarber.Models.Service;
 using SuperBarber.Services.Service;
-using static SuperBarber.CustomRoles;
+using static SuperBarber.Infrastructure.CustomRoles;
 
 namespace SuperBarber.Controllers
 {
@@ -29,7 +29,7 @@ namespace SuperBarber.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add(AddServiceFormModel model, int barberShopId)
+        public async Task<IActionResult> Add(AddServiceFormModel model, int barberShopId, string information)
         {
             try
             {
@@ -45,7 +45,7 @@ namespace SuperBarber.Controllers
 
                 await serviceService.AddServiceAsync(model, userId, barberShopId);
 
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction(nameof(All), new {barberShopId, information});
             }
             catch (ModelStateCustomException ex)
             {
@@ -73,6 +73,49 @@ namespace SuperBarber.Controllers
                 SetTempDataModelStateExtension.SetTempData(this, ex);
 
                 return RedirectToAction("All", "BarberShop");
+            }
+        }
+
+        [RestoreModelStateFromTempData]
+        public async Task<IActionResult> Manage(int barberShopId, string information)
+        {
+            try
+            {
+                if (barberShopId == 0 || information == null)
+                {
+                    return BadRequest();
+                }
+
+                return View(await serviceService.ShowServicesAsync(barberShopId));
+            }
+            catch (ModelStateCustomException ex)
+            {
+                SetTempDataModelStateExtension.SetTempData(this, ex);
+
+                return RedirectToAction("All", "BarberShop");
+            }
+        }
+        
+        public async Task<IActionResult> Remove(int barberShopId, int serviceId, string information)
+        {
+            try
+            {
+                if (barberShopId == 0 || information == null)
+                {
+                    return BadRequest();
+                }
+
+                var userId = User.Id();
+
+                await serviceService.RemoveServiceAsync(barberShopId, serviceId, userId);
+
+                return RedirectToAction(nameof(Manage), new { barberShopId, information });
+            }
+            catch (ModelStateCustomException ex)
+            {
+                SetTempDataModelStateExtension.SetTempData(this, ex);
+
+                return RedirectToAction(nameof(Manage), new { barberShopId , information});
             }
         }
     }

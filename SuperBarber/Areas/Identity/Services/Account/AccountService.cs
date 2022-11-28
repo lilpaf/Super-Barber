@@ -3,7 +3,7 @@ using SuperBarber.Data.Models;
 using SuperBarber.Data;
 using SuperBarber.Models.Account;
 using Microsoft.EntityFrameworkCore;
-using static SuperBarber.CustomRoles;
+using static SuperBarber.Infrastructure.CustomRoles;
 using System.Xml.Linq;
 using SuperBarber.Infrastructure;
 

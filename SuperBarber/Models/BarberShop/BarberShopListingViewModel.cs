@@ -17,5 +17,9 @@
         public string FinishHour { get; init; }
 
         public string ImageUrl { get; set; }
+
+        public bool UserIsEmployee { get; init; }
+        
+        public bool UserIsOwner { get; init; }
     }
 }

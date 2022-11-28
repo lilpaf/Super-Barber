@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SuperBarber.Data;
 using SuperBarber.Data.Models;
-using static SuperBarber.CustomRoles;
+using static SuperBarber.Infrastructure.CustomRoles;
 
 namespace SuperBarber.Infrastructure
 {

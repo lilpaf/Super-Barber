@@ -32,7 +32,8 @@ namespace SuperBarber.Services.Service
             }
 
             var barberShop = await this.data.BarberShops
-                   .FirstOrDefaultAsync(bs => bs.Id == barberShopId 
+                    .Include(bs => bs.Services)
+                    .FirstOrDefaultAsync(bs => bs.Id == barberShopId 
                         && bs.Barbers.Any(b => b.IsOwner && b.Barber.UserId == userId));
 
             if (barberShop == null)
@@ -89,7 +90,7 @@ namespace SuperBarber.Services.Service
 
             if (barberShop == null)
             {
-                throw new ModelStateCustomException("", "This barber shop does not exist");
+                throw new ModelStateCustomException("", "This barbershop does not exist");
             }
 
             return barberShop.Services
@@ -99,10 +100,50 @@ namespace SuperBarber.Services.Service
                     ServiceId = s.Service.Id,
                     ServiceName = s.Service.Name,
                     Price = s.Service.Price,
-                    Category = s.Service.Category.Name
+                    Category = s.Service.Category.Name,
+                    BarberShopName = barberShop.Name
                 })
                 .ToList()
                 .OrderBy(s => s.Category);
+        }
+
+        public async Task RemoveServiceAsync(int barberShopId, int serviceId, string userId)
+        {
+            var barberShop = await this.data.BarberShops
+               .Include(bs => bs.Services)
+               .Include(bs => bs.Barbers)
+               .ThenInclude(b => b.Barber)
+               .FirstOrDefaultAsync(bs => bs.Id == barberShopId);
+
+            if (barberShop == null)
+            {
+                throw new ModelStateCustomException("", "This barbershop does not exist");
+            }
+
+            if (!barberShop.Barbers.Any(b => b.IsOwner && b.Barber.UserId == userId))
+            {
+                throw new ModelStateCustomException("", $"You have to be owner of {barberShop.Name} to perform this action");
+            }
+
+            if (!barberShop.Services.Any(s => s.ServiceId == serviceId))
+            {
+                throw new ModelStateCustomException("", $"This service does not exist in {barberShop.Name}");
+            }
+
+            barberShop.Services
+                .Remove(barberShop.Services
+                .First(s => s.ServiceId == serviceId));
+
+            await this.data.SaveChangesAsync();
+
+            if (!await this.data.BarberShops.AnyAsync(bs => bs.Services.Any(s => s.ServiceId == serviceId)))
+            {
+                this.data.Services
+                    .Remove(this.data.Services
+                    .First(s => s.Id == serviceId));
+
+                await this.data.SaveChangesAsync();
+            }
         }
     }
 }

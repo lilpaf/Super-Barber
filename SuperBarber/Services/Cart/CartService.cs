@@ -4,7 +4,6 @@ using SuperBarber.Data.Models;
 using SuperBarber.Infrastructure;
 using SuperBarber.Models.Cart;
 using SuperBarber.Models.Service;
-using System.Drawing;
 
 namespace SuperBarber.Services.Cart
 {
@@ -44,8 +43,6 @@ namespace SuperBarber.Services.Cart
 
                 dateParsed = dateParsed.Date + ts;
 
-                //var dateFormated = dateParsed.ToString("yyyy-MM-dd HH:mm:ss.fff");
-
                 var barberShop = await this.data.BarberShops
                 .Include(bs => bs.Barbers)
                 .ThenInclude(b => b.Barber)
@@ -61,7 +58,7 @@ namespace SuperBarber.Services.Cart
                 }
 
                 var barber = barberShop.Barbers
-                    .Where(b => b.Barber.Orders.All(o => o.Date != dateParsed))
+                    .Where(b => b.Barber.Orders.All(o => o.Date != dateParsed) && b.IsAvailable)
                     .FirstOrDefault();
 
                 if (barber == null)

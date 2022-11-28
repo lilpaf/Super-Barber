@@ -4,7 +4,7 @@ using SuperBarber.Data.Models;
 using SuperBarber.Infrastructure;
 using SuperBarber.Services.Barbers;
 using SuperBarber.Services.Cart;
-using static SuperBarber.CustomRoles;
+using static SuperBarber.Infrastructure.CustomRoles;
 
 namespace SuperBarber.Controllers
 {
@@ -63,32 +63,8 @@ namespace SuperBarber.Controllers
             }
         }
         
-        [Authorize(Roles = BarberRoleName)]
-        public async Task<IActionResult> UnassignBarber(int barberShopId, string information)
-        {
-            try
-            {
-                if (barberShopId == 0 || information == null)
-                {
-                    return BadRequest();
-                }
-
-                var userId = User.Id();
-
-                await barberService.UnasignBarberFromBarberShopAsync(barberShopId, userId, null);
-
-                return RedirectToAction("Mine", "BarberShop");
-            }
-            catch (ModelStateCustomException ex)
-            {
-                SetTempDataModelStateExtension.SetTempData(this, ex);
-
-                return RedirectToAction("Mine", "BarberShop"); ;
-            }
-        }
-        
         [Authorize(Roles = BarberShopOwnerRoleName)]
-        public async Task<IActionResult> FireBarber(int barberShopId, int barberId, string information)
+        public async Task<IActionResult> UnassignBarber(int barberShopId, int barberId, string information)
         {
             try
             {
@@ -97,15 +73,22 @@ namespace SuperBarber.Controllers
                     return BadRequest();
                 }
 
-                await barberService.UnasignBarberFromBarberShopAsync(barberShopId, null, barberId);
+                var userId = User.Id();
 
-                return RedirectToAction("Manage", "BarberShop", new { barberShopId, information = barberService.GetBarberShopNameToFriendlyUrlAsync(barberShopId) });
+                await barberService.UnasignBarberFromBarberShopAsync(barberShopId, barberId, userId);
+
+                if (await barberService.CheckIfUserIsTheBabrerToFire(userId, barberId))
+                {
+                    return RedirectToAction("All", "BarberShop");
+                }
+
+                return RedirectToAction("Manage", "BarberShop", new { barberShopId, information });
             }
             catch (ModelStateCustomException ex)
             {
                 SetTempDataModelStateExtension.SetTempData(this, ex);
 
-                return RedirectToAction("Manage", "BarberShop", new { barberShopId, information = barberService.GetBarberShopNameToFriendlyUrlAsync(barberShopId) }); ;
+                return RedirectToAction("Manage", "BarberShop", new { barberShopId, information }); ;
             }
         }
         
@@ -119,15 +102,17 @@ namespace SuperBarber.Controllers
                     return BadRequest();
                 }
 
-                await barberService.AddOwnerToBarberShop(barberShopId, barberId);
+                var userId = User.Id();
 
-                return RedirectToAction("Manage", "BarberShop", new { barberShopId, information = barberService.GetBarberShopNameToFriendlyUrlAsync(barberShopId) });
+                await barberService.AddOwnerToBarberShop(barberShopId, barberId, userId);
+
+                return RedirectToAction("Manage", "BarberShop", new { barberShopId, information });
             }
             catch (ModelStateCustomException ex)
             {
                 SetTempDataModelStateExtension.SetTempData(this, ex);
 
-                return RedirectToAction("Manage", "BarberShop", new { barberShopId, information = barberService.GetBarberShopNameToFriendlyUrlAsync(barberShopId) }); ;
+                return RedirectToAction("Manage", "BarberShop", new { barberShopId, information }); ;
             }
         }
         
@@ -141,15 +126,65 @@ namespace SuperBarber.Controllers
                     return BadRequest();
                 }
 
-                await barberService.RemoveOwnerFromBarberShop(barberShopId, barberId);
+                var userId = User.Id();
 
-                return RedirectToAction("Manage", "BarberShop", new { barberShopId, information = barberService.GetBarberShopNameToFriendlyUrlAsync(barberShopId) });
+                await barberService.RemoveOwnerFromBarberShop(barberShopId, barberId, userId);
+
+                return RedirectToAction("Manage", "BarberShop", new { barberShopId, information });
             }
             catch (ModelStateCustomException ex)
             {
                 SetTempDataModelStateExtension.SetTempData(this, ex);
 
-                return RedirectToAction("Manage", "BarberShop", new { barberShopId, information = barberService.GetBarberShopNameToFriendlyUrlAsync(barberShopId) }); ;
+                return RedirectToAction("Manage", "BarberShop", new { barberShopId, information }); ;
+            }
+        }
+        
+        [Authorize(Roles = BarberShopOwnerRoleName)]
+        public async Task<IActionResult> MakeUnavailable(int barberShopId, int barberId, string information)
+        {
+            try
+            {
+                if (barberId == 0 || barberShopId == 0 || information == null)
+                {
+                    return BadRequest();
+                }
+
+                var userId = User.Id();
+
+                await barberService.MakeBarberUnavailableFromBarberShop(barberShopId, barberId, userId);
+
+                return RedirectToAction("Manage", "BarberShop", new { barberShopId, information });
+            }
+            catch (ModelStateCustomException ex)
+            {
+                SetTempDataModelStateExtension.SetTempData(this, ex);
+
+                return RedirectToAction("Manage", "BarberShop", new { barberShopId, information }); ;
+            }
+        }
+        
+        [Authorize(Roles = BarberShopOwnerRoleName)]
+        public async Task<IActionResult> MakeAvailable(int barberShopId, int barberId, string information)
+        {
+            try
+            {
+                if (barberId == 0 || barberShopId == 0 || information == null)
+                {
+                    return BadRequest();
+                }
+
+                var userId = User.Id();
+
+                await barberService.MakeBarberAvailableFromBarberShop(barberShopId, barberId, userId);
+
+                return RedirectToAction("Manage", "BarberShop", new { barberShopId, information });
+            }
+            catch (ModelStateCustomException ex)
+            {
+                SetTempDataModelStateExtension.SetTempData(this, ex);
+
+                return RedirectToAction("Manage", "BarberShop", new { barberShopId, information }); ;
             }
         }
     }

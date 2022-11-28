@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SuperBarber.Data;
 
@@ -11,9 +12,10 @@ using SuperBarber.Data;
 namespace SuperBarber.Data.Migrations
 {
     [DbContext(typeof(SuperBarberDbContext))]
-    partial class SuperBarberDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221128091400_AddedIsAvalibleInBarberShopBarbersTable")]
+    partial class AddedIsAvalibleInBarberShopBarbersTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -195,7 +197,7 @@ namespace SuperBarber.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Barbers", (string)null);
+                    b.ToTable("Barbers");
                 });
 
             modelBuilder.Entity("SuperBarber.Data.Models.BarberShop", b =>
@@ -238,7 +240,7 @@ namespace SuperBarber.Data.Migrations
 
                     b.HasIndex("DistrictId");
 
-                    b.ToTable("BarberShops", (string)null);
+                    b.ToTable("BarberShops");
                 });
 
             modelBuilder.Entity("SuperBarber.Data.Models.BarberShopBarbers", b =>
@@ -259,7 +261,7 @@ namespace SuperBarber.Data.Migrations
 
                     b.HasIndex("BarberShopId");
 
-                    b.ToTable("BarberShopBarbers", (string)null);
+                    b.ToTable("BarberShopBarbers");
                 });
 
             modelBuilder.Entity("SuperBarber.Data.Models.BarberShopServices", b =>
@@ -274,7 +276,7 @@ namespace SuperBarber.Data.Migrations
 
                     b.HasIndex("BarberShopId");
 
-                    b.ToTable("BarberShopServices", (string)null);
+                    b.ToTable("BarberShopServices");
                 });
 
             modelBuilder.Entity("SuperBarber.Data.Models.Category", b =>
@@ -292,7 +294,7 @@ namespace SuperBarber.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("SuperBarber.Data.Models.City", b =>
@@ -310,7 +312,7 @@ namespace SuperBarber.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Cities", (string)null);
+                    b.ToTable("Cities");
                 });
 
             modelBuilder.Entity("SuperBarber.Data.Models.District", b =>
@@ -328,7 +330,7 @@ namespace SuperBarber.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Districts", (string)null);
+                    b.ToTable("Districts");
                 });
 
             modelBuilder.Entity("SuperBarber.Data.Models.Order", b =>
@@ -363,7 +365,7 @@ namespace SuperBarber.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("SuperBarber.Data.Models.Service", b =>
@@ -389,7 +391,7 @@ namespace SuperBarber.Data.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Services", (string)null);
+                    b.ToTable("Services");
                 });
 
             modelBuilder.Entity("SuperBarber.Data.Models.User", b =>

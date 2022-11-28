@@ -21,8 +21,6 @@ namespace SuperBarber.Controllers
             {
                 if (string.IsNullOrWhiteSpace(city) || string.IsNullOrWhiteSpace(district) || string.IsNullOrWhiteSpace(date) || string.IsNullOrWhiteSpace(time))
                 {
-                    //ModelState.AddModelError("", "Invalid search criteria");
-
                     return View(new FilterBarberShopsViewModel
                     {
                         Cities = await homeService.GetCitiesAsync(),
@@ -30,7 +28,9 @@ namespace SuperBarber.Controllers
                     });
                 }
 
-                var barberShops = await homeService.SearchAvalibleBarbershopAsync(city, district, date, time);
+                var userId = User.Id();
+
+                var barberShops = await homeService.SearchAvalibleBarbershopAsync(city, district, date, time, userId);
 
                 TempData["list"] = JsonConvert.SerializeObject(barberShops);
 

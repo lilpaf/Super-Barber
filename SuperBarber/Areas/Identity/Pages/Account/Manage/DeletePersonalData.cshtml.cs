@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using SuperBarber.Areas.Identity.Services.Account;
 using SuperBarber.Data.Models;
+using SuperBarber.Infrastructure;
 
 namespace SuperBarber.Areas.Identity.Pages.Account.Manage
 {

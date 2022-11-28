@@ -15,5 +15,7 @@ namespace SuperBarber.Data.Models
         public Barber Barber { get; set; }
 
         public bool IsOwner { get; set; }
+        
+        public bool IsAvailable { get; set; }
     }
 }

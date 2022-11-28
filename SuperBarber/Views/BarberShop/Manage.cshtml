@@ -19,8 +19,8 @@
                 </h2>
                 <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
                     <div class="accordion-body text-center">
-                        <a class="btn btn-primary d-inline btn-manage-padding" asp-controller="Service" asp-action="All" asp-route-barbershopid="@Model.BarberShopId" asp-route-information="@Model.BarberShopName">See all the services</a>
-                        <a class="btn btn-secondary d-inline btn-manage-padding" asp-controller="Service" asp-action="Add" asp-route-barbershopid="@Model.BarberShopId" asp-route-information="@Model.BarberShopName">Add Service</a>
+                        <a class="btn btn-primary d-inline btn-manage-padding me-1" asp-controller="Service" asp-action="Manage" asp-route-barbershopid="@Model.BarberShopId" asp-route-information="@Model.ToFriendlyUrl()">Manage all the services</a>
+                        <a class="btn btn-secondary d-inline btn-manage-padding" asp-controller="Service" asp-action="Add" asp-route-barbershopid="@Model.BarberShopId" asp-route-information="@Model.ToFriendlyUrl()">Add Service</a>
                     </div>
                 </div>
             </div>
@@ -40,14 +40,34 @@
                                 <h6 class="me-3 d-inline">@barber.BarberName</h6>
                                 @if (User.Id() != barber.UserId)
                                 {
-                                    <a asp-controller="Barber" asp-action="FireBarber" asp-route-barbershopid="@Model.BarberShopId" asp-route-barberid="@barber.BarberId" asp-route-information="@barber.BarberName" class="btn btn-danger d-inline btn-manage-padding">Fire</a>
+                                    <a asp-controller="Barber" asp-action="UnassignBarber" asp-route-barbershopid="@Model.BarberShopId" asp-route-barberid="@barber.BarberId" asp-route-information="@Model.ToFriendlyUrl()" class="btn btn-danger d-inline me-1">Fire</a>
                                     @if (barber.IsOwner)
                                     {
-                                        <a asp-controller="Barber" asp-action="RemoveOwner" asp-route-barbershopid="@Model.BarberShopId" asp-route-barberid="@barber.BarberId" asp-route-information="@barber.BarberName" class="btn btn-success d-inline btn-manage-padding">Revoke ownership</a>
+                                        <a asp-controller="Barber" asp-action="RemoveOwner" asp-route-barbershopid="@Model.BarberShopId" asp-route-barberid="@barber.BarberId" asp-route-information="@Model.ToFriendlyUrl()" class="btn btn-success d-inline me-1">Revoke ownership</a>
                                     }
                                     else
                                     {
-                                        <a asp-controller="Barber" asp-action="MakeOwner" asp-route-barbershopid="@Model.BarberShopId" asp-route-barberid="@barber.BarberId" asp-route-information="@barber.BarberName" class="btn btn-success d-inline btn-manage-padding">Make owner</a>
+                                        <a asp-controller="Barber" asp-action="MakeOwner" asp-route-barbershopid="@Model.BarberShopId" asp-route-barberid="@barber.BarberId" asp-route-information="@Model.ToFriendlyUrl()" class="btn btn-success d-inline me-1">Make owner</a>
+                                    }
+                                    @if (barber.IsAvailable)
+                                    {
+                                        <a asp-controller="Barber" asp-action="MakeUnavailable" asp-route-barbershopid="@Model.BarberShopId" asp-route-barberid="@barber.BarberId" asp-route-information="@Model.ToFriendlyUrl()" class="btn btn-warning d-inline">Make unavailable</a>
+                                    }
+                                    else
+                                    {
+                                        <a asp-controller="Barber" asp-action="MakeAvailable" asp-route-barbershopid="@Model.BarberShopId" asp-route-barberid="@barber.BarberId" asp-route-information="@Model.ToFriendlyUrl()" class="btn btn-warning d-inline ">Make available</a>
+                                    }
+                                }
+                                else
+                                {
+                                    <a asp-controller="Barber" asp-action="UnassignBarber" asp-route-barbershopid="@Model.BarberShopId" asp-route-barberid="@barber.BarberId" asp-route-information="@Model.ToFriendlyUrl()" class="btn btn-danger d-inline me-1">Resign</a>
+                                    @if (barber.IsAvailable)
+                                    {
+                                        <a asp-controller="Barber" asp-action="MakeUnavailable" asp-route-barbershopid="@Model.BarberShopId" asp-route-barberid="@barber.BarberId" asp-route-information="@Model.ToFriendlyUrl()" class="btn btn-warning d-inline btn-availability-padding">Become unavailable</a>
+                                    }
+                                    else
+                                    {
+                                        <a asp-controller="Barber" asp-action="MakeAvailable" asp-route-barbershopid="@Model.BarberShopId" asp-route-barberid="@barber.BarberId" asp-route-information="@Model.ToFriendlyUrl()" class="btn btn-warning d-inline btn-availability-padding">Become available</a>
                                     }
                                 }
                             </li>

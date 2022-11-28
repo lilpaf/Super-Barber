@@ -1,4 +1,4 @@
-﻿namespace SuperBarber
+﻿namespace SuperBarber.Infrastructure
 {
     public class CustomRoles
     {

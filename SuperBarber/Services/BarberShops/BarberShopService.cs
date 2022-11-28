@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SuperBarber.Data.Models;
 using Microsoft.AspNetCore.Identity;
-using static SuperBarber.CustomRoles;
+using static SuperBarber.Infrastructure.CustomRoles;
 using SuperBarber.Infrastructure;
 using SuperBarber.Models.Barbers;
 
@@ -25,9 +25,12 @@ namespace SuperBarber.Services.BarberShops
             this.signInManager = signInManager;
         }
 
-        public async Task<AllBarberShopQueryModel> AllBarberShopsAsync([FromQuery] AllBarberShopQueryModel query, List<BarberShopListingViewModel> barberShops = null)
+        public async Task<AllBarberShopQueryModel> AllBarberShopsAsync([FromQuery] AllBarberShopQueryModel query, string userId, List<BarberShopListingViewModel>? barberShops = null)
         {
-            var barberShopQuery = this.data.BarberShops.AsQueryable();
+            var barberShopQuery = this.data.BarberShops
+                .Include(bs => bs.Barbers)
+                .ThenInclude(b => b.Barber)
+                .AsQueryable();
 
             if (!string.IsNullOrEmpty(query.SearchTerm))
             {
@@ -51,16 +54,18 @@ namespace SuperBarber.Services.BarberShops
             };
 
             barberShops ??= await barberShopQuery
-                     .Select(b => new BarberShopListingViewModel
+                     .Select(bs => new BarberShopListingViewModel
                      {
-                         Id = b.Id,
-                         Name = b.Name,
-                         City = b.City.Name,
-                         District = b.District.Name,
-                         Street = b.Street,
-                         StartHour = b.StartHour.ToString(@"hh\:mm"),
-                         FinishHour = b.FinishHour.ToString(@"hh\:mm"),
-                         ImageUrl = b.ImageUrl
+                         Id = bs.Id,
+                         Name = bs.Name,
+                         City = bs.City.Name,
+                         District = bs.District.Name,
+                         Street = bs.Street,
+                         StartHour = bs.StartHour.ToString(@"hh\:mm"),
+                         FinishHour = bs.FinishHour.ToString(@"hh\:mm"),
+                         ImageUrl = bs.ImageUrl,
+                         UserIsEmployee = bs.Barbers.Any(b => b.Barber.UserId == userId),
+                         UserIsOwner = bs.Barbers.Any(b => b.IsOwner && b.Barber.UserId == userId)
                      })
                      .ToListAsync();
 
@@ -156,7 +161,9 @@ namespace SuperBarber.Services.BarberShops
                    Street = b.Street,
                    StartHour = b.StartHour.ToString(@"hh\:mm"),
                    FinishHour = b.FinishHour.ToString(@"hh\:mm"),
-                   ImageUrl = b.ImageUrl
+                   ImageUrl = b.ImageUrl,
+                   UserIsEmployee = true,
+                   UserIsOwner = b.Barbers.Any(b => b.IsOwner && b.Barber.UserId == userId)
                })
                .ToListAsync();
 
@@ -186,7 +193,9 @@ namespace SuperBarber.Services.BarberShops
 
         public async Task EditBarberShopAsync(BarberShopFormModel model, int barberShopId, string userId, bool userIsAdmin)
         {
-            var barberShop = await this.data.BarberShops.FindAsync(barberShopId);
+            var barberShop = await this.data.BarberShops
+                .Include(bs => bs.Barbers)
+                .FirstOrDefaultAsync(bs => bs.Id == barberShopId);
 
             if (barberShop == null)
             {
@@ -241,19 +250,24 @@ namespace SuperBarber.Services.BarberShops
 
         public async Task DeleteBarberShopAsync(int barberShopId, string userId, bool userIsAdmin)
         {
-            var barberShop = await this.data.BarberShops.FindAsync(barberShopId);
+            var barberShop = await this.data.BarberShops
+                .Include(bs => bs.Barbers)
+                .Include(bs => bs.Orders)
+                .FirstOrDefaultAsync(bs => bs.Id == barberShopId);
 
             if (barberShop == null)
             {
                 throw new ModelStateCustomException("", "This barbershop does not exist");
             }
 
-            if (barberShop.Orders.Any())
+            if (barberShop.Orders.Any() && userIsAdmin)
             {
                 var orders = await this.data.Orders.Where(o => o.BarberShopId == barberShop.Id).ToListAsync();
 
                 this.data.Orders.RemoveRange(orders);
             }
+
+            var user = await this.data.Users.FirstAsync(u => u.Id == userId);
 
             if (!userIsAdmin)
             {
@@ -265,8 +279,14 @@ namespace SuperBarber.Services.BarberShops
                 }
                 */
 
+                if (barberShop.Barbers.Count(b => b.IsOwner) > 1)
+                {
+                    throw new ModelStateCustomException("", $"You are not the only owner of {barberShop.Name}. If you want to unasign only yourself as owner and barber from {barberShop.Name} press the 'resign' button in the barbershop manage menu");
+                }
+
                 var barber = await this.data.Barbers
-                .FirstOrDefaultAsync(b => b.UserId == userId &&
+                    .Include(b => b.BarberShops)
+                    .FirstOrDefaultAsync(b => b.UserId == userId &&
                         b.BarberShops.Any(bs => bs.BarberShopId == barberShop.Id && bs.IsOwner));
 
                 if (barber == null)
@@ -279,15 +299,29 @@ namespace SuperBarber.Services.BarberShops
                     throw new ModelStateCustomException("", "You can not delete this barbershop");
                 }
 
+                if (barberShop.Orders.Any())
+                {
+                    var orders = await this.data.Orders.Where(o => o.BarberShopId == barberShop.Id).ToListAsync();
+
+                    this.data.Orders.RemoveRange(orders);
+                }
+
                 barber.BarberShops
                     .Remove(barber.BarberShops
                             .Where(bs => bs.BarberShopId == barberShop.Id)
                             .First());
+
+                if (!barber.BarberShops.Any(bs => bs.IsOwner))
+                {
+                    await userManager.RemoveFromRoleAsync(user, BarberShopOwnerRoleName);
+                }
             }
 
             this.data.BarberShops.Remove(barberShop);
 
             await this.data.SaveChangesAsync();
+
+            await signInManager.RefreshSignInAsync(user);
         }
 
         private async Task CityExists(string city)
@@ -310,7 +344,7 @@ namespace SuperBarber.Services.BarberShops
             }
         }
 
-        private Tuple<TimeSpan, TimeSpan> ParseHours(string startHour, string finishHour)
+        private static Tuple<TimeSpan, TimeSpan> ParseHours(string startHour, string finishHour)
         {
             var startHourArr = startHour.Split(':');
             var finishHourArr = finishHour.Split(':');
@@ -341,6 +375,7 @@ namespace SuperBarber.Services.BarberShops
                     BarberId = b.BarberId,
                     BarberName = b.Barber.FirstName + ' ' + b.Barber.LastName,
                     IsOwner = b.IsOwner,
+                    IsAvailable = b.IsAvailable,
                     UserId = b.Barber.UserId
                 })
                .ToList()

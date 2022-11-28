@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using SuperBarber.Infrastructure;
 using SuperBarber.Models.BarberShop;
 using SuperBarber.Services.BarberShops;
-using static SuperBarber.CustomRoles;
+using static SuperBarber.Infrastructure.CustomRoles;
 
 namespace SuperBarber.Controllers
 {
@@ -20,14 +20,16 @@ namespace SuperBarber.Controllers
         [RestoreModelStateFromTempData]
         public async Task<IActionResult> All([FromQuery] AllBarberShopQueryModel query)
         {
+            var userId = User.Id();
+
             if (TempData.ContainsKey("list"))
             {
                 var barberShops = JsonConvert.DeserializeObject<List<BarberShopListingViewModel>>((string)TempData["list"]);
 
-                return View(await barberShopService.AllBarberShopsAsync(query, barberShops));
+                return View(await barberShopService.AllBarberShopsAsync(query, userId, barberShops));
             }
 
-            return View(await barberShopService.AllBarberShopsAsync(query));
+            return View(await barberShopService.AllBarberShopsAsync(query, userId));
         }
 
         [Authorize(Roles = BarberRoleName)]
@@ -89,7 +91,7 @@ namespace SuperBarber.Controllers
 
                 var userId = User.Id();
 
-                var userIsAdmin = User.IsInRole(CustomRoles.AdministratorRoleName);
+                var userIsAdmin = User.IsAdmin();
 
                 await barberShopService.EditBarberShopAsync(model, barberShopId, userId, userIsAdmin);
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SuperBarber.Data;
+using SuperBarber.Data.Models;
 using SuperBarber.Infrastructure;
 using SuperBarber.Models.BarberShop;
 
@@ -12,9 +13,12 @@ namespace SuperBarber.Services.Home
         public HomeService(SuperBarberDbContext data)
             => this.data = data;
 
-        public async Task<IEnumerable<BarberShopListingViewModel>> SearchAvalibleBarbershopAsync(string city, string district, string date, string time)
+        public async Task<IEnumerable<BarberShopListingViewModel>> SearchAvalibleBarbershopAsync(string city, string district, string date, string time, string userId)
         {
-            var barberShopQuery = this.data.BarberShops.AsQueryable();
+            var barberShopQuery = this.data.BarberShops
+                .Include(bs => bs.Barbers)
+                .ThenInclude(b => b.Barber)
+                .AsQueryable();
 
             var dateParsed = DateTime.Parse(date);
 
@@ -30,7 +34,8 @@ namespace SuperBarber.Services.Home
                 .Where(b => b.City.Name.ToLower().Trim() == city.ToLower().Trim() &&
                 b.StartHour <= dateParsed.TimeOfDay &&
                 b.FinishHour >= dateParsed.TimeOfDay &&
-                b.Orders.Count(o => o.Date == dateParsed) == 0);
+                b.Orders.All(o => o.Date != dateParsed) &&
+                b.Barbers.Any(b => b.IsAvailable));
             }
             else
             {
@@ -39,20 +44,23 @@ namespace SuperBarber.Services.Home
                 b.District.Name.ToLower().Trim() == district.ToLower().Trim() &&
                 b.StartHour <= dateParsed.TimeOfDay &&
                 b.FinishHour >= dateParsed.TimeOfDay &&
-                b.Orders.Count(o => o.Date == dateParsed) == 0);
+                b.Orders.All(o => o.Date != dateParsed) &&
+                b.Barbers.Any(b => b.IsAvailable));
             }
 
             var barberShopsData = await barberShopQuery
-                .Select(b => new BarberShopListingViewModel
+                .Select(bs => new BarberShopListingViewModel
                 {
-                    Id = b.Id,
-                    Name = b.Name,
-                    City = b.City.Name,
-                    District = b.District.Name,
-                    Street = b.Street,
-                    StartHour = b.StartHour.ToString(@"hh\:mm"),
-                    FinishHour = b.FinishHour.ToString(@"hh\:mm"),
-                    ImageUrl = b.ImageUrl
+                    Id = bs.Id,
+                    Name = bs.Name,
+                    City = bs.City.Name,
+                    District = bs.District.Name,
+                    Street = bs.Street,
+                    StartHour = bs.StartHour.ToString(@"hh\:mm"),
+                    FinishHour = bs.FinishHour.ToString(@"hh\:mm"),
+                    ImageUrl = bs.ImageUrl,
+                    UserIsEmployee = bs.Barbers.Any(b => b.Barber.UserId == userId),
+                    UserIsOwner = bs.Barbers.Any(b => b.IsOwner && b.Barber.UserId == userId)
                 })
                 .ToListAsync();
 

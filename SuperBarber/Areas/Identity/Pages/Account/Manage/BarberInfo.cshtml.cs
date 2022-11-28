@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SuperBarber.Areas.Identity.Services.Account;
 using SuperBarber.Data.Models;
+using SuperBarber.Infrastructure;
 using SuperBarber.Models.Account;
 using System.ComponentModel.DataAnnotations;
 using System.Xml.Linq;

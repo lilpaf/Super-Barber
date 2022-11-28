@@ -93,7 +93,7 @@ body {
     white-space: nowrap;
 }
 
-.btn-manage-padding {
-    padding-right: 60px;
-    padding-left: 60px;
+.btn-availability-padding {
+    padding-right: 20px;
+    padding-left: 20px;
 }
