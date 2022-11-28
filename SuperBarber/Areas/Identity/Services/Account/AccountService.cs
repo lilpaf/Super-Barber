@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using SuperBarber.Data.Models;
 using SuperBarber.Data;
-using SuperBarber.Models.Account;
 using Microsoft.EntityFrameworkCore;
 using static SuperBarber.Infrastructure.CustomRoles;
-using System.Xml.Linq;
 using SuperBarber.Infrastructure;
 
 namespace SuperBarber.Areas.Identity.Services.Account
@@ -42,20 +40,6 @@ namespace SuperBarber.Areas.Identity.Services.Account
                 await _data.SaveChangesAsync();
             }
         }
-
-        public async Task<IEnumerable<BarberOrdersListingViewModel>> GetBarberOrdersAsync(User user)
-            => await _data.Orders
-                .Where(o => o.Barber.UserId == user.Id)
-                .OrderByDescending(o => o.Date)
-                .Select(o => new BarberOrdersListingViewModel
-                {
-                    ClientFirstName = o.User.FirstName,
-                    ClientLastName = o.User.LastName,
-                    ServiceName = o.Service.Name,
-                    Price = o.Service.Price,
-                    Date = o.Date.ToString(@"MM/dd/yy H:mm")
-                })
-                .ToListAsync();
 
         public async Task DeleteBarberAsync(User user)
         {

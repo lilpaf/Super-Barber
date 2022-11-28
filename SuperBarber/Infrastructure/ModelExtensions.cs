@@ -1,5 +1,4 @@
-﻿using SuperBarber.Models.Barbers;
-using SuperBarber.Models.BarberShop;
+﻿using SuperBarber.Models.BarberShop;
 using SuperBarber.Models.Service;
 
 namespace SuperBarber.Infrastructure

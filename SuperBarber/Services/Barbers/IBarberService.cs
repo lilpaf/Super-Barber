@@ -1,4 +1,6 @@
-﻿namespace SuperBarber.Services.Barbers
+﻿using SuperBarber.Models.Barbers;
+
+namespace SuperBarber.Services.Barbers
 {
     public interface IBarberService
     {
@@ -17,5 +19,7 @@
         Task MakeBarberUnavailableFromBarberShop(int barberShopId, int barberId, string userId);
 
         Task<bool> CheckIfUserIsTheBabrerToFire(string userId, int barberId);
+
+        Task<IEnumerable<BarberOrdersListingViewModel>> GetBarberOrdersAsync(string userId);
     }
 }

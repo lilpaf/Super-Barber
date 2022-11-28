@@ -9,6 +9,7 @@ using SuperBarber.Services.Barbers;
 using SuperBarber.Services.BarberShops;
 using SuperBarber.Services.Cart;
 using SuperBarber.Services.Home;
+using SuperBarber.Services.Order;
 using SuperBarber.Services.Service;
 using static SuperBarber.Infrastructure.ApplicationBuilderExtensions;
 
@@ -49,6 +50,7 @@ builder.Services.AddTransient<IServiceService, ServiceService>();
 builder.Services.AddTransient<IHomeService, HomeService>();
 builder.Services.AddTransient<ICartService, CartService>();
 builder.Services.AddTransient<IAccountService, AccountService>();
+builder.Services.AddTransient<IOrderService, OrderService>();
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();

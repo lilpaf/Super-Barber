@@ -4,10 +4,6 @@
 }
 <ul class="nav nav-pills flex-column">
     <li class="nav-item"><a class="nav-link account-menu @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-page="./Index">Profile</a></li>
-    @if (User.IsInRole(CustomRoles.BarberRoleName))
-    {
-        <li class="nav-item"><a class="nav-link account-menu @ManageNavPages.BarberInfoNavClass(ViewContext)" id="barber-info" asp-page="./BarberInfo">Barber info</a></li>
-    }
     <li class="nav-item"><a class="nav-link account-menu @ManageNavPages.EmailNavClass(ViewContext)" id="email" asp-page="./Email">Email</a></li>
     <li class="nav-item"><a class="nav-link account-menu @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword">Password</a></li>
     <li class="nav-item"><a class="nav-link account-menu @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData">Personal data</a></li>

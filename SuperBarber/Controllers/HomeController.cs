@@ -15,6 +15,7 @@ namespace SuperBarber.Controllers
         public HomeController(IHomeService homeService)
             => this.homeService = homeService;
 
+        [RestoreModelStateFromTempData]
         public async Task<IActionResult> Index(string city, string district, string date, string time)
         {
             try

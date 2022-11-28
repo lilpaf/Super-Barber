@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SuperBarber.Data.Models;
 using SuperBarber.Infrastructure;
 using SuperBarber.Services.Barbers;
-using SuperBarber.Services.Cart;
 using static SuperBarber.Infrastructure.CustomRoles;
 
 namespace SuperBarber.Controllers
@@ -185,6 +183,24 @@ namespace SuperBarber.Controllers
                 SetTempDataModelStateExtension.SetTempData(this, ex);
 
                 return RedirectToAction("Manage", "BarberShop", new { barberShopId, information }); ;
+            }
+        }
+
+        [RestoreModelStateFromTempData]
+        [Authorize(Roles = BarberRoleName)]
+        public async Task<IActionResult> OrdersInfo()
+        {
+            try
+            {
+                var userId = User.Id();
+
+                return View(await barberService.GetBarberOrdersAsync(userId));
+            }
+            catch (ModelStateCustomException ex)
+            {
+                SetTempDataModelStateExtension.SetTempData(this, ex);
+
+                return RedirectToAction("Index", "Home"); ;
             }
         }
     }

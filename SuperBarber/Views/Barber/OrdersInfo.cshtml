@@ -1,0 +1,45 @@
+﻿@model List<BarberOrdersListingViewModel>
+@{
+    ViewBag.Title = "Orders";
+}
+
+<div class="row">
+    <h2 class="heading-margin text-center">@ViewBag.Title</h2>
+    <div class="col">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th class="table-text" scope="col">#</th>
+                    <th class="table-text" scope="col">Client first name</th>
+                    <th class="table-text" scope="col">Client last name</th>
+                    <th class="table-text" scope="col">Service name</th>
+                    <th class="table-text" scope="col">Price</th>
+                    <th class="table-text" scope="col">Date</th>
+                    <th class="table-text" scope="col">Cancel order</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < @Model.Count(); i++)
+                {
+                    var rowNumber = i + 1;
+                    <tr>
+                        <th scope="row" class="pt-3">@rowNumber</th>
+                        <td class="table-text pt-3">@Model[i].ClientFirstName</td>
+                        <td class="table-text pt-3">@Model[i].ClientLastName</td>
+                        <td class="table-text pt-3">@Model[i].ServiceName</td>
+                        <td class="table-text pt-3">@Model[i].Price</td>
+                        <td class="table-text pt-3">@Model[i].Date.ToLocalTime().ToString(@"MM/dd/yy H:mm")</td>
+                        @if (DateTime.UtcNow < Model[i].Date)
+                        {
+                            <td class="table-text"> <a class="btn btn-danger" asp-controller="Order" asp-action="Remove" asp-route-orderid="@Model[i].OrderId" asp-route-barberid="@Model[i].BarberId">Cancel</a></td>
+                        }
+                        else
+                        {
+                            <td class="table-text"> <a class="btn btn-danger disabled" asp-controller="Order" asp-action="Remove" asp-route-orderid="@Model[i].OrderId" asp-route-barberid="@Model[i].BarberId">Cancel</a></td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

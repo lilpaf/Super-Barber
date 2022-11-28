@@ -1,6 +1,5 @@
 ﻿namespace SuperBarber.Infrastructure
 {
-    using SuperBarber.Data.Models;
     using System.Security.Claims;
 
     using static CustomRoles;

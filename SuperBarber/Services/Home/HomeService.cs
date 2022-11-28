@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SuperBarber.Data;
-using SuperBarber.Data.Models;
 using SuperBarber.Infrastructure;
 using SuperBarber.Models.BarberShop;
 
@@ -32,9 +31,9 @@ namespace SuperBarber.Services.Home
             {
                 barberShopQuery = barberShopQuery
                 .Where(b => b.City.Name.ToLower().Trim() == city.ToLower().Trim() &&
-                b.StartHour <= dateParsed.TimeOfDay &&
-                b.FinishHour >= dateParsed.TimeOfDay &&
-                b.Orders.All(o => o.Date != dateParsed) &&
+                b.StartHour <= ts &&
+                b.FinishHour >= ts &&
+                b.Orders.All(o => o.Date != dateParsed.ToUniversalTime()) &&
                 b.Barbers.Any(b => b.IsAvailable));
             }
             else
@@ -44,7 +43,7 @@ namespace SuperBarber.Services.Home
                 b.District.Name.ToLower().Trim() == district.ToLower().Trim() &&
                 b.StartHour <= dateParsed.TimeOfDay &&
                 b.FinishHour >= dateParsed.TimeOfDay &&
-                b.Orders.All(o => o.Date != dateParsed) &&
+                b.Orders.All(o => o.Date != dateParsed.ToUniversalTime()) &&
                 b.Barbers.Any(b => b.IsAvailable));
             }
 

@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SuperBarber.Data;
-using SuperBarber.Data.Models;
 using SuperBarber.Infrastructure;
 using SuperBarber.Models.Cart;
 using SuperBarber.Models.Service;
@@ -48,29 +47,29 @@ namespace SuperBarber.Services.Cart
                 .ThenInclude(b => b.Barber)
                 .ThenInclude(o => o.Orders)
                 .FirstOrDefaultAsync(bs => bs.Id == item.BarberShopId
-                && bs.StartHour < ts
-                && bs.FinishHour > ts);
+                && bs.StartHour <= ts
+                && bs.FinishHour >= ts);
 
 
                 if (barberShop == null)
                 {
-                    throw new ModelStateCustomException("", $"Your desired book hour for {item.ServiceName} in {item.BarberShopName} is out of the working time of the barbershop. Remove the item from the cart to continue.", newCartList);
+                    throw new ModelStateCustomException("", $"Your desired book hour for {item.ServiceName} at {item.BarberShopName} is out of the working time of the barbershop. Remove {item.ServiceName} at {item.BarberShopName} from the cart to continue.", newCartList);
                 }
 
                 var barber = barberShop.Barbers
-                    .Where(b => b.Barber.Orders.All(o => o.Date != dateParsed) && b.IsAvailable)
+                    .Where(b => b.Barber.Orders.All(o => o.Date != dateParsed.ToUniversalTime()) && b.IsAvailable)
                     .FirstOrDefault();
 
                 if (barber == null)
                 {
-                    throw new ModelStateCustomException("", $"There are no avalible barbers at {barberShop.Name} for the desired time right now.", newCartList);
+                    throw new ModelStateCustomException("", $"There are no avalible barbers at {barberShop.Name} for the desired time right now. Remove {item.ServiceName} at {item.BarberShopName} from the cart to continue.", newCartList);
                 }
 
-                var order = new Order
+                var order = new Data.Models.Order
                 {
                     BarberShopId = barberShop.Id,
                     BarberId = barber.BarberId,
-                    Date = dateParsed,
+                    Date = dateParsed.ToUniversalTime(),
                     ServiceId = item.ServiceId,
                     UserId = userId
                 };
@@ -89,7 +88,7 @@ namespace SuperBarber.Services.Cart
         public string GetBarberShopNameToFriendlyUrl(string name)
             => name.Replace(' ', '-');
 
-        private bool CheckIfTimeIsCorrect(string time)
+        private static bool CheckIfTimeIsCorrect(string time)
         {
             var correctTimes = new string[]
             {

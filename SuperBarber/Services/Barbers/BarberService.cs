@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SuperBarber.Data;
 using SuperBarber.Data.Models;
 using SuperBarber.Infrastructure;
-using System.Threading;
+using SuperBarber.Models.Barbers;
 using static SuperBarber.Infrastructure.CustomRoles;
 
 namespace SuperBarber.Services.Barbers
@@ -318,5 +318,21 @@ namespace SuperBarber.Services.Barbers
 
             await this.data.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<BarberOrdersListingViewModel>> GetBarberOrdersAsync(string userId)
+           => await this.data.Orders
+               .Where(o => o.Barber.UserId == userId)
+               .OrderByDescending(o => o.Date)
+               .Select(o => new BarberOrdersListingViewModel
+               {
+                   OrderId = o.Id.ToString(),
+                   BarberId = o.BarberId,
+                   ClientFirstName = o.User.FirstName,
+                   ClientLastName = o.User.LastName,
+                   ServiceName = o.Service.Name,
+                   Price = o.Service.Price,
+                   Date = o.Date
+               })
+               .ToListAsync();
     }
 }
