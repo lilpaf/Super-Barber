@@ -1,4 +1,6 @@
-﻿namespace SuperBarber.Models.BarberShop
+﻿using SuperBarber.Services.BarberShops.Models;
+
+namespace SuperBarber.Models.BarberShop
 {
     public class BarberShopListingViewModel
     {
@@ -21,5 +23,7 @@
         public bool UserIsEmployee { get; init; }
         
         public bool UserIsOwner { get; init; }
+        
+        public IEnumerable<OwnerListingViewModel> OwnersInfo { get; init; }
     }
 }

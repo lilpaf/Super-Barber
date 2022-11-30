@@ -6,7 +6,8 @@ using SuperBarber.Data.Models;
 using Microsoft.AspNetCore.Identity;
 using static SuperBarber.Infrastructure.CustomRoles;
 using SuperBarber.Infrastructure;
-using SuperBarber.Models.Barbers;
+using SuperBarber.Models.Barber;
+using SuperBarber.Services.BarberShops.Models;
 
 namespace SuperBarber.Services.BarberShops
 {
@@ -65,7 +66,15 @@ namespace SuperBarber.Services.BarberShops
                          FinishHour = bs.FinishHour.ToString(@"hh\:mm"),
                          ImageUrl = bs.ImageUrl,
                          UserIsEmployee = bs.Barbers.Any(b => b.Barber.UserId == userId),
-                         UserIsOwner = bs.Barbers.Any(b => b.IsOwner && b.Barber.UserId == userId)
+                         UserIsOwner = bs.Barbers.Any(b => b.IsOwner && b.Barber.UserId == userId),
+                         OwnersInfo = bs.Barbers.Where(b => b.IsOwner)
+                                .Select(b => new OwnerListingViewModel
+                                {
+                                    Name = b.Barber.FirstName + ' ' + b.Barber.LastName,
+                                    Email = b.Barber.Email,
+                                    PhoneNumber = b.Barber.PhoneNumber
+                                })
+                                .ToList()
                      })
                      .ToListAsync();
 
@@ -152,18 +161,26 @@ namespace SuperBarber.Services.BarberShops
         public async Task<IEnumerable<BarberShopListingViewModel>> MineBarberShopsAsync(string userId)
             => await this.data.BarberShops
                .Where(bs => bs.Barbers.Any(b => b.Barber.UserId == userId))
-               .Select(b => new BarberShopListingViewModel
+               .Select(bs => new BarberShopListingViewModel
                {
-                   Id = b.Id,
-                   Name = b.Name,
-                   City = b.City.Name,
-                   District = b.District.Name,
-                   Street = b.Street,
-                   StartHour = b.StartHour.ToString(@"hh\:mm"),
-                   FinishHour = b.FinishHour.ToString(@"hh\:mm"),
-                   ImageUrl = b.ImageUrl,
+                   Id = bs.Id,
+                   Name = bs.Name,
+                   City = bs.City.Name,
+                   District = bs.District.Name,
+                   Street = bs.Street,
+                   StartHour = bs.StartHour.ToString(@"hh\:mm"),
+                   FinishHour = bs.FinishHour.ToString(@"hh\:mm"),
+                   ImageUrl = bs.ImageUrl,
                    UserIsEmployee = true,
-                   UserIsOwner = b.Barbers.Any(b => b.IsOwner && b.Barber.UserId == userId)
+                   UserIsOwner = bs.Barbers.Any(b => b.IsOwner && b.Barber.UserId == userId),
+                   OwnersInfo = bs.Barbers.Where(b => b.IsOwner)
+                                .Select(b => new OwnerListingViewModel
+                                {
+                                    Name = b.Barber.FirstName + ' ' + b.Barber.LastName,
+                                    Email = b.Barber.Email,
+                                    PhoneNumber = b.Barber.PhoneNumber
+                                })
+                                .ToList()
                })
                .ToListAsync();
 
@@ -253,6 +270,7 @@ namespace SuperBarber.Services.BarberShops
             var barberShop = await this.data.BarberShops
                 .Include(bs => bs.Barbers)
                 .Include(bs => bs.Orders)
+                .Include(bs => bs.Services)
                 .FirstOrDefaultAsync(bs => bs.Id == barberShopId);
 
             if (barberShop == null)
@@ -321,6 +339,20 @@ namespace SuperBarber.Services.BarberShops
 
             await this.data.SaveChangesAsync();
 
+            var barshopServices = barberShop.Services.ToList();
+
+            foreach (var service in barshopServices)
+            {
+                if (!await this.data.BarberShops.AnyAsync(bs => bs.Services.Any(s => s.ServiceId == service.ServiceId)))
+                {
+                    this.data.Services
+                        .Remove(this.data.Services
+                        .First(s => s.Id == service.ServiceId));
+
+                    await this.data.SaveChangesAsync();
+                }
+            }
+            
             await signInManager.RefreshSignInAsync(user);
         }
 

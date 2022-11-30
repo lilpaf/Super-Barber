@@ -50,7 +50,7 @@ namespace SuperBarber.Controllers
 
                 await barberShopService.AddBarberShopAsync(model, userId);
 
-                return RedirectToAction(nameof(All));
+                return RedirectToAction(nameof(Mine));
             }
             catch (ModelStateCustomException ex)
             {
@@ -104,7 +104,8 @@ namespace SuperBarber.Controllers
                 return View(model);
             }
         }
-        
+
+        [HttpPost]
         [Authorize(Roles = BarberShopOwnerOrAdmin)]
         public async Task<IActionResult> Delete(int barberShopId, string information)
         {
@@ -117,7 +118,7 @@ namespace SuperBarber.Controllers
 
                 var userId = User.Id();
 
-                var userIsAdmin = User.IsInRole(CustomRoles.AdministratorRoleName);
+                var userIsAdmin = User.IsAdmin();
 
                 await barberShopService.DeleteBarberShopAsync(barberShopId, userId, userIsAdmin);
 

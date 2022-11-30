@@ -1,4 +1,4 @@
-﻿using SuperBarber.Models.Barbers;
+﻿using SuperBarber.Models.Barber;   
 
 namespace SuperBarber.Models.BarberShop
 {

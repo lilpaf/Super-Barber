@@ -40,34 +40,74 @@
                                 <h6 class="me-3 d-inline">@barber.BarberName</h6>
                                 @if (User.Id() != barber.UserId)
                                 {
-                                    <a asp-controller="Barber" asp-action="UnassignBarber" asp-route-barbershopid="@Model.BarberShopId" asp-route-barberid="@barber.BarberId" asp-route-information="@Model.ToFriendlyUrl()" class="btn btn-danger d-inline me-1">Fire</a>
+                                    <form method="post" asp-controller="Barber" asp-action="UnassignBarber" class="d-inline">
+                                        <input type="hidden" name="barbershopid" value="@Model.BarberShopId">
+                                        <input type="hidden" name="barberid" value="@barber.BarberId">
+                                        <input type="hidden" name="information" value="@Model.ToFriendlyUrl()">
+                                        <button type="submit" class="btn btn-danger d-inline me-1">Fire</button>
+                                    </form>
                                     @if (barber.IsOwner)
                                     {
-                                        <a asp-controller="Barber" asp-action="RemoveOwner" asp-route-barbershopid="@Model.BarberShopId" asp-route-barberid="@barber.BarberId" asp-route-information="@Model.ToFriendlyUrl()" class="btn btn-success d-inline me-1">Revoke ownership</a>
+                                        <form method="post" asp-controller="Barber" asp-action="RemoveOwner" class="d-inline">
+                                            <input type="hidden" name="barbershopid" value="@Model.BarberShopId">
+                                            <input type="hidden" name="barberid" value="@barber.BarberId">
+                                            <input type="hidden" name="information" value="@Model.ToFriendlyUrl()">
+                                            <button type="submit" class="btn btn-success d-inline me-1">Revoke ownership</button>
+                                        </form>
                                     }
                                     else
                                     {
-                                        <a asp-controller="Barber" asp-action="MakeOwner" asp-route-barbershopid="@Model.BarberShopId" asp-route-barberid="@barber.BarberId" asp-route-information="@Model.ToFriendlyUrl()" class="btn btn-success d-inline me-1">Make owner</a>
+                                        <form method="post" asp-controller="Barber" asp-action="MakeOwner" class="d-inline">
+                                            <input type="hidden" name="barbershopid" value="@Model.BarberShopId">
+                                            <input type="hidden" name="barberid" value="@barber.BarberId">
+                                            <input type="hidden" name="information" value="@Model.ToFriendlyUrl()">
+                                            <button type="submit" class="btn btn-success d-inline me-1">Make owner</button>
+                                        </form>
                                     }
                                     @if (barber.IsAvailable)
                                     {
-                                        <a asp-controller="Barber" asp-action="MakeUnavailable" asp-route-barbershopid="@Model.BarberShopId" asp-route-barberid="@barber.BarberId" asp-route-information="@Model.ToFriendlyUrl()" class="btn btn-warning d-inline">Make unavailable</a>
+                                        <form method="post" asp-controller="Barber" asp-action="MakeUnavailable" class="d-inline">
+                                            <input type="hidden" name="barbershopid" value="@Model.BarberShopId">
+                                            <input type="hidden" name="barberid" value="@barber.BarberId">
+                                            <input type="hidden" name="information" value="@Model.ToFriendlyUrl()">
+                                            <button type="submit" class="btn btn-warning d-inline">Make unavailable</button>
+                                        </form>
                                     }
                                     else
                                     {
-                                        <a asp-controller="Barber" asp-action="MakeAvailable" asp-route-barbershopid="@Model.BarberShopId" asp-route-barberid="@barber.BarberId" asp-route-information="@Model.ToFriendlyUrl()" class="btn btn-warning d-inline ">Make available</a>
+                                        <form method="post" asp-controller="Barber" asp-action="MakeAvailable" class="d-inline">
+                                            <input type="hidden" name="barbershopid" value="@Model.BarberShopId">
+                                            <input type="hidden" name="barberid" value="@barber.BarberId">
+                                            <input type="hidden" name="information" value="@Model.ToFriendlyUrl()">
+                                            <button type="submit" class="btn btn-warning d-inline ">Make available</button>
+                                        </form>
                                     }
                                 }
                                 else
                                 {
-                                    <a asp-controller="Barber" asp-action="UnassignBarber" asp-route-barbershopid="@Model.BarberShopId" asp-route-barberid="@barber.BarberId" asp-route-information="@Model.ToFriendlyUrl()" class="btn btn-danger d-inline me-1">Resign</a>
+                                    <form method="post" asp-controller="Barber" asp-action="UnassignBarber" class="d-inline">
+                                        <input type="hidden" name="barbershopid" value="@Model.BarberShopId">
+                                        <input type="hidden" name="barberid" value="@barber.BarberId">
+                                        <input type="hidden" name="information" value="@Model.ToFriendlyUrl()">
+                                        <button type="submit" class="btn btn-danger d-inline me-1">Resign</button>
+                                    </form>
                                     @if (barber.IsAvailable)
                                     {
-                                        <a asp-controller="Barber" asp-action="MakeUnavailable" asp-route-barbershopid="@Model.BarberShopId" asp-route-barberid="@barber.BarberId" asp-route-information="@Model.ToFriendlyUrl()" class="btn btn-warning d-inline btn-availability-padding">Become unavailable</a>
+                                        <form method="post" asp-controller="Barber" asp-action="MakeUnavailable" class="d-inline">
+                                            <input type="hidden" name="barbershopid" value="@Model.BarberShopId">
+                                            <input type="hidden" name="barberid" value="@barber.BarberId">
+                                            <input type="hidden" name="information" value="@Model.ToFriendlyUrl()">
+                                            <button type="submit" class="btn btn-warning d-inline btn-availability-padding">Become unavailable</button>
+                                        </form>
                                     }
                                     else
                                     {
-                                        <a asp-controller="Barber" asp-action="MakeAvailable" asp-route-barbershopid="@Model.BarberShopId" asp-route-barberid="@barber.BarberId" asp-route-information="@Model.ToFriendlyUrl()" class="btn btn-warning d-inline btn-availability-padding">Become available</a>
+                                        <form method="post" asp-controller="Barber" asp-action="MakeAvailable" class="d-inline">
+                                            <input type="hidden" name="barbershopid" value="@Model.BarberShopId">
+                                            <input type="hidden" name="barberid" value="@barber.BarberId">
+                                            <input type="hidden" name="information" value="@Model.ToFriendlyUrl()">
+                                            <button type="submit" class="btn btn-warning d-inline btn-availability-padding">Become available</button>
+                                        </form>
                                     }
                                 }
                             </li>

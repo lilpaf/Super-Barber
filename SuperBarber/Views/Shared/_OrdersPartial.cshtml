@@ -1,0 +1,68 @@
+﻿@model List<OrdersListingViewModel>
+
+@for (var i = 0; i < Model.Count(); i++)
+{
+    var rowNumber = i + 1;
+    <tr>
+        <th scope="row" class="pt-3">@rowNumber</th>
+        @if (Model[i].ClientFirstName != null)
+        {
+            <td class="table-text pt-3">@Model[i].ClientFirstName</td>
+        }
+        else
+        {
+            <td class="table-text pt-3">@Model[i].BarberFirstName</td>
+        }
+        @if (Model[i].ClientLastName != null)
+        {
+            <td class="table-text pt-3">@Model[i].ClientLastName</td>
+        }
+        else
+        {
+            <td class="table-text pt-3">@Model[i].BarberLastName</td>
+        }
+        <td class="table-text pt-3">@Model[i].ServiceName</td>
+        <td class="table-text pt-3">@Model[i].Price</td>
+        <td class="table-text pt-3">@Model[i].Date.ToLocalTime().ToString(@"MM/dd/yy H:mm")</td>
+
+        @*action="/Order/Remove"*@
+        <form method="post" asp-controller="Order" asp-action="Remove">
+            @if (Model[i].BarberId == null)
+            {
+                @if (DateTime.UtcNow < Model[i].Date)
+                {
+                    <td class="table-text">
+                    <input type="hidden" name="orderId" value="@Model[i].OrderId">
+                        <button type="submit" class="btn btn-danger">Cancel</button>
+                    </td>
+                }
+                else
+                {
+                    <td class="table-text">
+                    <input type="hidden" name="orderId" value="@Model[i].OrderId">
+                        <button type="submit" class="btn btn-danger disabled">Cancel</button>
+                    </td>
+                }
+            }
+            else
+            {
+                @if (DateTime.UtcNow < Model[i].Date)
+                {
+                    <td class="table-text">
+                        <input type="hidden" name="orderid" value="@Model[i].OrderId">
+                        <input type="hidden" name="barberid" value="@Model[i].BarberId">
+                        <button type="submit" class="btn btn-danger">Cancel</button>
+                    </td>
+                }
+                else
+                {
+                    <td class="table-text">
+                        <input type="hidden" name="orderid" value="@Model[i].OrderId">
+                        <input type="hidden" name="barberid" value="@Model[i].BarberId">
+                        <button type="submit" class="btn btn-danger disabled">Cancel</button>
+                    </td>
+                }
+            }
+        </form>
+    </tr>
+}

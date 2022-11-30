@@ -1,4 +1,4 @@
-﻿using SuperBarber.Models.Barbers;
+﻿using SuperBarber.Models.Order;
 
 namespace SuperBarber.Services.Barbers
 {
@@ -20,6 +20,6 @@ namespace SuperBarber.Services.Barbers
 
         Task<bool> CheckIfUserIsTheBabrerToFire(string userId, int barberId);
 
-        Task<IEnumerable<BarberOrdersListingViewModel>> GetBarberOrdersAsync(string userId);
+        Task<IEnumerable<OrdersListingViewModel>> GetBarberOrdersAsync(string userId);
     }
 }

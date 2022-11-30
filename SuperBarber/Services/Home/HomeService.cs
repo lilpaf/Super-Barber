@@ -2,6 +2,7 @@
 using SuperBarber.Data;
 using SuperBarber.Infrastructure;
 using SuperBarber.Models.BarberShop;
+using SuperBarber.Services.BarberShops.Models;
 
 namespace SuperBarber.Services.Home
 {
@@ -59,7 +60,15 @@ namespace SuperBarber.Services.Home
                     FinishHour = bs.FinishHour.ToString(@"hh\:mm"),
                     ImageUrl = bs.ImageUrl,
                     UserIsEmployee = bs.Barbers.Any(b => b.Barber.UserId == userId),
-                    UserIsOwner = bs.Barbers.Any(b => b.IsOwner && b.Barber.UserId == userId)
+                    UserIsOwner = bs.Barbers.Any(b => b.IsOwner && b.Barber.UserId == userId),
+                    OwnersInfo = bs.Barbers.Where(b => b.IsOwner)
+                                .Select(b => new OwnerListingViewModel
+                                {
+                                    Name = b.Barber.FirstName + ' ' + b.Barber.LastName,
+                                    Email = b.Barber.Email,
+                                    PhoneNumber = b.Barber.PhoneNumber
+                                })
+                                .ToList()
                 })
                 .ToListAsync();
 

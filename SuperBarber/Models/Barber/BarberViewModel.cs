@@ -1,4 +1,4 @@
-﻿namespace SuperBarber.Models.Barbers
+﻿namespace SuperBarber.Models.Barber
 {
     public class BarberViewModel
     {

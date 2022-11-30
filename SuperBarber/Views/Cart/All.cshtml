@@ -18,24 +18,27 @@
         }
         else
         {
-                <div class="cart-col">
-                    @foreach (var service in Model.Services)
-                    {
-                        <div class="row">
-                            <div class="d-inline mb-5">
-                                <div class="d-inline me-3">
-                                    <a asp-controller="Cart" asp-action="Remove" asp-route-serviceid="@service.ServiceId" class="btn btn-danger d-inline text-center">Remove</a>
-                                </div>
-                                <div class="d-inline">
-                                    <h5 class="fw-bold d-inline">@service.ServiceName - @service.Price lv. at @service.BarberShopName</h5>
-                                </div>
+            <div class="cart-col">
+                @foreach (var service in Model.Services)
+                {
+                    <div class="row">
+                        <div class="d-inline mb-5">
+                            <div class="d-inline me-3">
+                                <form method="post" asp-controller="Cart" asp-action="Remove" class="d-inline">
+                                    <input type="hidden" name="serviceid" value="@service.ServiceId">
+                                    <button type="submit" class="btn btn-danger d-inline text-center">Remove</button>
+                                </form>
+                            </div>
+                            <div class="d-inline">
+                                <h5 class="fw-bold d-inline">@service.ServiceName - @service.Price lv. at @service.BarberShopName</h5>
                             </div>
                         </div>
-                    }
-                </div>
-                <h5 class="fw-bold mb-3 text-center">Total Price: @Model.TotalPrice lv.</h5>
+                    </div>
+                }
+            </div>
+            <h5 class="fw-bold mb-3 text-center">Total Price: @Model.TotalPrice lv.</h5>
 
-                <a asp-controller="Cart" asp-action="Book" class="btn-submit-big anchor-book">Book</a>
+            <a asp-controller="Cart" asp-action="Book" class="btn-submit-big anchor-book">Book</a>
         }
     </div>
 </div>

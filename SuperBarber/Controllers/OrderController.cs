@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SuperBarber.Infrastructure;
+using static SuperBarber.Infrastructure.CustomRoles;
 using SuperBarber.Services.Order;
 
 namespace SuperBarber.Controllers
 {
+    [Authorize]
     public class OrderController : Controller
     {
         private readonly IOrderService orderService;
@@ -11,27 +14,71 @@ namespace SuperBarber.Controllers
         public OrderController(IOrderService orderService)
             => this.orderService = orderService;
 
-        public async Task<IActionResult> Remove(string orderId, int barberId)
+        [HttpPost]
+        public async Task<IActionResult> Remove(string orderId, int? barberId)
         {
-            try
+            if (orderId == null)
             {
-                if (barberId == 0 || orderId == null)
+                return BadRequest();
+            }
+
+            if (barberId != null && User.IsBarber())
+            {
+                try
                 {
-                    return BadRequest();
+                    if (barberId == 0)
+                    {
+                        return BadRequest();
+                    }
+
+                    var userId = User.Id();
+
+                    await this.orderService.RemoveOrder(orderId, (int)barberId, userId);
+
+                    return RedirectToAction("OrdersInfo", "Barber");
                 }
+                catch (ModelStateCustomException ex)
+                {
+                    SetTempDataModelStateExtension.SetTempData(this, ex);
 
-                var userId = User.Id();
-
-                await this.orderService.RemoveOrder(orderId, barberId, userId);
-
-                return RedirectToAction("OrdersInfo", "Barber");
+                    return RedirectToAction("OrdersInfo", "Barber");
+                }
             }
-            catch (ModelStateCustomException ex)
+            else if (barberId == null)
             {
-                SetTempDataModelStateExtension.SetTempData(this, ex);
+                try
+                {
+                    var userId = User.Id();
 
-                return RedirectToAction("OrdersInfo", "Barber"); ;
+                    await this.orderService.RemoveYourOrder(orderId, userId);
+
+                    return RedirectToAction(nameof(Mine));
+                }
+                catch (ModelStateCustomException ex)
+                {
+                    SetTempDataModelStateExtension.SetTempData(this, ex);
+
+                    return RedirectToAction(nameof(Mine));
+                }
             }
+
+            return BadRequest();
+        }
+        
+        
+        /*public async Task<IActionResult> Remove()
+        {
+
+            ;
+            return BadRequest();
+        }*/
+
+        [RestoreModelStateFromTempData]
+        public async Task<IActionResult> Mine()
+        {
+            var userId = User.Id();
+
+            return View(await orderService.GetMyOrdersAsync(userId));
         }
     }
 }

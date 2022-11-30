@@ -45,7 +45,7 @@ namespace SuperBarber.Controllers
 
                 await serviceService.AddServiceAsync(model, userId, barberShopId);
 
-                return RedirectToAction(nameof(All), new {barberShopId, information});
+                return RedirectToAction(nameof(Manage), new {barberShopId, information});
             }
             catch (ModelStateCustomException ex)
             {
@@ -95,7 +95,8 @@ namespace SuperBarber.Controllers
                 return RedirectToAction("All", "BarberShop");
             }
         }
-        
+
+        [HttpPost]
         public async Task<IActionResult> Remove(int barberShopId, int serviceId, string information)
         {
             try

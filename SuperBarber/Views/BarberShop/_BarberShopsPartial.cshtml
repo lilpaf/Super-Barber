@@ -17,6 +17,23 @@
                     <p class="card-text d-inline">Working hours:</p>
                     <p class="card-text d-inline">@barbershop.StartHour</p>
                     <p class="card-text d-inline">- @barbershop.FinishHour</p>
+                    <div class="accordion-item mt-2 mb-2">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                Contacts
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                                @foreach (var owner in barbershop.OwnersInfo)
+                                {
+                                    <p>@owner.Name</p>
+                                    <p>email: @owner.Email</p>
+                                    <p>phone number: @owner.PhoneNumber</p>
+                                }
+                            </div>
+                        </div>
+                    </div>
 
                     <a asp-controller="Service" asp-action="All" asp-route-barbershopid="@barbershop.Id" asp-route-information="@barbershop.ToFriendlyUrl()" class="btn btn-primary d-block mt-2">See all the services</a>
 
@@ -25,13 +42,21 @@
                         if (barbershop.UserIsOwner)
                         {
                             <a asp-controller="BarberShop" asp-action="Edit" asp-route-barbershopid="@barbershop.Id" asp-route-information="@barbershop.ToFriendlyUrl()" class="btn btn-warning d-block mt-2">Edit</a>
-                            <a asp-controller="BarberShop" asp-action="Delete" asp-route-barbershopid="@barbershop.Id" asp-route-information="@barbershop.ToFriendlyUrl()" class="btn btn-danger d-block mt-2">Delete</a>
+                            <form method="post" asp-controller="BarberShop" asp-action="Delete" class="d-block">
+                                <input type="hidden" name="barbershopid" value="@barbershop.Id">
+                                <input type="hidden" name="information" value="@barbershop.ToFriendlyUrl()">
+                                <button type="submit" class="btn btn-danger w-100 mt-2">Delete</button>
+                            </form>
                             <a asp-controller="BarberShop" asp-action="Manage" asp-route-barbershopid="@barbershop.Id" asp-route-information="@barbershop.ToFriendlyUrl()" class="btn btn-secondary d-block mt-2">Manage Barbershop</a>
                         }
                         else
                         {
                             <a asp-controller="BarberShop" asp-action="Edit" asp-route-barbershopid="@barbershop.Id" asp-route-information="@barbershop.ToFriendlyUrl()" class="btn btn-warning d-block mt-2 disabled">Edit</a>
-                            <a asp-controller="BarberShop" asp-action="Delete" asp-route-barbershopid="@barbershop.Id" asp-route-information="@barbershop.ToFriendlyUrl()" class="btn btn-danger d-block mt-2 disabled">Delete</a>
+                            <form method="post" asp-controller="BarberShop" asp-action="Delete">
+                                <input type="hidden" name="barbershopid" value="@barbershop.Id">
+                                <input type="hidden" name="information" value="@barbershop.ToFriendlyUrl()">
+                                <button type="submit" class="btn btn-danger d-block mt-2 disabled">Delete</button>
+                            </form>
                             <a asp-controller="BarberShop" asp-action="Manage" asp-route-barbershopid="@barbershop.Id" asp-route-information="@barbershop.ToFriendlyUrl()" class="btn btn-secondary d-block mt-2 disabled">Manage Barbershop</a>
                         }
                     }
@@ -39,11 +64,19 @@
                     {
                         @if (!barbershop.UserIsEmployee)
                         {
-                            <a asp-controller="Barber" asp-action="AssignBarber" asp-route-barbershopid="@barbershop.Id" asp-route-information="@barbershop.ToFriendlyUrl()" class="btn btn-success d-block mt-2">I work here</a>
+                            <form method="post" asp-controller="Barber" asp-action="AssignBarber" class="d-block">
+                                <input type="hidden" name="barbershopid" value="@barbershop.Id">
+                                <input type="hidden" name="information" value="@barbershop.ToFriendlyUrl()">
+                                <button type="submit" class="btn btn-success w-100 mt-2">I work here</button>
+                            </form>
                         }
                         else if (ViewBag.CanEdit != true)
                         {
-                            <a asp-controller="Barber" asp-action="AssignBarber" asp-route-barbershopid="@barbershop.Id" asp-route-information="@barbershop.ToFriendlyUrl()" class="btn btn-success d-block mt-2 disabled">You already work here</a>
+                            <form method="post" asp-controller="Barber" asp-action="AssignBarber" class="d-block">
+                                <input type="hidden" name="barbershopid" value="@barbershop.Id">
+                                <input type="hidden" name="information" value="@barbershop.ToFriendlyUrl()">
+                                <button type="submit" class="btn btn-success w-100 mt-2 disabled">You already work here</button>
+                            </form>
                         }
                     }
 

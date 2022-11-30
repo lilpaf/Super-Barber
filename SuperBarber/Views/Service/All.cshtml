@@ -19,46 +19,9 @@
                 <a asp-controller="BarberShop" asp-action="All" button class="btn btn-primary btn-lg" type="button">All Barbershops</a>
             </div>
         }
-        <div class="col">
-            <form method="post">
 
-                @if (Model.Any(s => s.Category == "Hair"))
-                {
-                    <div class="row mb-5">
-                        <h4 class="text-center mb-3 fw-bold">Hair</h4>
-                        <hr class="mb-5" />
-                        @foreach (var service in Model.Where(s => s.Category == "Hair"))
-                        {
-                            <partial name="_ServicesPartial" model="service" />
-                        }
-                    </div>
-                }
+        <partial name="_ServicesPartial" model="@Model" />
 
-                @if (Model.Any(s => s.Category == "Face"))
-                {
-                    <div class="row mb-5">
-                        <h4 class="text-center mb-3 fw-bold">Face</h4>
-                        <hr class="mb-5" />
-                        @foreach (var service in Model.Where(s => s.Category == "Face"))
-                        {
-                            <partial name="_ServicesPartial" model="service" />
-                        }
-                    </div>
-                }
-
-                @if (Model.Any(s => s.Category == "Epilation"))
-                {
-                    <div class="row mb-5">
-                        <h4 class="text-center mb-3 fw-bold">Epilation</h4>
-                        <hr class="mb-5" />
-                        @foreach (var service in Model.Where(s => s.Category == "Epilation"))
-                        {
-                            <partial name="_ServicesPartial" model="service" />
-                        }
-                    </div>
-                }
-            </form>
-        </div>
     </div>
 </div>
 

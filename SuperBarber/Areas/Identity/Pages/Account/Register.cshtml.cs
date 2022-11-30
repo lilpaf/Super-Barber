@@ -50,7 +50,7 @@ namespace SuperBarber.Areas.Identity.Pages.Account
 
             [Required]
             [Display(Name = "Phone number")]
-            [RegularExpression(@"^\+?\d+[ |-]?\d+[ |-]?\d{3}[ |-]?\d{4}$")]
+            [RegularExpression(@"^\+(\d{3})+[ |-]?(\d{1,})+[ |-]?(\d{3})+[ |-]?(\d{4})+$")]
             [StringLength(PhoneNumberMaxLength, MinimumLength = PhoneNumberMinLength)]
             public string PhoneNumber { get; set; }
 

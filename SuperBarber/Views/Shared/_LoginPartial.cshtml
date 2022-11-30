@@ -28,6 +28,13 @@
         var userIsAdmin = User.IsInRole(CustomRoles.AdministratorRoleName);
         var userIsBarber = User.IsInRole(CustomRoles.BarberRoleName);
 
+        @if (!userIsAdmin)
+        {
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-controller="Order" asp-area="" asp-action="Mine">My orders</a>
+            </li>
+        }
+
         @if (!userIsAdmin && !userIsBarber)
         {
             <li class="nav-item">

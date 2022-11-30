@@ -33,6 +33,7 @@ namespace SuperBarber.Controllers
             return View(new CartViewModel { Services = new List<ServiceListingViewModel>() });
         }
 
+        [HttpPost]
         public async Task<IActionResult> Add(int barbershopId, int serviceId)
         {
             List<ServiceListingViewModel> cartList;
@@ -88,6 +89,7 @@ namespace SuperBarber.Controllers
             return RedirectToAction("All", "Service", new { barbershopId, information = barberShopName });
         }
 
+        [HttpPost]
         public IActionResult Remove(int serviceid)
         {
             if (HttpContext.Session.Get<List<ServiceListingViewModel>>(SessionName) != null

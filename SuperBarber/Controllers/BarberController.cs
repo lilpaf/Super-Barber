@@ -37,6 +37,7 @@ namespace SuperBarber.Controllers
             }
         }
 
+        [HttpPost]
         [Authorize(Roles = BarberRoleName)]
         public async Task<IActionResult> AssignBarber(int barberShopId, string information)
         {
@@ -60,7 +61,8 @@ namespace SuperBarber.Controllers
                 return RedirectToAction("All", "BarberShop"); ;
             }
         }
-        
+
+        [HttpPost]
         [Authorize(Roles = BarberShopOwnerRoleName)]
         public async Task<IActionResult> UnassignBarber(int barberShopId, int barberId, string information)
         {
@@ -89,7 +91,7 @@ namespace SuperBarber.Controllers
                 return RedirectToAction("Manage", "BarberShop", new { barberShopId, information }); ;
             }
         }
-        
+
         [Authorize(Roles = BarberShopOwnerRoleName)]
         public async Task<IActionResult> MakeOwner(int barberShopId, int barberId, string information)
         {
@@ -113,7 +115,8 @@ namespace SuperBarber.Controllers
                 return RedirectToAction("Manage", "BarberShop", new { barberShopId, information }); ;
             }
         }
-        
+
+        [HttpPost]
         [Authorize(Roles = BarberShopOwnerRoleName)]
         public async Task<IActionResult> RemoveOwner(int barberShopId, int barberId, string information)
         {
@@ -137,7 +140,8 @@ namespace SuperBarber.Controllers
                 return RedirectToAction("Manage", "BarberShop", new { barberShopId, information }); ;
             }
         }
-        
+
+        [HttpPost]
         [Authorize(Roles = BarberShopOwnerRoleName)]
         public async Task<IActionResult> MakeUnavailable(int barberShopId, int barberId, string information)
         {
@@ -161,7 +165,8 @@ namespace SuperBarber.Controllers
                 return RedirectToAction("Manage", "BarberShop", new { barberShopId, information }); ;
             }
         }
-        
+
+        [HttpPost]
         [Authorize(Roles = BarberShopOwnerRoleName)]
         public async Task<IActionResult> MakeAvailable(int barberShopId, int barberId, string information)
         {
@@ -190,18 +195,9 @@ namespace SuperBarber.Controllers
         [Authorize(Roles = BarberRoleName)]
         public async Task<IActionResult> OrdersInfo()
         {
-            try
-            {
-                var userId = User.Id();
+            var userId = User.Id();
 
-                return View(await barberService.GetBarberOrdersAsync(userId));
-            }
-            catch (ModelStateCustomException ex)
-            {
-                SetTempDataModelStateExtension.SetTempData(this, ex);
-
-                return RedirectToAction("Index", "Home"); ;
-            }
+            return View(await barberService.GetBarberOrdersAsync(userId));
         }
     }
 }
