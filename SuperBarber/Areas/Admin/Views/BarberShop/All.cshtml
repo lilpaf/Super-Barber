@@ -16,35 +16,7 @@
 }
 else
 {
-    <form method="get">
-        <div class="row mb-5">
-            <div class="mb-3 col-md-3">
-                <label asp-for="SearchTerm" class="form-label">Search by name</label>
-                <input asp-for="SearchTerm" class="form-control">
-            </div>
-            <div class="mb-3 col-md-3">
-                <label asp-for="City" class="form-label">Search by city</label>
-                <select asp-for="City" class="form-select">
-                    <option value="">All</option>
-
-                    @foreach (var city in Model.Cities)
-                    {
-                        <option value="@city">@city</option>
-                    }
-                </select>
-            </div>
-            <div class="mb-3 col-md-3">
-                <label asp-for="Sorting" class="form-label">Sort by</label>
-                <select asp-for="Sorting" class="form-select">
-                    <option value="0" selected>Name</option>
-                    <option value="1">City</option>
-                </select>
-            </div>
-            <div class="mb-3 col-md-3 btn-search-margin">
-                <button type="submit" class="btn btn-primary">Search</button>
-            </div>
-        </div>
-    </form>
+    <partial name="_SearchAndSortMenuPartial" model="@Model" />
 
     <div asp-validation-summary="ModelOnly" class="text-danger text-center list-error"></div>
 

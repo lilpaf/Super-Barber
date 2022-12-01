@@ -105,8 +105,8 @@ namespace SuperBarber.Services.Home
         
         private async Task<int> GetDistrictIdAsync(string name)
            => await this.data.Districts
-               .Where(c => c.Name.ToLower().Trim() == name.ToLower().Trim())
-               .Select(c => c.Id)
+               .Where(d => d.Name.ToLower().Trim() == name.ToLower().Trim())
+               .Select(d => d.Id)
                .FirstOrDefaultAsync();
 
         public async Task<IEnumerable<string>> GetCitiesAsync()

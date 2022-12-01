@@ -37,16 +37,34 @@ namespace SuperBarber.Services.BarberShops
             if (!string.IsNullOrEmpty(query.SearchTerm))
             {
                 barberShopQuery = barberShopQuery
-                .Where(b => b.Name
-                    .ToLower()
-                .Trim()
+                .Where(b => b.Name.ToLower().Trim()
                     .Contains(query.SearchTerm.ToLower().Trim()));
             }
 
             if (!string.IsNullOrEmpty(query.City))
             {
+                var cityId = await GetCityIdAsync(query.City);
+
+                if (cityId == 0)
+                {
+                    throw new ModelStateCustomException("", "Invalid city.");
+                }
+
                 barberShopQuery = barberShopQuery
-                    .Where(b => b.City.Name == query.City);
+                    .Where(b => b.CityId == cityId);
+            }
+            
+            if (!string.IsNullOrEmpty(query.District))
+            {
+                var districtId = await GetDistrictIdAsync(query.District);
+
+                if (districtId == 0)
+                {
+                    throw new ModelStateCustomException("", "Invalid district.");
+                }
+
+                barberShopQuery = barberShopQuery
+                    .Where(b => b.DistrictId == districtId);
             }
 
             barberShopQuery = query.Sorting switch
@@ -79,30 +97,52 @@ namespace SuperBarber.Services.BarberShops
                     })
                     .ToListAsync();
 
-            var totalBarberShops = this.data.BarberShops.Count();
+            var totalBarberShops = barberShops.Count;
 
             var barberShopsPaged = barberShops
                     .Skip((query.CurrentPage - 1) * AllBarberShopQueryModel.BarberShopsPerPage)
                     .Take(AllBarberShopQueryModel.BarberShopsPerPage);
 
             var cities = await GetCitiesAsync();
+            
+            var districts = await GetDistrictsAsync();
 
             return new AllBarberShopQueryModel
             {
                 BarberShops = barberShopsPaged,
                 SearchTerm = query.SearchTerm,
                 Cities = cities,
+                City = query.City,
                 Sorting = query.Sorting,
                 TotalBarberShops = totalBarberShops,
-                CurrentPage = query.CurrentPage
-                //Districts = districts
+                CurrentPage = query.CurrentPage,
+                Districts = districts,
+                District = query.District
             };
         }
+
+        private async Task<int> GetCityIdAsync(string name)
+           => await this.data.Cities
+               .Where(c => c.Name.ToLower().Trim() == name.ToLower().Trim())
+               .Select(c => c.Id)
+               .FirstOrDefaultAsync();
+
+        private async Task<int> GetDistrictIdAsync(string name)
+           => await this.data.Districts
+               .Where(d => d.Name.ToLower().Trim() == name.ToLower().Trim())
+               .Select(d => d.Id)
+               .FirstOrDefaultAsync();
 
         private async Task<IEnumerable<string>> GetCitiesAsync()
             => await this.data.Cities
                 .Select(c => c.Name)
                 .OrderBy(c => c)
+                .ToListAsync();
+        
+        private async Task<IEnumerable<string>> GetDistrictsAsync()
+            => await this.data.Districts
+                .Select(d => d.Name)
+                .OrderBy(d => d)
                 .ToListAsync();
 
 
@@ -248,10 +288,14 @@ namespace SuperBarber.Services.BarberShops
             
             await CityExists(model.City);
 
+            var oldCityId = barberShop.CityId;
+
             barberShop.CityId = this.data.Cities
                 .First(c => c.Name.ToLower().Trim() == model.City.ToLower().Trim()).Id;
 
             await DistrictExists(model.District);
+
+            var oldDistrictId = barberShop.DistrictId;
 
             barberShop.DistrictId = this.data.Districts
                 .First(d => d.Name.ToLower().Trim() == model.District.ToLower().Trim()).Id;
@@ -274,6 +318,10 @@ namespace SuperBarber.Services.BarberShops
             barberShop.IsPublic = false;
 
             await this.data.SaveChangesAsync();
+
+            await CityIsUsed(oldCityId);
+
+            await DistrictIsUsed(oldDistrictId);
         }
 
         public async Task DeleteBarberShopAsync(int barberShopId, string userId, bool userIsAdmin)
@@ -352,18 +400,12 @@ namespace SuperBarber.Services.BarberShops
 
             var barshopServices = barberShop.Services.ToList();
 
-            foreach (var service in barshopServices)
-            {
-                if (!await this.data.BarberShops.AnyAsync(bs => bs.Services.Any(s => s.ServiceId == service.ServiceId)))
-                {
-                    this.data.Services
-                        .Remove(this.data.Services
-                        .First(s => s.Id == service.ServiceId));
+            await ServiceIsUsed(barshopServices);
 
-                    await this.data.SaveChangesAsync();
-                }
-            }
-            
+            await CityIsUsed(barberShop.CityId);
+
+            await DistrictIsUsed(barberShop.DistrictId);
+
             await signInManager.RefreshSignInAsync(user);
         }
 
@@ -384,6 +426,40 @@ namespace SuperBarber.Services.BarberShops
             {
                 await this.data.Districts.AddAsync(new District { Name = district });
                 await this.data.SaveChangesAsync();
+            }
+        }
+        
+        private async Task CityIsUsed(int id)
+        {
+            if (!this.data.BarberShops.Any(b => b.CityId == id))
+            {
+                this.data.Cities.Remove(this.data.Cities.Find(id));
+                
+                await this.data.SaveChangesAsync();
+            }
+        }
+
+        private async Task DistrictIsUsed(int id)
+        {
+            if (!this.data.BarberShops.Any(b => b.DistrictId == id))
+            {
+                this.data.Districts.Remove(this.data.Districts.Find(id));
+
+                await this.data.SaveChangesAsync();
+            }
+        }
+        
+        private async Task ServiceIsUsed(IEnumerable<BarberShopServices> services)
+        {
+            foreach (var service in services)
+            {
+                if (!await this.data.BarberShops.AnyAsync(bs => bs.Services.Any(s => s.ServiceId == service.ServiceId)))
+                {
+                    this.data.Services
+                        .Remove(this.data.Services.Find(service.ServiceId));
+
+                    await this.data.SaveChangesAsync();
+                }
             }
         }
 

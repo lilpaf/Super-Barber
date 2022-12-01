@@ -18,6 +18,7 @@
            asp-action="All"
            asp-route-currentPage="previousPage"
            asp-route-city="@Model.City"
+           asp-route-district="@Model.District"
            asp-route-searchTerm="@Model.SearchTerm"
            asp-route-sorting="@((int)Model.Sorting)">&lt&lt</a>
     </div>
@@ -32,6 +33,7 @@
            asp-action="All"
            asp-route-currentPage="@(Model.CurrentPage + 1)"
            asp-route-city="@Model.City"
+           asp-route-district="@Model.District"
            asp-route-searchTerm="@Model.SearchTerm"
            asp-route-sorting="@((int)Model.Sorting)">>></a>
     </div>

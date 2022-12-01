@@ -8,9 +8,9 @@
 
         public IEnumerable<string> Cities { get; init; }
 
-        //public string District { get; init; }
+        public string District { get; init; }
 
-        //public IEnumerable<string> Districts { get; init; }
+        public IEnumerable<string> Districts { get; init; }
 
         public string SearchTerm { get; init; }
 
