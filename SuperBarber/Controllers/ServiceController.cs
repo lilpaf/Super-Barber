@@ -4,10 +4,11 @@ using SuperBarber.Infrastructure;
 using SuperBarber.Models.Service;
 using SuperBarber.Services.Service;
 using static SuperBarber.Infrastructure.CustomRoles;
+using static SuperBarber.Infrastructure.WebConstants;
 
 namespace SuperBarber.Controllers
 {
-    [Authorize(Roles = BarberShopOwnerRoleName)]
+    [Authorize]
     public class ServiceController : Controller
     {
         private readonly IServiceService serviceService;
@@ -15,9 +16,10 @@ namespace SuperBarber.Controllers
         public ServiceController(IServiceService serviceService)
             => this.serviceService = serviceService;
 
+        [Authorize(Roles = BarberShopOwnerRoleName)]
         public async Task<IActionResult> Add(int barberShopId, string information)
         {
-            if (barberShopId == 0 || information == null)
+            if (barberShopId == 0 || information == null || information != await this.serviceService.GetBarberShopNameToFriendlyUrlAsync(barberShopId))
             {
                 return BadRequest();
             }
@@ -29,6 +31,7 @@ namespace SuperBarber.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = BarberShopOwnerRoleName)]
         public async Task<IActionResult> Add(AddServiceFormModel model, int barberShopId, string information)
         {
             try
@@ -44,6 +47,8 @@ namespace SuperBarber.Controllers
                 var userId = User.Id();
 
                 await serviceService.AddServiceAsync(model, userId, barberShopId);
+
+                TempData[GlobalMessageKey] = $"Service was added to {information.Replace('-', ' ')}!";
 
                 return RedirectToAction(nameof(Manage), new {barberShopId, information});
             }
@@ -61,7 +66,7 @@ namespace SuperBarber.Controllers
         {
             try
             {
-                if (barberShopId == 0 || information == null)
+                if (barberShopId == 0 || information == null || information != await this.serviceService.GetBarberShopNameToFriendlyUrlAsync(barberShopId))
                 {
                     return BadRequest();
                 }
@@ -77,11 +82,12 @@ namespace SuperBarber.Controllers
         }
 
         [RestoreModelStateFromTempData]
+        [Authorize(Roles = BarberShopOwnerOrAdmin)]
         public async Task<IActionResult> Manage(int barberShopId, string information)
         {
             try
             {
-                if (barberShopId == 0 || information == null)
+                if (barberShopId == 0 || information == null || information != await this.serviceService.GetBarberShopNameToFriendlyUrlAsync(barberShopId))
                 {
                     return BadRequest();
                 }
@@ -97,18 +103,23 @@ namespace SuperBarber.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = BarberShopOwnerOrAdmin)]
         public async Task<IActionResult> Remove(int barberShopId, int serviceId, string information)
         {
             try
             {
-                if (barberShopId == 0 || information == null)
+                if (barberShopId == 0 || information == null || information != await this.serviceService.GetBarberShopNameToFriendlyUrlAsync(barberShopId) || serviceId == 0)
                 {
                     return BadRequest();
                 }
 
                 var userId = User.Id();
 
-                await serviceService.RemoveServiceAsync(barberShopId, serviceId, userId);
+                var userIsAdmin = User.IsAdmin();
+
+                await serviceService.RemoveServiceAsync(barberShopId, serviceId, userId, userIsAdmin);
+
+                TempData[GlobalMessageKey] = $"Service was removed from {information.Replace('-', ' ')}!";
 
                 return RedirectToAction(nameof(Manage), new { barberShopId, information });
             }

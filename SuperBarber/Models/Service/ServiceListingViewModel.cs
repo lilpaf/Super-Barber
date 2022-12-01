@@ -1,6 +1,8 @@
-﻿namespace SuperBarber.Models.Service
+﻿using SuperBarber.Models.Interfaces;
+
+namespace SuperBarber.Models.Service
 {
-    public class ServiceListingViewModel
+    public class ServiceListingViewModel : IBarberShopModel
     {
         public int ServiceId { get; init; }
         

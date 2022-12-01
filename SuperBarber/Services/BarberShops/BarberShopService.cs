@@ -26,11 +26,12 @@ namespace SuperBarber.Services.BarberShops
             this.signInManager = signInManager;
         }
 
-        public async Task<AllBarberShopQueryModel> AllBarberShopsAsync([FromQuery] AllBarberShopQueryModel query, string userId, List<BarberShopListingViewModel>? barberShops = null)
+        public async Task<AllBarberShopQueryModel> AllBarberShopsAsync([FromQuery] AllBarberShopQueryModel query, string userId, List<BarberShopListingViewModel>? barberShops = null, bool publicOnly = true)
         {
             var barberShopQuery = this.data.BarberShops
                 .Include(bs => bs.Barbers)
                 .ThenInclude(b => b.Barber)
+                .Where(b => b.IsPublic == publicOnly)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(query.SearchTerm))
@@ -55,37 +56,45 @@ namespace SuperBarber.Services.BarberShops
             };
 
             barberShops ??= await barberShopQuery
-                     .Select(bs => new BarberShopListingViewModel
-                     {
-                         Id = bs.Id,
-                         Name = bs.Name,
-                         City = bs.City.Name,
-                         District = bs.District.Name,
-                         Street = bs.Street,
-                         StartHour = bs.StartHour.ToString(@"hh\:mm"),
-                         FinishHour = bs.FinishHour.ToString(@"hh\:mm"),
-                         ImageUrl = bs.ImageUrl,
-                         UserIsEmployee = bs.Barbers.Any(b => b.Barber.UserId == userId),
-                         UserIsOwner = bs.Barbers.Any(b => b.IsOwner && b.Barber.UserId == userId),
-                         OwnersInfo = bs.Barbers.Where(b => b.IsOwner)
-                                .Select(b => new OwnerListingViewModel
-                                {
-                                    Name = b.Barber.FirstName + ' ' + b.Barber.LastName,
-                                    Email = b.Barber.Email,
-                                    PhoneNumber = b.Barber.PhoneNumber
-                                })
-                                .ToList()
-                     })
-                     .ToListAsync();
+                    .Select(bs => new BarberShopListingViewModel
+                    {
+                        Id = bs.Id,
+                        BarberShopName = bs.Name,
+                        City = bs.City.Name,
+                        District = bs.District.Name,
+                        Street = bs.Street,
+                        StartHour = bs.StartHour.ToString(@"hh\:mm"),
+                        FinishHour = bs.FinishHour.ToString(@"hh\:mm"),
+                        ImageUrl = bs.ImageUrl,
+                        UserIsEmployee = bs.Barbers.Any(b => b.Barber.UserId == userId),
+                        UserIsOwner = bs.Barbers.Any(b => b.IsOwner && b.Barber.UserId == userId),
+                        OwnersInfo = bs.Barbers.Where(b => b.IsOwner)
+                               .Select(b => new OwnerListingViewModel
+                               {
+                                   Name = b.Barber.FirstName + ' ' + b.Barber.LastName,
+                                   Email = b.Barber.Email,
+                                   PhoneNumber = b.Barber.PhoneNumber
+                               })
+                               .ToList()
+                    })
+                    .ToListAsync();
+
+            var totalBarberShops = this.data.BarberShops.Count();
+
+            var barberShopsPaged = barberShops
+                    .Skip((query.CurrentPage - 1) * AllBarberShopQueryModel.BarberShopsPerPage)
+                    .Take(AllBarberShopQueryModel.BarberShopsPerPage);
 
             var cities = await GetCitiesAsync();
 
             return new AllBarberShopQueryModel
             {
-                BarberShops = barberShops,
+                BarberShops = barberShopsPaged,
                 SearchTerm = query.SearchTerm,
                 Cities = cities,
                 Sorting = query.Sorting,
+                TotalBarberShops = totalBarberShops,
+                CurrentPage = query.CurrentPage
                 //Districts = districts
             };
         }
@@ -124,7 +133,8 @@ namespace SuperBarber.Services.BarberShops
                 Street = model.Street,
                 StartHour = startHour,
                 FinishHour = finishHour,
-                ImageUrl = model.ImageUrl
+                ImageUrl = model.ImageUrl,
+                IsPublic = false
             };
 
             if (this.data.BarberShops
@@ -164,7 +174,7 @@ namespace SuperBarber.Services.BarberShops
                .Select(bs => new BarberShopListingViewModel
                {
                    Id = bs.Id,
-                   Name = bs.Name,
+                   BarberShopName = bs.Name,
                    City = bs.City.Name,
                    District = bs.District.Name,
                    Street = bs.Street,
@@ -261,6 +271,7 @@ namespace SuperBarber.Services.BarberShops
             barberShop.FinishHour = finishHour;
             barberShop.Name = model.Name;
             barberShop.ImageUrl = model.ImageUrl;
+            barberShop.IsPublic = false;
 
             await this.data.SaveChangesAsync();
         }
@@ -317,13 +328,6 @@ namespace SuperBarber.Services.BarberShops
                     throw new ModelStateCustomException("", "You can not delete this barbershop");
                 }
 
-                if (barberShop.Orders.Any())
-                {
-                    var orders = await this.data.Orders.Where(o => o.BarberShopId == barberShop.Id).ToListAsync();
-
-                    this.data.Orders.RemoveRange(orders);
-                }
-
                 barber.BarberShops
                     .Remove(barber.BarberShops
                             .Where(bs => bs.BarberShopId == barberShop.Id)
@@ -333,6 +337,13 @@ namespace SuperBarber.Services.BarberShops
                 {
                     await userManager.RemoveFromRoleAsync(user, BarberShopOwnerRoleName);
                 }
+            }
+
+            if (barberShop.Orders.Any())
+            {
+                var orders = await this.data.Orders.Where(o => o.BarberShopId == barberShop.Id).ToListAsync();
+
+                this.data.Orders.RemoveRange(orders);
             }
 
             this.data.BarberShops.Remove(barberShop);
@@ -413,6 +424,37 @@ namespace SuperBarber.Services.BarberShops
                .ToList()
             })
             .FirstOrDefaultAsync();
+        }
+
+        public async Task<string> GetBarberShopNameToFriendlyUrlAsync(int id)
+            => await this.data.BarberShops.Where(bs => bs.Id == id).Select(bs => bs.Name.Replace(' ', '-')).FirstOrDefaultAsync();
+
+        public async Task MakeBarberShopPublicAsync(int barberShopId)
+        {
+            var barberShop = await this.data.BarberShops.FindAsync(barberShopId);
+
+            if (barberShop == null)
+            {
+                throw new ModelStateCustomException("", "This barbershop does not exist");
+            }
+
+            barberShop.IsPublic = true;
+
+            await this.data.SaveChangesAsync();
+        }
+        
+        public async Task MakeBarberShopPrivateAsync(int barberShopId)
+        {
+            var barberShop = await this.data.BarberShops.FindAsync(barberShopId);
+
+            if (barberShop == null)
+            {
+                throw new ModelStateCustomException("", "This barbershop does not exist");
+            }
+
+            barberShop.IsPublic = false;
+
+            await this.data.SaveChangesAsync();
         }
     }
 }

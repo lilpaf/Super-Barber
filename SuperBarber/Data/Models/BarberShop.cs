@@ -32,6 +32,8 @@ namespace SuperBarber.Data.Models
 
         [Required]
         public string ImageUrl { get; set; }
+        
+        public bool IsPublic { get; set; }
 
         public ICollection<BarberShopServices> Services { get; set; } = new HashSet<BarberShopServices>();
         

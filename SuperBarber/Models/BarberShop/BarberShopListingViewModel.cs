@@ -1,12 +1,13 @@
-﻿using SuperBarber.Services.BarberShops.Models;
+﻿using SuperBarber.Models.Interfaces;
+using SuperBarber.Services.BarberShops.Models;
 
 namespace SuperBarber.Models.BarberShop
 {
-    public class BarberShopListingViewModel
+    public class BarberShopListingViewModel : IBarberShopModel
     {
         public int Id { get; init; }
 
-        public string Name { get; init; }
+        public string BarberShopName { get; init; }
 
         public string City { get; init; }
         

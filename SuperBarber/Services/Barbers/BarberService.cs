@@ -52,7 +52,8 @@ namespace SuperBarber.Services.Barbers
 
         public async Task AsignBarberToBarberShopAsync(int barberShopId, string userId)
         {
-            var barberShop = await this.data.BarberShops.FindAsync(barberShopId);
+            var barberShop = await this.data.BarberShops
+                .FirstOrDefaultAsync(bs => bs.Id == barberShopId && bs.IsPublic);
 
             if (barberShop == null)
             {
@@ -334,5 +335,11 @@ namespace SuperBarber.Services.Barbers
                    Date = o.Date
                })
                .ToListAsync();
+
+        public async Task<string> GetBarberShopNameToFriendlyUrlAsync(int id)
+            => await this.data.BarberShops.Where(bs => bs.Id == id).Select(bs => bs.Name.Replace(' ', '-')).FirstOrDefaultAsync();
+        
+        public async Task<string> GetBarberNameAsync(int id)
+            => await this.data.Barbers.Where(b => b.Id == id).Select(b => b.FirstName + ' ' + b.LastName).FirstOrDefaultAsync();
     }
 }

@@ -1,11 +1,17 @@
 ﻿@model AllBarberShopQueryModel
 
+@{
+    ViewData["Title"] = "Barbershops administration";
+    ViewBag.Title = "Barbershops administration";
+    ViewBag.CanEdit = true;
+}
+
 @if (Model.BarberShops.Count() == 0)
 {
     <div class="container-fluid py-5 text-center">
-        <h1 class="display-5 fw-bold">Welcome to Super Barber</h1>
-        <p class="fs-3">Right now we do not have any avalible barbershops.</p>
-        <a asp-controller="Home" asp-action="Index" button class="btn btn-primary btn-lg" type="button">Back to home</a>
+        <h1 class="display-5 fw-bold">Welcome to Super Barber administrator area</h1>
+        <p class="fs-3">Right now you do not have any barbershops to approve.</p>
+        <a asp-controller="Home" asp-action="Index" asp-area="" button class="btn btn-primary btn-lg" type="button">Back to home</a>
     </div>
 }
 else
@@ -42,8 +48,9 @@ else
 
     <div asp-validation-summary="ModelOnly" class="text-danger text-center list-error"></div>
 
+    <h2 class="heading-margin text-center">@ViewBag.Title</h2>
+
     <partial name="_BarberShopsPartial" model="@Model.BarberShops" />
 
     <partial name="_PageButtonsPartial" model="@Model" />
 }
-

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SuperBarber.Infrastructure;
-using static SuperBarber.Infrastructure.CustomRoles;
+using static SuperBarber.Infrastructure.WebConstants;
 using SuperBarber.Services.Order;
 
 namespace SuperBarber.Controllers
@@ -35,6 +35,8 @@ namespace SuperBarber.Controllers
 
                     await this.orderService.RemoveOrder(orderId, (int)barberId, userId);
 
+                    TempData[GlobalMessageKey] = "Order was canceled!";
+
                     return RedirectToAction("OrdersInfo", "Barber");
                 }
                 catch (ModelStateCustomException ex)
@@ -52,6 +54,8 @@ namespace SuperBarber.Controllers
 
                     await this.orderService.RemoveYourOrder(orderId, userId);
 
+                    TempData[GlobalMessageKey] = "Order was canceled!";
+
                     return RedirectToAction(nameof(Mine));
                 }
                 catch (ModelStateCustomException ex)
@@ -64,14 +68,6 @@ namespace SuperBarber.Controllers
 
             return BadRequest();
         }
-        
-        
-        /*public async Task<IActionResult> Remove()
-        {
-
-            ;
-            return BadRequest();
-        }*/
 
         [RestoreModelStateFromTempData]
         public async Task<IActionResult> Mine()

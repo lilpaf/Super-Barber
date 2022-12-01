@@ -9,24 +9,33 @@
 <ul class="navbar-nav">
     @if (SignInManager.IsSignedIn(User))
     {
-        if (HttpContextAccessor.HttpContext.Session.Get<List<ServiceListingViewModel>>(SessionName) != null
-        && HttpContextAccessor.HttpContext.Session.Get<List<ServiceListingViewModel>>(SessionName).Any())
+        var userIsAdmin = User.IsInRole(CustomRoles.AdministratorRoleName);
+        var userIsBarber = User.IsInRole(CustomRoles.BarberRoleName);
+
+        @if (!userIsAdmin)
         {
-            var items = HttpContextAccessor.HttpContext.Session.Get<List<ServiceListingViewModel>>(SessionName).ToList();
+            @if (HttpContextAccessor.HttpContext.Session.Get<List<ServiceListingViewModel>>(SessionName) != null
+           && HttpContextAccessor.HttpContext.Session.Get<List<ServiceListingViewModel>>(SessionName).Any())
+            {
+                var items = HttpContextAccessor.HttpContext.Session.Get<List<ServiceListingViewModel>>(SessionName).ToList();
 
                 <li class="nav-item">
-                <a class="nav-link text-dark" asp-controller="Cart" asp-area="" asp-action="All">Cart (@items.Count)</a>
+                    <a class="nav-link text-dark" asp-controller="Cart" asp-area="" asp-action="All">Cart (@items.Count)</a>
                 </li>
+            }
+            else
+            {
+                <li class="nav-item">
+                    <a class="nav-link text-dark" asp-controller="Cart" asp-area="" asp-action="All">Cart</a>
+                </li>
+            }
         }
         else
         {
             <li class="nav-item">
-                <a class="nav-link text-dark" asp-controller="Cart" asp-area="" asp-action="All">Cart</a>
+                <a class="nav-link text-dark" asp-controller="BarberShop" asp-area="Admin" asp-action="All">Administration</a>
             </li>
         }
-
-        var userIsAdmin = User.IsInRole(CustomRoles.AdministratorRoleName);
-        var userIsBarber = User.IsInRole(CustomRoles.BarberRoleName);
 
         @if (!userIsAdmin)
         {
@@ -34,7 +43,7 @@
                 <a class="nav-link text-dark" asp-controller="Order" asp-area="" asp-action="Mine">My orders</a>
             </li>
         }
-
+        
         @if (!userIsAdmin && !userIsBarber)
         {
             <li class="nav-item">

@@ -1,7 +1,8 @@
 ﻿@model ManageBarberShopViewModel
 
 @{
-    ViewBag.Title = "Manage your babrber shop";
+    ViewData["Title"] = $"{Model.ToFriendlyUrl()} manage";
+    ViewBag.Title = $"Manage {Model.BarberShopName}";
 }
 
 <div class="row">

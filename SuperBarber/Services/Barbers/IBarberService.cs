@@ -21,5 +21,9 @@ namespace SuperBarber.Services.Barbers
         Task<bool> CheckIfUserIsTheBabrerToFire(string userId, int barberId);
 
         Task<IEnumerable<OrdersListingViewModel>> GetBarberOrdersAsync(string userId);
+
+        Task<string> GetBarberShopNameToFriendlyUrlAsync(int id);
+
+        Task<string> GetBarberNameAsync(int id);
     }
 }

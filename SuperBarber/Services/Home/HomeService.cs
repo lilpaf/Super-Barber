@@ -16,8 +16,12 @@ namespace SuperBarber.Services.Home
         public async Task<IEnumerable<BarberShopListingViewModel>> SearchAvalibleBarbershopAsync(string city, string district, string date, string time, string userId)
         {
             var barberShopQuery = this.data.BarberShops
+                .Include(bs => bs.Orders)
+                .Include(bs => bs.District)
+                .Include(bs => bs.City)
                 .Include(bs => bs.Barbers)
                 .ThenInclude(b => b.Barber)
+                .Where(b => b.IsPublic)
                 .AsQueryable();
 
             var dateParsed = DateTime.Parse(date);
@@ -28,31 +32,44 @@ namespace SuperBarber.Services.Home
 
             dateParsed = dateParsed.Date + ts;
 
+            var cityId = await GetCityIdAsync(city);
+
+            if (cityId == 0)
+            {
+                throw new ModelStateCustomException("", "Invalid city.");
+            }
+
             if (district == "All")
             {
                 barberShopQuery = barberShopQuery
-                .Where(b => b.City.Name.ToLower().Trim() == city.ToLower().Trim() &&
-                b.StartHour <= ts &&
-                b.FinishHour >= ts &&
-                b.Orders.All(o => o.Date != dateParsed.ToUniversalTime()) &&
-                b.Barbers.Any(b => b.IsAvailable));
+                .Where(bs => bs.CityId == cityId &&
+                bs.StartHour <= ts &&
+                bs.FinishHour >= ts &&
+                bs.Orders.All(o => o.Date != dateParsed.ToUniversalTime()) &&
+                bs.Barbers.Any(b => b.IsAvailable));
             }
             else
             {
-                barberShopQuery = barberShopQuery
-                .Where(b => b.City.Name.ToLower().Trim() == city.ToLower().Trim() &&
-                b.District.Name.ToLower().Trim() == district.ToLower().Trim() &&
-                b.StartHour <= dateParsed.TimeOfDay &&
-                b.FinishHour >= dateParsed.TimeOfDay &&
-                b.Orders.All(o => o.Date != dateParsed.ToUniversalTime()) &&
-                b.Barbers.Any(b => b.IsAvailable));
-            }
+                var districtId = await GetDistrictIdAsync(district);
 
+                if (districtId == 0)
+                {
+                    throw new ModelStateCustomException("", "Invalid district.");
+                }
+
+                barberShopQuery = barberShopQuery
+                .Where(bs => bs.CityId == cityId &&
+                bs.District.Id == districtId &&
+                bs.StartHour <= dateParsed.TimeOfDay &&
+                bs.FinishHour >= dateParsed.TimeOfDay &&
+                bs.Orders.All(o => o.Date != dateParsed.ToUniversalTime()) &&
+                bs.Barbers.Any(b => b.IsAvailable));
+            }
             var barberShopsData = await barberShopQuery
                 .Select(bs => new BarberShopListingViewModel
                 {
                     Id = bs.Id,
-                    Name = bs.Name,
+                    BarberShopName = bs.Name,
                     City = bs.City.Name,
                     District = bs.District.Name,
                     Street = bs.Street,
@@ -79,6 +96,18 @@ namespace SuperBarber.Services.Home
 
             return barberShopsData;
         }
+
+        private async Task<int> GetCityIdAsync(string name)
+           => await this.data.Cities
+               .Where(c => c.Name.ToLower().Trim() == name.ToLower().Trim())
+               .Select(c => c.Id)
+               .FirstOrDefaultAsync();
+        
+        private async Task<int> GetDistrictIdAsync(string name)
+           => await this.data.Districts
+               .Where(c => c.Name.ToLower().Trim() == name.ToLower().Trim())
+               .Select(c => c.Id)
+               .FirstOrDefaultAsync();
 
         public async Task<IEnumerable<string>> GetCitiesAsync()
             => await this.data.Cities

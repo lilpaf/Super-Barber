@@ -5,6 +5,7 @@ using SuperBarber.Models.Cart;
 using SuperBarber.Models.Service;
 using SuperBarber.Services.Cart;
 using static SuperBarber.Infrastructure.SessionExtensions;
+using static SuperBarber.Infrastructure.WebConstants;
 
 namespace SuperBarber.Controllers
 {
@@ -68,6 +69,8 @@ namespace SuperBarber.Controllers
 
                 HttpContext.Session.Set<List<ServiceListingViewModel>>(SessionName, cartList);
 
+                TempData[GlobalMessageKey] = "Item was added to the cart!";
+
                 return RedirectToAction("All", "Service", new { barbershopId, information = cartService.GetBarberShopNameToFriendlyUrl(barberShopName)});
             }
 
@@ -85,6 +88,8 @@ namespace SuperBarber.Controllers
             };
 
             HttpContext.Session.Set(SessionName, cartList);
+
+            TempData[GlobalMessageKey] = "Item was added to the cart!";
 
             return RedirectToAction("All", "Service", new { barbershopId, information = barberShopName });
         }
@@ -110,6 +115,8 @@ namespace SuperBarber.Controllers
                 cartList.Remove(service);
 
                 HttpContext.Session.Set<List<ServiceListingViewModel>>(SessionName, cartList);
+
+                TempData[GlobalMessageKey] = "Item was removed from the cart!";
             }
 
             return RedirectToAction("All", "Cart");
@@ -141,6 +148,7 @@ namespace SuperBarber.Controllers
 
                     HttpContext.Session.Set<List<ServiceListingViewModel>>(SessionName, cartList);
 
+                    TempData[GlobalMessageKey] = "Your order was booked! You can find all the orders you have made in the menu 'My Orders'";
                 }
 
                 return RedirectToAction("All", "BarberShop");

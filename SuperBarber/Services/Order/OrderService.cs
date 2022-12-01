@@ -28,7 +28,7 @@ namespace SuperBarber.Services.Order
                 throw new ModelStateCustomException("", "You are not authorized to preform this action");
             }
 
-            if (DateTime.UtcNow > order.Date)
+            if (DateTime.UtcNow.AddMinutes(30) > order.Date)
             {
                 throw new ModelStateCustomException("", "You can no longer cancel this order");
             }
@@ -54,7 +54,7 @@ namespace SuperBarber.Services.Order
                 throw new ModelStateCustomException("", "You are not authorized to preform this action");
             }
 
-            if (DateTime.UtcNow > order.Date)
+            if (DateTime.UtcNow.AddMinutes(30) > order.Date)
             {
                 throw new ModelStateCustomException("", "You can no longer cancel this order");
             }

@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualBasic;
 using SuperBarber.Infrastructure;
 using SuperBarber.Services.Barbers;
 using static SuperBarber.Infrastructure.CustomRoles;
+using static SuperBarber.Infrastructure.WebConstants;
 
 namespace SuperBarber.Controllers
 {
@@ -27,6 +29,8 @@ namespace SuperBarber.Controllers
 
                 await barberService.AddBarberAsync(userId);
 
+                TempData[GlobalMessageKey] = $"You are barber now!";
+
                 return RedirectToAction("All", "BarberShop");
             }
             catch (ModelStateCustomException ex)
@@ -43,7 +47,7 @@ namespace SuperBarber.Controllers
         {
             try
             {
-                if (barberShopId == 0 || information == null)
+                if (barberShopId == 0 || information == null || information != await this.barberService.GetBarberShopNameToFriendlyUrlAsync(barberShopId))
                 {
                     return BadRequest();
                 }
@@ -51,6 +55,8 @@ namespace SuperBarber.Controllers
                 var userId = User.Id();
 
                 await barberService.AsignBarberToBarberShopAsync(barberShopId, userId);
+
+                TempData[GlobalMessageKey] = $"You started working at {information.Replace('-', ' ')}!";
 
                 return RedirectToAction("Mine", "BarberShop");
             }
@@ -68,7 +74,7 @@ namespace SuperBarber.Controllers
         {
             try
             {
-                if (barberId == 0 || barberShopId == 0 || information == null)
+                if (barberId == 0 || barberShopId == 0 || information == null || information != await this.barberService.GetBarberShopNameToFriendlyUrlAsync(barberShopId))
                 {
                     return BadRequest();
                 }
@@ -81,6 +87,8 @@ namespace SuperBarber.Controllers
                 {
                     return RedirectToAction("All", "BarberShop");
                 }
+
+                TempData[GlobalMessageKey] = $"{await barberService.GetBarberNameAsync(barberId)} stoped working at {information.Replace('-', ' ')}!";
 
                 return RedirectToAction("Manage", "BarberShop", new { barberShopId, information });
             }
@@ -97,7 +105,7 @@ namespace SuperBarber.Controllers
         {
             try
             {
-                if (barberId == 0 || barberShopId == 0 || information == null)
+                if (barberId == 0 || barberShopId == 0 || information == null || information != await this.barberService.GetBarberShopNameToFriendlyUrlAsync(barberShopId))
                 {
                     return BadRequest();
                 }
@@ -105,6 +113,8 @@ namespace SuperBarber.Controllers
                 var userId = User.Id();
 
                 await barberService.AddOwnerToBarberShop(barberShopId, barberId, userId);
+
+                TempData[GlobalMessageKey] = $"{await barberService.GetBarberNameAsync(barberId)} is owner at {information.Replace('-', ' ')}!";
 
                 return RedirectToAction("Manage", "BarberShop", new { barberShopId, information });
             }
@@ -122,7 +132,7 @@ namespace SuperBarber.Controllers
         {
             try
             {
-                if (barberId == 0 || barberShopId == 0 || information == null)
+                if (barberId == 0 || barberShopId == 0 || information == null || information != await this.barberService.GetBarberShopNameToFriendlyUrlAsync(barberShopId))
                 {
                     return BadRequest();
                 }
@@ -130,6 +140,8 @@ namespace SuperBarber.Controllers
                 var userId = User.Id();
 
                 await barberService.RemoveOwnerFromBarberShop(barberShopId, barberId, userId);
+
+                TempData[GlobalMessageKey] = $"{await barberService.GetBarberNameAsync(barberId)} is no longer owner at {information.Replace('-', ' ')}!";
 
                 return RedirectToAction("Manage", "BarberShop", new { barberShopId, information });
             }
@@ -147,7 +159,7 @@ namespace SuperBarber.Controllers
         {
             try
             {
-                if (barberId == 0 || barberShopId == 0 || information == null)
+                if (barberId == 0 || barberShopId == 0 || information != await this.barberService.GetBarberShopNameToFriendlyUrlAsync(barberShopId))
                 {
                     return BadRequest();
                 }
@@ -155,6 +167,8 @@ namespace SuperBarber.Controllers
                 var userId = User.Id();
 
                 await barberService.MakeBarberUnavailableFromBarberShop(barberShopId, barberId, userId);
+
+                TempData[GlobalMessageKey] = $"{await barberService.GetBarberNameAsync(barberId)} is unavailable at {information.Replace('-', ' ')}!";
 
                 return RedirectToAction("Manage", "BarberShop", new { barberShopId, information });
             }
@@ -172,7 +186,7 @@ namespace SuperBarber.Controllers
         {
             try
             {
-                if (barberId == 0 || barberShopId == 0 || information == null)
+                if (barberId == 0 || barberShopId == 0 || information == null ||  information != await this.barberService.GetBarberShopNameToFriendlyUrlAsync(barberShopId))
                 {
                     return BadRequest();
                 }
@@ -180,6 +194,8 @@ namespace SuperBarber.Controllers
                 var userId = User.Id();
 
                 await barberService.MakeBarberAvailableFromBarberShop(barberShopId, barberId, userId);
+
+                TempData[GlobalMessageKey] = $"{await barberService.GetBarberNameAsync(barberId)} is available at {information.Replace('-', ' ')}!";
 
                 return RedirectToAction("Manage", "BarberShop", new { barberShopId, information });
             }

@@ -5,7 +5,7 @@ namespace SuperBarber.Services.BarberShops
 {
     public interface IBarberShopService
     {
-        Task<AllBarberShopQueryModel> AllBarberShopsAsync([FromQuery] AllBarberShopQueryModel query, string userId, List<BarberShopListingViewModel>? barberShops = null);
+        Task<AllBarberShopQueryModel> AllBarberShopsAsync([FromQuery] AllBarberShopQueryModel query, string userId, List<BarberShopListingViewModel>? barberShops = null, bool publicOnly = true);
 
         Task AddBarberShopAsync(BarberShopFormModel model, string userId);
 
@@ -18,5 +18,11 @@ namespace SuperBarber.Services.BarberShops
         Task<BarberShopFormModel> DisplayBarberShopInfoAsync(int barberShopId);
 
         Task<ManageBarberShopViewModel> BarberShopInformationAsync(string userId, int barberShopId);
+
+        Task<string> GetBarberShopNameToFriendlyUrlAsync(int id);
+
+        Task MakeBarberShopPrivateAsync(int barberShopId);
+
+        Task MakeBarberShopPublicAsync(int barberShopId);
     }
 }

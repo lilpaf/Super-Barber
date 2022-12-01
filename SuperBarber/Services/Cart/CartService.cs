@@ -47,6 +47,7 @@ namespace SuperBarber.Services.Cart
                 .ThenInclude(b => b.Barber)
                 .ThenInclude(o => o.Orders)
                 .FirstOrDefaultAsync(bs => bs.Id == item.BarberShopId
+                && bs.IsPublic
                 && bs.StartHour <= ts
                 && bs.FinishHour >= ts);
 

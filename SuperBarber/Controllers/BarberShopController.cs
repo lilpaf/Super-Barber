@@ -1,10 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualBasic;
 using Newtonsoft.Json;
+using SuperBarber.Data.Models;
 using SuperBarber.Infrastructure;
 using SuperBarber.Models.BarberShop;
+using SuperBarber.Services.Barbers;
 using SuperBarber.Services.BarberShops;
 using static SuperBarber.Infrastructure.CustomRoles;
+using static SuperBarber.Infrastructure.WebConstants;
 
 namespace SuperBarber.Controllers
 {
@@ -47,8 +51,9 @@ namespace SuperBarber.Controllers
                 }
 
                 var userId = User.Id();
-
                 await barberShopService.AddBarberShopAsync(model, userId);
+                
+                TempData[GlobalMessageKey] = $"Your barbershop was added and is waiting for approval!";
 
                 return RedirectToAction(nameof(Mine));
             }
@@ -84,7 +89,7 @@ namespace SuperBarber.Controllers
                     return View(model);
                 }
 
-                if (barberShopId == 0 || information == null)
+                if (barberShopId == 0 || information == null || information != await this.barberShopService.GetBarberShopNameToFriendlyUrlAsync(barberShopId))
                 {
                     return BadRequest();
                 }
@@ -94,6 +99,13 @@ namespace SuperBarber.Controllers
                 var userIsAdmin = User.IsAdmin();
 
                 await barberShopService.EditBarberShopAsync(model, barberShopId, userId, userIsAdmin);
+
+                TempData[GlobalMessageKey] = $"{information.Replace('-', ' ')} was edited and is waiting for approval!";
+
+                if (userIsAdmin)
+                {
+                    return RedirectToAction("All", "BarberShop", new { area = "Admin" });
+                }
 
                 return RedirectToAction(nameof(Mine));
             }
@@ -111,7 +123,7 @@ namespace SuperBarber.Controllers
         {
             try
             {
-                if (barberShopId == 0 || information == null)
+                if (barberShopId == 0 || information == null || information != await this.barberShopService.GetBarberShopNameToFriendlyUrlAsync(barberShopId))
                 {
                     return BadRequest();
                 }
@@ -122,11 +134,23 @@ namespace SuperBarber.Controllers
 
                 await barberShopService.DeleteBarberShopAsync(barberShopId, userId, userIsAdmin);
 
+                TempData[GlobalMessageKey] = $"{information.Replace('-', ' ')} was deleted!";
+
+                if (userIsAdmin)
+                {
+                    return RedirectToAction("All", "BarberShop", new { area = "Admin" });
+                }
+
                 return RedirectToAction(nameof(Mine));
             }
             catch (ModelStateCustomException ex)
             {
                 SetTempDataModelStateExtension.SetTempData(this, ex);
+
+                if (User.IsAdmin())
+                {
+                    return RedirectToAction("All", "BarberShop", new { area = "Admin" });
+                }
 
                 return RedirectToAction(nameof(Mine));
             }
@@ -138,7 +162,7 @@ namespace SuperBarber.Controllers
         {
             try
             {
-                if (barberShopId == 0 || information == null)
+                if (barberShopId == 0 || information == null || information != await this.barberShopService.GetBarberShopNameToFriendlyUrlAsync(barberShopId))
                 {
                     return BadRequest();
                 }

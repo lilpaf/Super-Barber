@@ -2,7 +2,7 @@
 {
     public class AllBarberShopQueryModel
     {
-        //public const int BarberShopPerPage = 3;
+        public const int BarberShopsPerPage = 3;
 
         public string City { get; init; }
 
@@ -13,6 +13,10 @@
         //public IEnumerable<string> Districts { get; init; }
 
         public string SearchTerm { get; init; }
+
+        public int CurrentPage { get; init; } = 1;
+
+        public int TotalBarberShops { get; set; }
 
         public BarberShopSorting Sorting { get; init; }
         

@@ -11,7 +11,7 @@
             <div class="card h-100" style="width: 20rem;">
                 <img src="@barbershop.ImageUrl" class="card-img-top" alt="Barbershop image">
                 <div class="card-body">
-                    <h5 class="card-title">@barbershop.Name</h5>
+                    <h5 class="card-title">@barbershop.BarberShopName</h5>
                     <p class="card-text">@barbershop.City, @barbershop.District</p>
                     <p class="card-text">@barbershop.Street</p>
                     <p class="card-text d-inline">Working hours:</p>
@@ -35,27 +35,37 @@
                         </div>
                     </div>
 
-                    <a asp-controller="Service" asp-action="All" asp-route-barbershopid="@barbershop.Id" asp-route-information="@barbershop.ToFriendlyUrl()" class="btn btn-primary d-block mt-2">See all the services</a>
-
-                    @if (userIsAdmin || (ViewBag.CanEdit == true && userIsOwner))
+                    @if (userIsAdmin)
                     {
-                        if (barbershop.UserIsOwner)
+                        <a asp-controller="Service" asp-action="Manage" asp-area="" asp-route-barbershopid="@barbershop.Id" asp-route-information="@barbershop.ToFriendlyUrl()" class="btn btn-primary d-block mt-2">Manage all the services</a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Service" asp-action="All" asp-route-barbershopid="@barbershop.Id" asp-route-information="@barbershop.ToFriendlyUrl()" class="btn btn-primary d-block mt-2">See all the services</a>
+                    }
+
+                    @if (ViewBag.CanEdit == true && (userIsAdmin || userIsOwner))
+                    {
+                        if (barbershop.UserIsOwner || userIsAdmin)
                         {
-                            <a asp-controller="BarberShop" asp-action="Edit" asp-route-barbershopid="@barbershop.Id" asp-route-information="@barbershop.ToFriendlyUrl()" class="btn btn-warning d-block mt-2">Edit</a>
-                            <form method="post" asp-controller="BarberShop" asp-action="Delete" class="d-block">
+                            <a asp-controller="BarberShop" asp-action="Edit" asp-area="" asp-route-barbershopid="@barbershop.Id" asp-route-information="@barbershop.ToFriendlyUrl()" class="btn btn-warning d-block mt-2">Edit</a>
+                            <form method="post" asp-controller="BarberShop" asp-action="Delete" asp-area="" class="d-block">
                                 <input type="hidden" name="barbershopid" value="@barbershop.Id">
                                 <input type="hidden" name="information" value="@barbershop.ToFriendlyUrl()">
                                 <button type="submit" class="btn btn-danger w-100 mt-2">Delete</button>
                             </form>
-                            <a asp-controller="BarberShop" asp-action="Manage" asp-route-barbershopid="@barbershop.Id" asp-route-information="@barbershop.ToFriendlyUrl()" class="btn btn-secondary d-block mt-2">Manage Barbershop</a>
+                            if (!userIsAdmin)
+                            {
+                                <a asp-controller="BarberShop" asp-action="Manage" asp-route-barbershopid="@barbershop.Id" asp-route-information="@barbershop.ToFriendlyUrl()" class="btn btn-secondary d-block mt-2">Manage Barbershop</a>
+                            }
                         }
                         else
                         {
                             <a asp-controller="BarberShop" asp-action="Edit" asp-route-barbershopid="@barbershop.Id" asp-route-information="@barbershop.ToFriendlyUrl()" class="btn btn-warning d-block mt-2 disabled">Edit</a>
-                            <form method="post" asp-controller="BarberShop" asp-action="Delete">
+                            <form method="post" asp-controller="BarberShop" asp-action="Delete" class="d-block">
                                 <input type="hidden" name="barbershopid" value="@barbershop.Id">
                                 <input type="hidden" name="information" value="@barbershop.ToFriendlyUrl()">
-                                <button type="submit" class="btn btn-danger d-block mt-2 disabled">Delete</button>
+                                <button type="submit" class="btn btn-danger w-100 mt-2 disabled">Delete</button>
                             </form>
                             <a asp-controller="BarberShop" asp-action="Manage" asp-route-barbershopid="@barbershop.Id" asp-route-information="@barbershop.ToFriendlyUrl()" class="btn btn-secondary d-block mt-2 disabled">Manage Barbershop</a>
                         }
@@ -78,6 +88,22 @@
                                 <button type="submit" class="btn btn-success w-100 mt-2 disabled">You already work here</button>
                             </form>
                         }
+                    }
+                    else if (userIsAdmin && ViewBag.CanEdit == true)
+                    {
+                        <form method="post" asp-controller="BarberShop" asp-action="MakePublic" asp-area="Admin" class="d-block">
+                            <input type="hidden" name="barbershopid" value="@barbershop.Id">
+                            <input type="hidden" name="information" value="@barbershop.ToFriendlyUrl()">
+                            <button type="submit" class="btn btn-success w-100 mt-2">Make public</button>
+                        </form>
+                    }
+                    else if (userIsAdmin)
+                    {
+                        <form method="post" asp-controller="BarberShop" asp-action="MakePrivate" asp-area="Admin" class="d-block">
+                            <input type="hidden" name="barbershopid" value="@barbershop.Id">
+                            <input type="hidden" name="information" value="@barbershop.ToFriendlyUrl()">
+                            <button type="submit" class="btn btn-success w-100 mt-2">Make private</button>
+                        </form>
                     }
 
                 </div>

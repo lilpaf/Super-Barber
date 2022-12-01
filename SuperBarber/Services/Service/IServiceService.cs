@@ -10,6 +10,8 @@ namespace SuperBarber.Services.Service
 
         Task<IEnumerable<ServiceListingViewModel>> ShowServicesAsync(int barberShopId);
 
-        Task RemoveServiceAsync(int barberShopId, int serviceId, string userId);
+        Task RemoveServiceAsync(int barberShopId, int serviceId, string userId, bool userIsAdmin);
+
+        Task<string> GetBarberShopNameToFriendlyUrlAsync(int id);
     }
 }

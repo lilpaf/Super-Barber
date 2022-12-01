@@ -25,11 +25,10 @@
         <td class="table-text pt-3">@Model[i].Price</td>
         <td class="table-text pt-3">@Model[i].Date.ToLocalTime().ToString(@"MM/dd/yy H:mm")</td>
 
-        @*action="/Order/Remove"*@
         <form method="post" asp-controller="Order" asp-action="Remove">
             @if (Model[i].BarberId == null)
             {
-                @if (DateTime.UtcNow < Model[i].Date)
+                @if (DateTime.UtcNow.AddMinutes(30) < Model[i].Date)
                 {
                     <td class="table-text">
                     <input type="hidden" name="orderId" value="@Model[i].OrderId">
@@ -46,7 +45,7 @@
             }
             else
             {
-                @if (DateTime.UtcNow < Model[i].Date)
+                @if (DateTime.UtcNow.AddMinutes(30) < Model[i].Date)
                 {
                     <td class="table-text">
                         <input type="hidden" name="orderid" value="@Model[i].OrderId">

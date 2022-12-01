@@ -1,6 +1,7 @@
 ﻿@model IEnumerable<ServiceListingViewModel>
 
 @{
+    ViewData["Title"] = $"{Model.FirstOrDefault()?.ToFriendlyUrl()} manage services";
     ViewBag.Title = "Services";
     ViewBag.CanEdit = true;
 }

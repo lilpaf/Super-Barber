@@ -107,7 +107,7 @@ namespace SuperBarber.Services.Service
                 .OrderBy(s => s.Category);
         }
 
-        public async Task RemoveServiceAsync(int barberShopId, int serviceId, string userId)
+        public async Task RemoveServiceAsync(int barberShopId, int serviceId, string userId, bool userIsAdmin)
         {
             var barberShop = await this.data.BarberShops
                .Include(bs => bs.Services)
@@ -120,7 +120,7 @@ namespace SuperBarber.Services.Service
                 throw new ModelStateCustomException("", "This barbershop does not exist");
             }
 
-            if (!barberShop.Barbers.Any(b => b.IsOwner && b.Barber.UserId == userId))
+            if (!barberShop.Barbers.Any(b => b.IsOwner && b.Barber.UserId == userId) || !userIsAdmin)
             {
                 throw new ModelStateCustomException("", $"You have to be owner of {barberShop.Name} to perform this action");
             }
@@ -145,5 +145,8 @@ namespace SuperBarber.Services.Service
                 await this.data.SaveChangesAsync();
             }
         }
+
+        public async Task<string> GetBarberShopNameToFriendlyUrlAsync(int id)
+            => await this.data.BarberShops.Where(bs => bs.Id == id).Select(bs => bs.Name.Replace(' ', '-')).FirstOrDefaultAsync();
     }
 }
