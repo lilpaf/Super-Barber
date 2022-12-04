@@ -13,5 +13,8 @@ namespace SuperBarber.Data.Models
 
         [ForeignKey(nameof(ServiceId))]
         public Service Service { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal Price { get; set; }
     }
 }

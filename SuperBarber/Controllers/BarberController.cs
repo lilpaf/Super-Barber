@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualBasic;
 using SuperBarber.Infrastructure;
+using SuperBarber.Models.Order;
 using SuperBarber.Services.Barbers;
 using static SuperBarber.Infrastructure.CustomRoles;
 using static SuperBarber.Infrastructure.WebConstants;
@@ -166,7 +167,7 @@ namespace SuperBarber.Controllers
 
                 var userId = User.Id();
 
-                await barberService.MakeBarberUnavailableFromBarberShop(barberShopId, barberId, userId);
+                await barberService.MakeBarberUnavailableAtBarberShop(barberShopId, barberId, userId);
 
                 TempData[GlobalMessageKey] = $"{await barberService.GetBarberNameAsync(barberId)} is unavailable at {information.Replace('-', ' ')}!";
 
@@ -193,7 +194,7 @@ namespace SuperBarber.Controllers
 
                 var userId = User.Id();
 
-                await barberService.MakeBarberAvailableFromBarberShop(barberShopId, barberId, userId);
+                await barberService.MakeBarberAvailableAtBarberShop(barberShopId, barberId, userId);
 
                 TempData[GlobalMessageKey] = $"{await barberService.GetBarberNameAsync(barberId)} is available at {information.Replace('-', ' ')}!";
 
@@ -209,11 +210,11 @@ namespace SuperBarber.Controllers
 
         [RestoreModelStateFromTempData]
         [Authorize(Roles = BarberRoleName)]
-        public async Task<IActionResult> OrdersInfo()
+        public async Task<IActionResult> OrdersInfo([FromQuery] OrderViewModel model)
         {
             var userId = User.Id();
 
-            return View(await barberService.GetBarberOrdersAsync(userId));
+            return View(await barberService.GetBarberOrdersAsync(userId, model.CurrentPage));
         }
     }
 }

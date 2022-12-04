@@ -16,17 +16,19 @@ namespace SuperBarber.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
-        //private readonly ILogger<DeletePersonalDataModel> _logger;
+        private readonly ILogger<DeletePersonalDataModel> _logger;
         private readonly IAccountService _accountService;
 
         public DeletePersonalDataModel(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
-            IAccountService accountService)
+            IAccountService accountService,
+            ILogger<DeletePersonalDataModel> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _accountService = accountService;
+            _logger = logger;
         }
 
         [BindProperty]
@@ -55,39 +57,50 @@ namespace SuperBarber.Areas.Identity.Pages.Account.Manage
 
         public async Task<IActionResult> OnPostAsync()
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
+            try
             {
-                return NotFound("Unable to load user.");
-            }
-
-            RequirePassword = await _userManager.HasPasswordAsync(user);
-            if (RequirePassword)
-            {
-                if (!await _userManager.CheckPasswordAsync(user, Input.Password))
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
                 {
-                    ModelState.AddModelError(string.Empty, "Incorrect password.");
-                    return Page();
+                    return NotFound("Unable to load user.");
                 }
-            }
 
-            if (!User.IsInRole(CustomRoles.BarberRoleName))
+                RequirePassword = await _userManager.HasPasswordAsync(user);
+                if (RequirePassword)
+                {
+                    if (!await _userManager.CheckPasswordAsync(user, Input.Password))
+                    {
+                        ModelState.AddModelError(string.Empty, "Incorrect password.");
+                        return Page();
+                    }
+                }
+
+                if (User.IsBarber())
+                {
+                    await _accountService.DeleteBarberAsync(user, true);
+                }
+
+                await _accountService.DeleteUserAsync(user);
+
+                /*if (!result.Succeeded)
+                {
+                    throw new InvalidOperationException($"Unexpected error occurred deleting user.");
+                }*/
+
+                await _signInManager.SignOutAsync();
+
+                var userId = await _userManager.GetUserIdAsync(user);
+
+                _logger.LogInformation("User with ID '{UserId}' deleted themselves.", userId);
+
+                return RedirectToAction("Index", "Home", new { area = "" });
+            }
+            catch (ModelStateCustomException ex)
             {
-                await _accountService.DeleteBarberAsync(user);
+                ModelState.AddModelError(ex.Key, ex.Message);
+
+                return Page();
             }
-
-            var result = await _userManager.DeleteAsync(user);
-            //var userId = await _userManager.GetUserIdAsync(user);
-            if (!result.Succeeded)
-            {
-                throw new InvalidOperationException($"Unexpected error occurred deleting user.");
-            }
-
-            await _signInManager.SignOutAsync();
-
-            //_logger.LogInformation("User with ID '{UserId}' deleted themselves.", userId);
-
-            return RedirectToAction("Index", "Home", new { area = "" });
-        }
+        } 
     }
 }

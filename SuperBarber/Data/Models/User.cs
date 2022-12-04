@@ -6,13 +6,15 @@ namespace SuperBarber.Data.Models
 {
     public class User : IdentityUser
     {
-        [Required]
         [MaxLength(FirstNameMaxLength)]
         public string FirstName { get; set; }
 
-        [Required]
         [MaxLength(LastNameMaxLength)]
         public string LastName { get; set; }
+
+        public bool IsDeleted { get; set; }
+
+        public DateTime? DeleteDate { get; set; }
 
         public ICollection<Order> Orders { get; set; } = new HashSet<Order>();
     }

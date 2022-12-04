@@ -91,6 +91,9 @@ namespace SuperBarber.Areas.Identity.Pages.Account.Manage
             if (Input.PhoneNumber != phoneNumber)
             {
                 var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
+
+                await _accountService.UpdateBarberPhoneNumberAsync(user, Input.PhoneNumber);
+
                 if (!setPhoneResult.Succeeded)
                 {
                     StatusMessage = "Unexpected error when trying to set phone number.";

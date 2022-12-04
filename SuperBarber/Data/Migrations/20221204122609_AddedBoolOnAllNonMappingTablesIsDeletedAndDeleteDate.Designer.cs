@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SuperBarber.Data;
 
@@ -11,9 +12,10 @@ using SuperBarber.Data;
 namespace SuperBarber.Data.Migrations
 {
     [DbContext(typeof(SuperBarberDbContext))]
-    partial class SuperBarberDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221204122609_AddedBoolOnAllNonMappingTablesIsDeletedAndDeleteDate")]
+    partial class AddedBoolOnAllNonMappingTablesIsDeletedAndDeleteDate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -285,9 +287,6 @@ namespace SuperBarber.Data.Migrations
                     b.Property<int>("BarberShopId")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
                     b.HasKey("ServiceId", "BarberShopId");
 
                     b.HasIndex("BarberShopId");
@@ -370,9 +369,6 @@ namespace SuperBarber.Data.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<int>("ServiceId")
                         .HasColumnType("int");
 
@@ -414,6 +410,9 @@ namespace SuperBarber.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 

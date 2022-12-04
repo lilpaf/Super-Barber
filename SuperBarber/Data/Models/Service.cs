@@ -13,12 +13,13 @@ namespace SuperBarber.Data.Models
         [MaxLength(ServiceNameMaxLength)]
         public string Name { get; set; }
 
-        [Column(TypeName = "decimal(18,2)")]
-        public decimal Price { get; set; }
-
         public int CategoryId { get; set; }
 
         [ForeignKey(nameof(CategoryId))]
         public Category Category { get; set; }
+
+        public bool IsDeleted { get; set; }
+
+        public DateTime? DeleteDate { get; set; }
     }
 }

@@ -23,9 +23,16 @@ namespace SuperBarber.Services.Barbers
             this.signInManager = signInManager;
         }
 
+        /// <summary>
+        /// This method allows the user to become a barber
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        /// <exception cref="ModelStateCustomException"></exception>
+
         public async Task AddBarberAsync(string userId)
         {
-            if (this.data.Barbers.Any(b => b.UserId == userId))
+            if (this.data.Barbers.Any(b => b.UserId == userId && !b.IsDeleted))
             {
                 throw new ModelStateCustomException("", "User is already a barber");
             }
@@ -39,21 +46,46 @@ namespace SuperBarber.Services.Barbers
                 PhoneNumber = user.PhoneNumber,
                 Email = user.Email,
                 UserId = userId,
+                IsDeleted = false,
+                DeleteDate = null
             };
 
             await userManager.AddToRoleAsync(user, BarberRoleName);
 
-            await data.Barbers.AddAsync(barber);
+            var deletedBarber = await this.data.Barbers
+                .FirstOrDefaultAsync(b => barber.UserId == b.UserId);
 
+            if (deletedBarber != null)
+            {
+                deletedBarber.FirstName = barber.FirstName;
+                deletedBarber.LastName = barber.LastName;
+                deletedBarber.PhoneNumber = barber.PhoneNumber;
+                deletedBarber.Email = barber.Email;
+                deletedBarber.IsDeleted = barber.IsDeleted;
+                deletedBarber.DeleteDate = barber.DeleteDate;
+            }
+            else
+            {
+                await data.Barbers.AddAsync(barber);
+            }
+            
             await data.SaveChangesAsync();
 
             await signInManager.RefreshSignInAsync(user);
         }
 
+        /// <summary>
+        /// This method allows the barber to assign himself as employee of a barbershop, 
+        /// but he will not be takeing orders untill the shop owner makes him available.
+        /// </summary>
+        /// <param name="barberShopId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        /// <exception cref="ModelStateCustomException"></exception>
         public async Task AsignBarberToBarberShopAsync(int barberShopId, string userId)
         {
             var barberShop = await this.data.BarberShops
-                .FirstOrDefaultAsync(bs => bs.Id == barberShopId && bs.IsPublic);
+                .FirstOrDefaultAsync(bs => bs.Id == barberShopId && bs.IsPublic && !bs.IsDeleted);
 
             if (barberShop == null)
             {
@@ -80,12 +112,20 @@ namespace SuperBarber.Services.Barbers
             }
         }
 
+        /// <summary>
+        /// This method allows the shop owner to fire barbers from his shop and to resign as owner and barber from his shop.
+        /// </summary>
+        /// <param name="barberShopId"></param>
+        /// <param name="barberId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        /// <exception cref="ModelStateCustomException"></exception>
         public async Task UnasignBarberFromBarberShopAsync(int barberShopId, int barberId, string userId)
         {
             var barberShop = await this.data.BarberShops
                 .Include(bs => bs.Barbers)
                 .ThenInclude(b => b.Barber)
-                .FirstOrDefaultAsync(bs => bs.Id == barberShopId);
+                .FirstOrDefaultAsync(bs => bs.Id == barberShopId && !bs.IsDeleted);
 
             if (barberShop == null)
             {
@@ -100,7 +140,7 @@ namespace SuperBarber.Services.Barbers
 
             var barber = await this.data.Barbers
             .Include(b => b.BarberShops)
-            .FirstOrDefaultAsync(b => b.Id == barberId && b.BarberShops.Any(bs => bs.BarberShopId == barberShop.Id));
+            .FirstOrDefaultAsync(b => b.Id == barberId && !b.IsDeleted && b.BarberShops.Any(bs => bs.BarberShopId == barberShop.Id));
 
             if (barber == null)
             {
@@ -121,7 +161,8 @@ namespace SuperBarber.Services.Barbers
 
             if (orders.Any())
             {
-                data.Orders.RemoveRange(orders);
+                orders.ForEach(o => o.IsDeleted = true);
+                orders.ForEach(o => o.DeleteDate = DateTime.UtcNow);
             }
 
             await data.SaveChangesAsync();
@@ -139,10 +180,16 @@ namespace SuperBarber.Services.Barbers
             }
         }
 
+        /// <summary>
+        /// Checks if the user is fireing a barber from his shop or he is resigning as owner and barber from his shop.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="barberId"></param>
+        /// <returns></returns>
         public async Task<bool> CheckIfUserIsTheBabrerToFire(string userId, int barberId)
         {
             var barber = await this.data.Barbers
-            .FirstOrDefaultAsync(b => b.Id == barberId);
+            .FirstOrDefaultAsync(b => b.Id == barberId && !b.IsDeleted);
 
             if (barber == null)
             {
@@ -152,12 +199,20 @@ namespace SuperBarber.Services.Barbers
             return barber.UserId.Equals(userId);
         }
 
+        /// <summary>
+        /// This method allows the owners of a barbershop to add employees barbers as owners of their barbershop.
+        /// </summary>
+        /// <param name="barberShopId"></param>
+        /// <param name="barberId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        /// <exception cref="ModelStateCustomException"></exception>
         public async Task AddOwnerToBarberShop(int barberShopId, int barberId, string userId)
         {
             var barberShop = await this.data.BarberShops
                 .Include(bs => bs.Barbers)
                 .ThenInclude(b => b.Barber)
-                .FirstOrDefaultAsync(bs => bs.Id == barberShopId);
+                .FirstOrDefaultAsync(bs => bs.Id == barberShopId && !bs.IsDeleted);
 
             if (barberShop == null)
             {
@@ -172,7 +227,7 @@ namespace SuperBarber.Services.Barbers
 
             var barber = await this.data.Barbers
                 .Include(b => b.BarberShops)
-                .FirstOrDefaultAsync(b => b.Id == barberId && b.BarberShops.Any(bs => bs.BarberShopId == barberShop.Id));
+                .FirstOrDefaultAsync(b => b.Id == barberId && !b.IsDeleted && b.BarberShops.Any(bs => bs.BarberShopId == barberShop.Id));
 
             if (barber == null)
             {
@@ -198,12 +253,20 @@ namespace SuperBarber.Services.Barbers
             await this.data.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// This method allows the owners to revoke the ownership of other owners. 
+        /// </summary>
+        /// <param name="barberShopId"></param>
+        /// <param name="barberId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        /// <exception cref="ModelStateCustomException"></exception>
         public async Task RemoveOwnerFromBarberShop(int barberShopId, int barberId, string userId)
         {
             var barberShop = await this.data.BarberShops
                 .Include(bs => bs.Barbers)
                 .ThenInclude(b => b.Barber)
-                .FirstOrDefaultAsync(bs => bs.Id == barberShopId);
+                .FirstOrDefaultAsync(bs => bs.Id == barberShopId && !bs.IsDeleted);
 
             if (barberShop == null)
             {
@@ -223,7 +286,7 @@ namespace SuperBarber.Services.Barbers
 
             var barber = await this.data.Barbers
                 .Include(b => b.BarberShops)
-                .FirstOrDefaultAsync(b => b.Id == barberId && b.BarberShops.Any(bs => bs.BarberShopId == barberShop.Id));
+                .FirstOrDefaultAsync(b => b.Id == barberId && !b.IsDeleted && b.BarberShops.Any(bs => bs.BarberShopId == barberShop.Id));
 
             if (barber == null)
             {
@@ -254,12 +317,20 @@ namespace SuperBarber.Services.Barbers
             }
         }
 
-        public async Task MakeBarberUnavailableFromBarberShop(int barberShopId, int barberId, string userId)
+        /// <summary>
+        /// This method allows the barbershop owners to make themself or other employees barbers unavailable. 
+        /// </summary>
+        /// <param name="barberShopId"></param>
+        /// <param name="barberId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        /// <exception cref="ModelStateCustomException"></exception>
+        public async Task MakeBarberUnavailableAtBarberShop(int barberShopId, int barberId, string userId)
         {
             var barberShop = await this.data.BarberShops
                 .Include(bs => bs.Barbers)
                 .ThenInclude(b => b.Barber)
-                .FirstOrDefaultAsync(bs => bs.Id == barberShopId);
+                .FirstOrDefaultAsync(bs => bs.Id == barberShopId && !bs.IsDeleted);
 
             if (barberShop == null)
             {
@@ -267,7 +338,7 @@ namespace SuperBarber.Services.Barbers
             }
 
             var barber = await this.data.Barbers
-                .FirstOrDefaultAsync(b => b.Id == barberId && b.BarberShops.Any(bs => bs.BarberShopId == barberShop.Id));
+                .FirstOrDefaultAsync(b => b.Id == barberId && !b.IsDeleted && b.BarberShops.Any(bs => bs.BarberShopId == barberShop.Id));
 
             if (barber == null)
             {
@@ -287,12 +358,20 @@ namespace SuperBarber.Services.Barbers
             await this.data.SaveChangesAsync();
         }
 
-        public async Task MakeBarberAvailableFromBarberShop(int barberShopId, int barberId, string userId)
+        /// <summary>
+        /// This method allows owners to make themself or other employees barbers avalible at their barbershop.
+        /// </summary>
+        /// <param name="barberShopId"></param>
+        /// <param name="barberId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        /// <exception cref="ModelStateCustomException"></exception>
+        public async Task MakeBarberAvailableAtBarberShop(int barberShopId, int barberId, string userId)
         {
             var barberShop = await this.data.BarberShops
                 .Include(bs => bs.Barbers)
                 .ThenInclude(b => b.Barber)
-                .FirstOrDefaultAsync(bs => bs.Id == barberShopId);
+                .FirstOrDefaultAsync(bs => bs.Id == barberShopId && !bs.IsDeleted);
 
             if (barberShop == null)
             {
@@ -300,7 +379,7 @@ namespace SuperBarber.Services.Barbers
             }
 
             var barber = await this.data.Barbers
-                .FirstOrDefaultAsync(b => b.Id == barberId && b.BarberShops.Any(bs => bs.BarberShopId == barberShop.Id));
+                .FirstOrDefaultAsync(b => b.Id == barberId && !b.IsDeleted && b.BarberShops.Any(bs => bs.BarberShopId == barberShop.Id));
 
             if (barber == null)
             {
@@ -320,26 +399,51 @@ namespace SuperBarber.Services.Barbers
             await this.data.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<OrdersListingViewModel>> GetBarberOrdersAsync(string userId)
-           => await this.data.Orders
+        /// <summary>
+        /// This method gets all the orders that the user barber has.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<OrderViewModel> GetBarberOrdersAsync(string userId, int currentPage)
+        {
+            var barberOrders = await this.data.Orders
                .Where(o => o.Barber.UserId == userId)
                .OrderByDescending(o => o.Date)
                .Select(o => new OrdersListingViewModel
                {
                    OrderId = o.Id.ToString(),
+                   BarberShop = o.BarberShop.Name,
                    BarberId = o.BarberId,
-                   ClientFirstName = o.User.FirstName, 
+                   ClientFirstName = o.User.FirstName,
                    ClientLastName = o.User.LastName,
+                   ClientPhoneNumber = o.User.PhoneNumber,
+                   ClientEmail = o.User.Email,
                    ServiceName = o.Service.Name,
-                   Price = o.Service.Price,
-                   Date = o.Date
+                   Price = o.Price,
+                   Date = o.Date,
+                   IsDeleted = o.IsDeleted
                })
                .ToListAsync();
 
+            var totalBarberOrders = barberOrders.Count;
+
+            var barberOrdersPaged = barberOrders
+                    .Skip((currentPage - 1) * OrderViewModel.OrdersPerPage)
+                    .Take(OrderViewModel.OrdersPerPage)
+                    .ToList();
+
+            return new OrderViewModel
+            {
+                Orders = barberOrdersPaged,
+                CurrentPage = currentPage,
+                TotalOrders = totalBarberOrders
+            };
+        }
+
         public async Task<string> GetBarberShopNameToFriendlyUrlAsync(int id)
-            => await this.data.BarberShops.Where(bs => bs.Id == id).Select(bs => bs.Name.Replace(' ', '-')).FirstOrDefaultAsync();
-        
+            => await this.data.BarberShops.Where(bs => bs.Id == id && !bs.IsDeleted).Select(bs => bs.Name.Replace(' ', '-')).FirstOrDefaultAsync();
+
         public async Task<string> GetBarberNameAsync(int id)
-            => await this.data.Barbers.Where(b => b.Id == id).Select(b => b.FirstName + ' ' + b.LastName).FirstOrDefaultAsync();
+            => await this.data.Barbers.Where(b => b.Id == id && !b.IsDeleted).Select(b => b.FirstName + ' ' + b.LastName).FirstOrDefaultAsync();
     }
 }

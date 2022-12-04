@@ -31,7 +31,7 @@ namespace SuperBarber.Controllers
 
                 var userId = User.Id();
 
-                var barberShops = await homeService.SearchAvalibleBarbershopAsync(city, district, date, time, userId);
+                var barberShops = await homeService.SearchAvalibleBarbershopsAsync(city, district, date, time, userId);
 
                 TempData["list"] = JsonConvert.SerializeObject(barberShops);
 

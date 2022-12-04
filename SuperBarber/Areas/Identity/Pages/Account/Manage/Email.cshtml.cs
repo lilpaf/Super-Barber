@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using SuperBarber.Areas.Identity.Services.Account;
 using SuperBarber.Data.Models;
 using static SuperBarber.Data.DataConstraints;
 
@@ -20,15 +21,18 @@ namespace SuperBarber.Areas.Identity.Pages.Account.Manage
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly IEmailSender _emailSender;
+        private readonly IAccountService _accountService;
 
         public EmailModel(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IAccountService accountService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
+            _accountService = accountService;
         }
 
         
@@ -102,6 +106,8 @@ namespace SuperBarber.Areas.Identity.Pages.Account.Manage
 
                 await _userManager.SetEmailAsync(user, Input.NewEmail);
 
+                await _accountService.UpdateBarberEmailAsync(user, Input.NewEmail);
+
                 /*var code = await _userManager.GenerateChangeEmailTokenAsync(user, Input.NewEmail);
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                 var callbackUrl = Url.Page(
@@ -119,7 +125,7 @@ namespace SuperBarber.Areas.Identity.Pages.Account.Manage
                 */
             }
 
-            StatusMessage = "Your email is unchanged.";
+            StatusMessage = "Your email has been changed.";
             return RedirectToPage();
         }
         
@@ -151,7 +157,7 @@ namespace SuperBarber.Areas.Identity.Pages.Account.Manage
                 "Confirm your email",
                 $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
-            StatusMessage = "Verification email sent. Please check your email.";
+            StatusMessage = "Your email has been changed";
             return RedirectToPage();
         }
         

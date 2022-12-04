@@ -2,7 +2,7 @@
 {
     public class AllBarberShopQueryModel
     {
-        public const int BarberShopsPerPage = 3;
+        public const int BarberShopsPerPage = 6;
 
         public string City { get; init; }
 

@@ -65,14 +65,12 @@ namespace SuperBarber.Areas.Identity.Pages.Account.Manage
                     }
                 }
 
-                if (!User.IsInRole(CustomRoles.BarberRoleName))
+                if (!User.IsBarber())
                 {
-                    ModelState.AddModelError(string.Empty, "User in not a barber.");
-
-                    return RedirectToPage("PersonalData");
+                    return NotFound("User in not a barber.");
                 }
 
-                await _accountService.DeleteBarberAsync(user);
+                await _accountService.DeleteBarberAsync(user, false);
 
                 return RedirectToPage("PersonalData");
             }
@@ -80,7 +78,7 @@ namespace SuperBarber.Areas.Identity.Pages.Account.Manage
             {
                 ModelState.AddModelError(ex.Key, ex.Message);
 
-                return RedirectToPage("PersonalData");
+                return Page();
             }
             
         }

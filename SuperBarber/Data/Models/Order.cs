@@ -27,5 +27,12 @@ namespace SuperBarber.Data.Models
         
         [ForeignKey(nameof(ServiceId))]
         public Service Service { get; set; }
+
+        public bool IsDeleted { get; set; }
+
+        public DateTime? DeleteDate { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal Price { get; set; }
     }
 }

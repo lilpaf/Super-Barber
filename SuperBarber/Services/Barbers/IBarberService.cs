@@ -14,13 +14,13 @@ namespace SuperBarber.Services.Barbers
 
         Task RemoveOwnerFromBarberShop(int barberShopId, int barberId, string userId);
 
-        Task MakeBarberAvailableFromBarberShop(int barberShopId, int barberId, string userId);
+        Task MakeBarberAvailableAtBarberShop(int barberShopId, int barberId, string userId);
 
-        Task MakeBarberUnavailableFromBarberShop(int barberShopId, int barberId, string userId);
+        Task MakeBarberUnavailableAtBarberShop(int barberShopId, int barberId, string userId);
 
         Task<bool> CheckIfUserIsTheBabrerToFire(string userId, int barberId);
 
-        Task<IEnumerable<OrdersListingViewModel>> GetBarberOrdersAsync(string userId);
+        Task<OrderViewModel> GetBarberOrdersAsync(string userId, int currentPage);
 
         Task<string> GetBarberShopNameToFriendlyUrlAsync(int id);
 

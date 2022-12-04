@@ -3,6 +3,7 @@ using SuperBarber.Data;
 using SuperBarber.Infrastructure;
 using SuperBarber.Models.BarberShop;
 using SuperBarber.Services.BarberShops.Models;
+using static SuperBarber.Services.Common.TimeCheck;
 
 namespace SuperBarber.Services.Home
 {
@@ -13,7 +14,7 @@ namespace SuperBarber.Services.Home
         public HomeService(SuperBarberDbContext data)
             => this.data = data;
 
-        public async Task<IEnumerable<BarberShopListingViewModel>> SearchAvalibleBarbershopAsync(string city, string district, string date, string time, string userId)
+        public async Task<IEnumerable<BarberShopListingViewModel>> SearchAvalibleBarbershopsAsync(string city, string district, string date, string time, string userId)
         {
             var barberShopQuery = this.data.BarberShops
                 .Include(bs => bs.Orders)
@@ -21,10 +22,22 @@ namespace SuperBarber.Services.Home
                 .Include(bs => bs.City)
                 .Include(bs => bs.Barbers)
                 .ThenInclude(b => b.Barber)
-                .Where(b => b.IsPublic)
+                .Where(b => b.IsPublic && !b.IsDeleted)
                 .AsQueryable();
 
-            var dateParsed = DateTime.Parse(date);
+            DateTime dateParsed;
+
+            var dateWasParsed = DateTime.TryParse(date, out dateParsed);
+
+            if (!dateWasParsed)
+            {
+                throw new ModelStateCustomException("", "Invalid date input.");
+            }
+
+            if (!CheckIfTimeIsCorrect(time))
+            {
+                throw new ModelStateCustomException("", "Invalid time input.");
+            }
 
             var timeArr = time.Split(':');
 

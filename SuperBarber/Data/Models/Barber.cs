@@ -8,19 +8,15 @@ namespace SuperBarber.Data.Models
     {
         public int Id { get; set; }
         
-        [Required]
         [MaxLength(FirstNameMaxLength)]
         public string FirstName { get; set; }
         
-        [Required]
         [MaxLength(LastNameMaxLength)]
         public string LastName { get; set; }
 
-        [Required]
         [MaxLength(PhoneNumberMaxLength)]
         public string PhoneNumber { get; set; }
 
-        [Required]
         [MaxLength(EmailMaxLength)]
         public string Email { get; set; }
 
@@ -29,6 +25,10 @@ namespace SuperBarber.Data.Models
         
         [ForeignKey(nameof(UserId))]
         public User User { get; set; }
+
+        public bool IsDeleted { get; set; }
+
+        public DateTime? DeleteDate { get; set; }
 
         public ICollection<Order> Orders { get; set; } = new HashSet<Order>();
 

@@ -1,4 +1,5 @@
-﻿using SuperBarber.Models.Cart;
+﻿using SuperBarber.Data.Models;
+using SuperBarber.Models.Cart;
 using SuperBarber.Models.Service;
 
 namespace SuperBarber.Services.Cart
@@ -7,7 +8,7 @@ namespace SuperBarber.Services.Cart
     {
         Task<Data.Models.Service> GetServiceAsync(int serviceId);
 
-        bool CheckBarberShopId(int barberShopId);
+        Task<decimal> BarberShopServicePrice(int barberShopId, int serviceId);
 
         Task AddOrderAsync(BookServiceFormModel model, List<ServiceListingViewModel> cartList, string userId);
 

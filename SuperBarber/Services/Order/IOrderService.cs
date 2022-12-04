@@ -6,7 +6,7 @@ namespace SuperBarber.Services.Order
     {
         Task RemoveOrder(string orderId, int barberId, string userId);
 
-        Task<IEnumerable<OrdersListingViewModel>> GetMyOrdersAsync(string userId);
+        Task<OrderViewModel> GetMyOrdersAsync(string userId, int currentPage);
 
         Task RemoveYourOrder(string orderId, string userId);
     }

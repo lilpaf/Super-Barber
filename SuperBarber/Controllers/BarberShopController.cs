@@ -67,11 +67,11 @@ namespace SuperBarber.Controllers
 
         [Authorize(Roles = BarberShopOwnerOrBarber)]
         [RestoreModelStateFromTempData]
-        public async Task<IActionResult> Mine()
+        public async Task<IActionResult> Mine([FromQuery] MineBarberShopViewModel model)
         {
             var userId = User.Id();
 
-            return View(await barberShopService.MineBarberShopsAsync(userId));
+            return View(await barberShopService.MineBarberShopsAsync(userId, model.CurrentPage));
         }
 
         [Authorize(Roles = BarberShopOwnerOrAdmin)]

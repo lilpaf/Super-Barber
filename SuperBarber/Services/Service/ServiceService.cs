@@ -50,11 +50,18 @@ namespace SuperBarber.Services.Service
                 {
                     throw new ModelStateCustomException(nameof(model.Name), "This service already exists in your barber shop");
                 }
+                
+                if (service.IsDeleted)
+                {
+                    service.IsDeleted = false;
+                    service.DeleteDate = null;
+                }
 
                 barberShop.Services.Add(new BarberShopServices
                 {
                     BarberShop = barberShop,
-                    Service = service
+                    Service = service,
+                    Price = model.Price
                 });
 
                 await this.data.SaveChangesAsync();
@@ -64,8 +71,9 @@ namespace SuperBarber.Services.Service
                 var service = new Data.Models.Service
                 {
                     Name = model.Name,
-                    Price = model.Price,
-                    CategoryId = model.CategoryId
+                    CategoryId = model.CategoryId,
+                    IsDeleted = false,
+                    DeleteDate = null
                 };
 
                 await this.data.Services.AddAsync(service);
@@ -73,7 +81,8 @@ namespace SuperBarber.Services.Service
                 barberShop.Services.Add(new BarberShopServices
                 {
                     BarberShop = barberShop,
-                    Service = service
+                    Service = service,
+                    Price = model.Price
                 });
 
                 await this.data.SaveChangesAsync();
@@ -94,12 +103,13 @@ namespace SuperBarber.Services.Service
             }
 
             return barberShop.Services
+                .Where(s => !s.Service.IsDeleted)
                 .Select(s => new ServiceListingViewModel
                 {
                     BarberShopId = barberShop.Id,
                     ServiceId = s.Service.Id,
                     ServiceName = s.Service.Name,
-                    Price = s.Service.Price,
+                    Price = s.Price,
                     Category = s.Service.Category.Name,
                     BarberShopName = barberShop.Name
                 })
@@ -120,7 +130,7 @@ namespace SuperBarber.Services.Service
                 throw new ModelStateCustomException("", "This barbershop does not exist");
             }
 
-            if (!barberShop.Barbers.Any(b => b.IsOwner && b.Barber.UserId == userId) || !userIsAdmin)
+            if (!barberShop.Barbers.Any(b => b.IsOwner && b.Barber.UserId == userId) && !userIsAdmin)
             {
                 throw new ModelStateCustomException("", $"You have to be owner of {barberShop.Name} to perform this action");
             }
@@ -138,9 +148,14 @@ namespace SuperBarber.Services.Service
 
             if (!await this.data.BarberShops.AnyAsync(bs => bs.Services.Any(s => s.ServiceId == serviceId)))
             {
-                this.data.Services
-                    .Remove(this.data.Services
-                    .First(s => s.Id == serviceId));
+                var service = await this.data.Services.FindAsync(serviceId);
+
+                if (service != null)
+                {
+                    service.IsDeleted = true;
+
+                    service.DeleteDate = DateTime.UtcNow;
+                }
 
                 await this.data.SaveChangesAsync();
             }

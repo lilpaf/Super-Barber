@@ -4,7 +4,7 @@ namespace SuperBarber.Services.Home
 {
     public interface IHomeService
     {
-        Task<IEnumerable<BarberShopListingViewModel>> SearchAvalibleBarbershopAsync(string city, string district, string date, string time, string userId);
+        Task<IEnumerable<BarberShopListingViewModel>> SearchAvalibleBarbershopsAsync(string city, string district, string date, string time, string userId);
 
         Task<IEnumerable<string>> GetCitiesAsync();
 

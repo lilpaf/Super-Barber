@@ -34,6 +34,9 @@ builder.Services.AddDefaultIdentity<User>(options =>
         options.Password.RequireLowercase = false;
         options.Password.RequireNonAlphanumeric = false;
         options.Password.RequireUppercase = false;
+        options.Lockout.AllowedForNewUsers = true;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(2);
+        options.Lockout.MaxFailedAccessAttempts = 5;
     })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<SuperBarberDbContext>();

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SuperBarber.Data;
 using SuperBarber.Infrastructure;
+using SuperBarber.Models.BarberShop;
 using SuperBarber.Models.Order;
 
 namespace SuperBarber.Services.Order
@@ -28,12 +29,14 @@ namespace SuperBarber.Services.Order
                 throw new ModelStateCustomException("", "You are not authorized to preform this action");
             }
 
-            if (DateTime.UtcNow.AddMinutes(30) > order.Date)
+            if (DateTime.UtcNow > order.Date || order.IsDeleted)
             {
                 throw new ModelStateCustomException("", "You can no longer cancel this order");
             }
 
-            this.data.Orders.Remove(order);
+            order.IsDeleted = true;
+
+            order.DeleteDate = DateTime.UtcNow;
 
             await this.data.SaveChangesAsync();
         }
@@ -54,29 +57,51 @@ namespace SuperBarber.Services.Order
                 throw new ModelStateCustomException("", "You are not authorized to preform this action");
             }
 
-            if (DateTime.UtcNow.AddMinutes(30) > order.Date)
+            if (DateTime.UtcNow.AddMinutes(30) > order.Date || order.IsDeleted)
             {
                 throw new ModelStateCustomException("", "You can no longer cancel this order");
             }
 
-            this.data.Orders.Remove(order);
+            order.IsDeleted = true;
+
+            order.DeleteDate = DateTime.UtcNow;
 
             await this.data.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<OrdersListingViewModel>> GetMyOrdersAsync(string userId)
-           => await this.data.Orders
-               .Where(o => o.Barber.UserId == userId)
+        public async Task<OrderViewModel> GetMyOrdersAsync(string userId, int currentPage)
+        {
+            var userOrders = await this.data.Orders
+               .Where(o => o.UserId == userId)
                .OrderByDescending(o => o.Date)
                .Select(o => new OrdersListingViewModel
                {
                    OrderId = o.Id.ToString(),
-                   BarberFirstName = o.User.FirstName,
-                   BarberLastName = o.User.LastName,
+                   BarberShop = o.BarberShop.Name,
+                   BarberFirstName = o.Barber.FirstName,
+                   BarberLastName = o.Barber.LastName,
+                   BarberPhoneNumber = o.Barber.PhoneNumber,
+                   BarberEmail = o.Barber.Email,
                    ServiceName = o.Service.Name,
-                   Price = o.Service.Price,
-                   Date = o.Date
+                   Price = o.Price,
+                   Date = o.Date,
+                   IsDeleted = o.IsDeleted
                })
                .ToListAsync();
+
+            var totalUserOrders = userOrders.Count;
+
+            var userOrdersPaged = userOrders
+                    .Skip((currentPage - 1) * OrderViewModel.OrdersPerPage)
+                    .Take(OrderViewModel.OrdersPerPage)
+                    .ToList();
+
+            return new OrderViewModel
+            {
+                Orders = userOrdersPaged,
+                CurrentPage = currentPage,
+                TotalOrders = totalUserOrders
+            };
+        }
     }
 }

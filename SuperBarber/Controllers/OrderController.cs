@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SuperBarber.Infrastructure;
 using static SuperBarber.Infrastructure.WebConstants;
 using SuperBarber.Services.Order;
+using SuperBarber.Models.Order;
 
 namespace SuperBarber.Controllers
 {
@@ -70,11 +71,11 @@ namespace SuperBarber.Controllers
         }
 
         [RestoreModelStateFromTempData]
-        public async Task<IActionResult> Mine()
+        public async Task<IActionResult> Mine([FromQuery] OrderViewModel model)
         {
             var userId = User.Id();
 
-            return View(await orderService.GetMyOrdersAsync(userId));
+            return View(await orderService.GetMyOrdersAsync(userId, model.CurrentPage));
         }
     }
 }

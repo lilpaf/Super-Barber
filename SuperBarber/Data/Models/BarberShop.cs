@@ -34,6 +34,10 @@ namespace SuperBarber.Data.Models
         public string ImageUrl { get; set; }
         
         public bool IsPublic { get; set; }
+        
+        public bool IsDeleted { get; set; }
+
+        public DateTime? DeleteDate { get; set; }
 
         public ICollection<BarberShopServices> Services { get; set; } = new HashSet<BarberShopServices>();
         

@@ -9,7 +9,7 @@ namespace SuperBarber.Services.BarberShops
 
         Task AddBarberShopAsync(BarberShopFormModel model, string userId);
 
-        Task<IEnumerable<BarberShopListingViewModel>> MineBarberShopsAsync(string userId);
+        Task<MineBarberShopViewModel> MineBarberShopsAsync(string userId, int currentPage);
 
         Task EditBarberShopAsync(BarberShopFormModel model, int barberShopId, string userId, bool userIsAdmin);
 

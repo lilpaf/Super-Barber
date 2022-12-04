@@ -1,4 +1,4 @@
-﻿@model List<OrdersListingViewModel>
+﻿@model OrderViewModel
 @{
     ViewData["Title"] = "My Orders";
     ViewBag.Title = "My Orders";
@@ -6,22 +6,30 @@
 
 <div class="row">
     <h2 class="heading-margin text-center">@ViewBag.Title</h2>
+
+    <div asp-validation-summary="ModelOnly" class="text-danger text-center list-error"></div>
+
     <div class="col">
         <table class="table">
             <thead>
                 <tr>
                     <th class="table-text" scope="col">#</th>
+                    <th class="table-text" scope="col">Barbershop</th>
                     <th class="table-text" scope="col">Barber first name</th>
                     <th class="table-text" scope="col">Barber last name</th>
+                    <th class="table-text" scope="col">Barber phone number</th>
+                    <th class="table-text" scope="col">Barber email</th>
                     <th class="table-text" scope="col">Service name</th>
                     <th class="table-text" scope="col">Price</th>
                     <th class="table-text" scope="col">Date</th>
+                    <th class="table-text" scope="col">Status</th>
                     <th class="table-text" scope="col">Cancel order</th>
                 </tr>
             </thead>
             <tbody>
-                <partial name="_OrdersPartial" model="@Model" />
+                <partial name="_OrdersPartial" model="@Model.Orders" />
             </tbody>
         </table>
     </div>
+    <partial name="_PageButtonsOrdersPartial" model="@Model" />
 </div>

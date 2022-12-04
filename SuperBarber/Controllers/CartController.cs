@@ -41,13 +41,24 @@ namespace SuperBarber.Controllers
 
             var service = await cartService.GetServiceAsync(serviceId);
 
-            var barberShopExists = cartService.CheckBarberShopId(barbershopId);
-
             var barberShopName = await cartService.GetBarberShopNameAsync(barbershopId);
 
-            if (service == null || !barberShopExists || barberShopName == null)
+            if (service == null || barberShopName == null)
             {
                 SetTempDataModelStateExtension.SetTempData(this, "", "Invalid service or barbershop");
+
+                return RedirectToAction("All", "BarberShop");
+            }
+
+            decimal servicePrice;
+
+            try
+            {
+                servicePrice = await cartService.BarberShopServicePrice(barbershopId, serviceId);
+            }
+            catch (ModelStateCustomException ex)
+            {
+                SetTempDataModelStateExtension.SetTempData(this, ex.Key, ex.Message);
 
                 return RedirectToAction("All", "BarberShop");
             }
@@ -62,7 +73,7 @@ namespace SuperBarber.Controllers
                     ServiceId = service.Id,
                     BarberShopId = barbershopId,
                     BarberShopName = barberShopName,
-                    Price = service.Price,
+                    Price = servicePrice,
                     ServiceName = service.Name,
                     Category = service.Category.Name
                 });
@@ -71,7 +82,7 @@ namespace SuperBarber.Controllers
 
                 TempData[GlobalMessageKey] = "Item was added to the cart!";
 
-                return RedirectToAction("All", "Service", new { barbershopId, information = cartService.GetBarberShopNameToFriendlyUrl(barberShopName)});
+                return RedirectToAction("All", "Service", new { barbershopId, information = cartService.GetBarberShopNameToFriendlyUrl(barberShopName) });
             }
 
             cartList = new List<ServiceListingViewModel>
@@ -81,7 +92,7 @@ namespace SuperBarber.Controllers
                     ServiceId = service.Id,
                     BarberShopId = barbershopId,
                     BarberShopName = barberShopName,
-                    Price = service.Price,
+                    Price = servicePrice,
                     ServiceName = service.Name,
                     Category = service.Category.Name
                 }
@@ -91,7 +102,7 @@ namespace SuperBarber.Controllers
 
             TempData[GlobalMessageKey] = "Item was added to the cart!";
 
-            return RedirectToAction("All", "Service", new { barbershopId, information = barberShopName });
+            return RedirectToAction("All", "Service", new { barbershopId, information = cartService.GetBarberShopNameToFriendlyUrl(barberShopName) });
         }
 
         [HttpPost]
@@ -156,7 +167,7 @@ namespace SuperBarber.Controllers
             catch (ModelStateCustomException ex)
             {
                 this.ModelState.AddModelError(ex.Key, ex.Message);
-                
+
                 HttpContext.Session.Set<List<ServiceListingViewModel>>(SessionName, ex.CartList);
 
                 return View(model);
