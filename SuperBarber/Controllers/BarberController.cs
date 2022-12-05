@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualBasic;
 using SuperBarber.Infrastructure;
 using SuperBarber.Models.Order;
 using SuperBarber.Services.Barbers;

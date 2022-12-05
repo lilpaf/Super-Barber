@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using static SuperBarber.Infrastructure.CustomRoles;
 using SuperBarber.Infrastructure;
 using SuperBarber.Services.BarberShops;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace SuperBarber.Areas.Identity.Services.Account
 {

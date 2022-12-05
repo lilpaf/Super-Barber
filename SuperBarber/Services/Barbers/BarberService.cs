@@ -24,7 +24,7 @@ namespace SuperBarber.Services.Barbers
         }
 
         /// <summary>
-        /// This method allows the user to become a barber
+        /// This method allows the user to become a barber and adds him to the role of barber
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>

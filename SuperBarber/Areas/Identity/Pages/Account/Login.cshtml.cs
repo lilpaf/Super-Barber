@@ -39,8 +39,8 @@ namespace SuperBarber.Areas.Identity.Pages.Account
             [DataType(DataType.Password)]
             public string Password { get; set; }
             
-            //[Display(Name = "Remember me?")]
-            //public bool RememberMe { get; set; }
+            [Display(Name = "Remember me?")]
+            public bool RememberMe { get; set; }
         }
 
         public async Task<IActionResult> OnGetAsync()
@@ -66,7 +66,7 @@ namespace SuperBarber.Areas.Identity.Pages.Account
             {
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, false, false);
+                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, true);
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
@@ -75,7 +75,8 @@ namespace SuperBarber.Areas.Identity.Pages.Account
                 if (result.IsLockedOut)
                 {
                     _logger.LogWarning("User account locked out.");
-                    return RedirectToPage("./Lockout");
+                    ModelState.AddModelError(string.Empty, "Your account is locked out. Kindly wait for 5 minutes and try again.");
+                    return Page();
                 }
                 else
                 {

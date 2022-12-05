@@ -9,7 +9,6 @@ using SuperBarber.Infrastructure;
 using SuperBarber.Models.Barber;
 using SuperBarber.Services.BarberShops.Models;
 using static SuperBarber.Services.Common.TimeCheck;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace SuperBarber.Services.BarberShops
 {

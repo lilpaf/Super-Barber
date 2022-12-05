@@ -3,7 +3,6 @@ using SuperBarber.Data;
 using SuperBarber.Infrastructure;
 using SuperBarber.Models.Cart;
 using SuperBarber.Models.Service;
-using System.Linq;
 using static SuperBarber.Services.Common.TimeCheck;
 
 namespace SuperBarber.Services.Cart

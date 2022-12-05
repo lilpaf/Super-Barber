@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SuperBarber.Data;
 using SuperBarber.Infrastructure;
-using SuperBarber.Models.BarberShop;
 using SuperBarber.Models.Order;
 
 namespace SuperBarber.Services.Order
