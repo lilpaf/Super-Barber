@@ -112,7 +112,7 @@ namespace SuperBarber.Controllers
 
                 var userId = User.Id();
 
-                await barberService.AddOwnerToBarberShop(barberShopId, barberId, userId);
+                await barberService.AddOwnerToBarberShopAsync(barberShopId, barberId, userId);
 
                 TempData[GlobalMessageKey] = $"{await barberService.GetBarberNameAsync(barberId)} is owner at {information.Replace('-', ' ')}!";
 
@@ -139,7 +139,7 @@ namespace SuperBarber.Controllers
 
                 var userId = User.Id();
 
-                await barberService.RemoveOwnerFromBarberShop(barberShopId, barberId, userId);
+                await barberService.RemoveOwnerFromBarberShopAsync(barberShopId, barberId, userId);
 
                 TempData[GlobalMessageKey] = $"{await barberService.GetBarberNameAsync(barberId)} is no longer owner at {information.Replace('-', ' ')}!";
 
@@ -166,7 +166,7 @@ namespace SuperBarber.Controllers
 
                 var userId = User.Id();
 
-                await barberService.MakeBarberUnavailableAtBarberShop(barberShopId, barberId, userId);
+                await barberService.MakeBarberUnavailableAtBarberShopAsync(barberShopId, barberId, userId);
 
                 TempData[GlobalMessageKey] = $"{await barberService.GetBarberNameAsync(barberId)} is unavailable at {information.Replace('-', ' ')}!";
 
@@ -193,7 +193,7 @@ namespace SuperBarber.Controllers
 
                 var userId = User.Id();
 
-                await barberService.MakeBarberAvailableAtBarberShop(barberShopId, barberId, userId);
+                await barberService.MakeBarberAvailableAtBarberShopAsync(barberShopId, barberId, userId);
 
                 TempData[GlobalMessageKey] = $"{await barberService.GetBarberNameAsync(barberId)} is available at {information.Replace('-', ' ')}!";
 

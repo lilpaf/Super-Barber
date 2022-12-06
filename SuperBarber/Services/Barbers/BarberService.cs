@@ -207,7 +207,7 @@ namespace SuperBarber.Services.Barbers
         /// <param name="userId"></param>
         /// <returns></returns>
         /// <exception cref="ModelStateCustomException"></exception>
-        public async Task AddOwnerToBarberShop(int barberShopId, int barberId, string userId)
+        public async Task AddOwnerToBarberShopAsync(int barberShopId, int barberId, string userId)
         {
             var barberShop = await this.data.BarberShops
                 .Include(bs => bs.Barbers)
@@ -261,7 +261,7 @@ namespace SuperBarber.Services.Barbers
         /// <param name="userId"></param>
         /// <returns></returns>
         /// <exception cref="ModelStateCustomException"></exception>
-        public async Task RemoveOwnerFromBarberShop(int barberShopId, int barberId, string userId)
+        public async Task RemoveOwnerFromBarberShopAsync(int barberShopId, int barberId, string userId)
         {
             var barberShop = await this.data.BarberShops
                 .Include(bs => bs.Barbers)
@@ -281,7 +281,7 @@ namespace SuperBarber.Services.Barbers
 
             if (barberShop.Barbers.Count(b => b.IsOwner) == 1)
             {
-                throw new ModelStateCustomException("", "Every babrbershop has to have at least one owner.");
+                throw new ModelStateCustomException("", "Every barbershop has to have at least one owner.");
             }
 
             var barber = await this.data.Barbers
@@ -325,7 +325,7 @@ namespace SuperBarber.Services.Barbers
         /// <param name="userId"></param>
         /// <returns></returns>
         /// <exception cref="ModelStateCustomException"></exception>
-        public async Task MakeBarberUnavailableAtBarberShop(int barberShopId, int barberId, string userId)
+        public async Task MakeBarberUnavailableAtBarberShopAsync(int barberShopId, int barberId, string userId)
         {
             var barberShop = await this.data.BarberShops
                 .Include(bs => bs.Barbers)
@@ -366,7 +366,7 @@ namespace SuperBarber.Services.Barbers
         /// <param name="userId"></param>
         /// <returns></returns>
         /// <exception cref="ModelStateCustomException"></exception>
-        public async Task MakeBarberAvailableAtBarberShop(int barberShopId, int barberId, string userId)
+        public async Task MakeBarberAvailableAtBarberShopAsync(int barberShopId, int barberId, string userId)
         {
             var barberShop = await this.data.BarberShops
                 .Include(bs => bs.Barbers)

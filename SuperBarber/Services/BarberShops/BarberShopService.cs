@@ -81,6 +81,7 @@ namespace SuperBarber.Services.BarberShops
             barberShopQuery = query.Sorting switch
             {
                 BarberShopSorting.City => barberShopQuery.OrderBy(b => b.City.Name),
+                BarberShopSorting.District => barberShopQuery.OrderBy(b => b.District.Name),
                 BarberShopSorting.Name or _ => barberShopQuery.OrderBy(b => b.Name)
             };
 
@@ -167,17 +168,13 @@ namespace SuperBarber.Services.BarberShops
         /// <exception cref="ModelStateCustomException"></exception>
         public async Task AddBarberShopAsync(BarberShopFormModel model, string userId)
         {
-            await CityExists(model.City);
-
-            await DistrictExists(model.District);
-
             if (!CheckIfTimeIsCorrect(model.StartHour))
             {
-                throw new ModelStateCustomException("", "Start hour input is incorect.");
+                throw new ModelStateCustomException("", "Start hour input is incorrect.");
             }
             if (!CheckIfTimeIsCorrect(model.FinishHour))
             {
-                throw new ModelStateCustomException("", "Finish hour input is incorect.");
+                throw new ModelStateCustomException("", "Finish hour input is incorrect.");
             }
 
             var hoursParsed = ParseHours(model.StartHour, model.FinishHour);
@@ -190,6 +187,10 @@ namespace SuperBarber.Services.BarberShops
             {
                 throw new ModelStateCustomException(nameof(model.StartHour), "Opening hour must be smaller that the closing hour. And can not be the same as the closing hour.");
             }
+
+            await CityExists(model.City);
+
+            await DistrictExists(model.District);
 
             var barberShop = new BarberShop
             {
@@ -207,14 +208,25 @@ namespace SuperBarber.Services.BarberShops
                 DeleteDate = null
             };
 
-            if (this.data.BarberShops
-                .Any(b => b.Name.ToLower().Trim() == barberShop.Name.ToLower().Trim()
+            var existingBarberShop = await this.data.BarberShops.FirstOrDefaultAsync
+                (b => b.Name.ToLower().Trim() == barberShop.Name.ToLower().Trim()
                 && b.CityId == barberShop.CityId
                 && b.DistrictId == barberShop.DistrictId
-                 && GetStreetNameAndNumberCaseInsensitive(b.Street) == GetStreetNameAndNumberCaseInsensitive(barberShop.Street)
-                 && !b.IsDeleted))
+                && !b.IsDeleted);
+
+            if (existingBarberShop != null
+                && GetStreetNameAndNumberCaseInsensitive(existingBarberShop.Street) == GetStreetNameAndNumberCaseInsensitive(barberShop.Street))
             {
                 throw new ModelStateCustomException("", "This barbershop already exist.");
+            }
+
+
+            var user = await this.data.Users
+                .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted);
+
+            if (user == null)
+            {
+                throw new ModelStateCustomException("", "User does not exist.");
             }
 
             var barber = await data.Barbers
@@ -224,9 +236,6 @@ namespace SuperBarber.Services.BarberShops
             {
                 throw new ModelStateCustomException("", "You need to be a barber in order to do this action.");
             }
-
-            var user = await this.data.Users
-                .FirstAsync(u => u.Id == userId);
 
             barberShop.Barbers.Add(new BarberShopBarbers
             {
@@ -241,10 +250,10 @@ namespace SuperBarber.Services.BarberShops
                 .FirstOrDefaultAsync(b => b.Name.ToLower().Trim() == barberShop.Name.ToLower().Trim()
                     && b.CityId == barberShop.CityId
                     && b.DistrictId == barberShop.DistrictId
-                    && b.Street == barberShop.Street
                     && b.IsDeleted);
 
-            if (deletedBarbershop != null)
+            if (deletedBarbershop != null 
+                && GetStreetNameAndNumberCaseInsensitive(deletedBarbershop.Street) == GetStreetNameAndNumberCaseInsensitive(barberShop.Street))
             {
                 deletedBarbershop.Name = barberShop.Name;
                 deletedBarbershop.IsDeleted = false;
@@ -550,7 +559,7 @@ namespace SuperBarber.Services.BarberShops
                 // If the city input is sofia it will save Sofia
                 if (!char.IsUpper(city[0]))
                 {
-                    cityName = char.ToUpper(city[0]).ToString() + city.Skip(1).ToString();
+                    cityName = char.ToUpper(city[0]).ToString() + city.Substring(1);
                 }
 
                 await this.data.Cities.AddAsync(new City { Name = cityName });
@@ -568,7 +577,7 @@ namespace SuperBarber.Services.BarberShops
                 // If the district input is lozenets it will save Lozenets
                 if (!char.IsUpper(district[0]))
                 {
-                    districtName = char.ToUpper(district[0]).ToString() + district.Skip(1).ToString();
+                    districtName = char.ToUpper(district[0]).ToString() + district.Substring(1);
                 }
 
                 await this.data.Districts.AddAsync(new District { Name = districtName });

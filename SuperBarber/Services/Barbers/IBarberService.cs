@@ -10,13 +10,13 @@ namespace SuperBarber.Services.Barbers
 
         Task UnasignBarberFromBarberShopAsync(int barberShopId, int barberId, string userId);
 
-        Task AddOwnerToBarberShop(int barberShopId, int barberId, string userId);
+        Task AddOwnerToBarberShopAsync(int barberShopId, int barberId, string userId);
 
-        Task RemoveOwnerFromBarberShop(int barberShopId, int barberId, string userId);
+        Task RemoveOwnerFromBarberShopAsync(int barberShopId, int barberId, string userId);
 
-        Task MakeBarberAvailableAtBarberShop(int barberShopId, int barberId, string userId);
+        Task MakeBarberAvailableAtBarberShopAsync(int barberShopId, int barberId, string userId);
 
-        Task MakeBarberUnavailableAtBarberShop(int barberShopId, int barberId, string userId);
+        Task MakeBarberUnavailableAtBarberShopAsync(int barberShopId, int barberId, string userId);
 
         Task<bool> CheckIfUserIsTheBabrerToFire(string userId, int barberId);
 
