@@ -48,7 +48,7 @@ namespace SuperBarber.Tests
             this.barbers = new List<Barber>()
             {
                 new Barber() { Id = 1, UserId = BarberShopOwnerUserId.ToString(), FirstName = "", LastName = "", Email = "", PhoneNumber = "", IsDeleted = false, DeleteDate = null },
-                new Barber() { Id = 2, UserId = BarberUserId.ToString(), FirstName = "", LastName = "", Email = "", PhoneNumber = "", IsDeleted = false, DeleteDate = null } 
+                new Barber() { Id = 2, UserId = BarberUserId.ToString(), FirstName = "", LastName = "", Email = "", PhoneNumber = "", IsDeleted = false, DeleteDate = null }
             };
 
             this.districts = new List<District>()
@@ -64,13 +64,13 @@ namespace SuperBarber.Tests
                  new BarberShop()
                  {
                      Id = 1,
-                     Name = "TestBarberShopOne",
+                     Name = "TestBarberShop One",
                      CityId = 1,
                      DistrictId = 1,
                      Street= "st. Test 1",
                      StartHour = new TimeSpan(9,0,0),
                      FinishHour = new TimeSpan(18,0,0),
-                     ImageUrl = ImageUrl, 
+                     ImageUrl = ImageUrl,
                      IsPublic = true,
                      Barbers = new HashSet<BarberShopBarbers>(){new BarberShopBarbers(){BarberId = 1, IsOwner = true, IsAvailable = true } },
                      Orders = new HashSet<Order>(),
@@ -90,11 +90,51 @@ namespace SuperBarber.Tests
                     ImageUrl = ImageUrl,
                     IsPublic = true,
                     Barbers = new HashSet<BarberShopBarbers>(){new BarberShopBarbers(){BarberId = 1, IsOwner = true, IsAvailable = true } },
-                    Orders = new HashSet<Order>(){new Order() { Id = OrderId, BarberId = 1, Date = new DateTime(2022,12,03,11,0,0).ToUniversalTime(), ServiceId = 1, UserId = GuestUserId.ToString() } },
-                    Services = new HashSet<BarberShopServices>(),
+                    Orders = new HashSet<Order>()
+                    {
+                        new Order()
+                        {
+                            Id = OrderId,
+                            BarberId = 1,
+                            Date = new DateTime(2022,12,03,11,0,0).ToUniversalTime(),
+                            ServiceId = 1,
+                            UserId = GuestUserId.ToString()
+                        }
+                    },
+                    Services = new HashSet<BarberShopServices>()
+                    {
+                        new BarberShopServices()
+                        {
+                            Service = new Service()
+                            {
+                                Id = 1,
+                                Name = "Hair cut",
+                                CategoryId = 1,
+                                IsDeleted = false
+                            },
+                            Price = 20
+                        }
+                    },
                     IsDeleted = false,
                     DeleteDate = null
                 },
+                new BarberShop
+                {
+                    Id = 3,
+                    Name = "DeletedBarberShopTest",
+                    CityId = 1,
+                    DistrictId = 2,
+                    Street = "st. Deleted 2",
+                    StartHour = new TimeSpan(9, 0, 0),
+                    FinishHour = new TimeSpan(18, 0, 0),
+                    ImageUrl = ImageUrl,
+                    IsPublic = false,
+                    Barbers = new HashSet<BarberShopBarbers>(),
+                    Orders = new HashSet<Order>(),
+                    Services = new HashSet<BarberShopServices>(),
+                    IsDeleted = true,
+                    DeleteDate = DateTime.UtcNow
+                }
             };
 
 
@@ -107,21 +147,25 @@ namespace SuperBarber.Tests
             this.dbContext.Add(this.city);
             this.dbContext.AddRange(this.districts);
             this.dbContext.AddRange(this.barberShops);
-            
+
             this.signInManager = MockSignInManager();
             this.userManager = MockUserManager(this.users);
-
-            if (!dbContext.Barbers.Any() && !dbContext.BarberShops.Any() && !dbContext.Districts.Any()
-                    && !dbContext.Users.Any() && !dbContext.Cities.Any())
-            {
-                this.dbContext.SaveChanges();
-            }
+            
+            this.dbContext.SaveChanges();
 
             return this.dbContext;
         }
 
         public void DisposeTestDb()
         {
+            this.dbContext.Orders.RemoveRange(this.dbContext.Orders.ToList());
+            this.dbContext.Services.RemoveRange(this.dbContext.Services.ToList());
+            this.dbContext.BarberShops.RemoveRange(this.dbContext.BarberShops.ToList());
+            this.dbContext.Cities.RemoveRange(this.dbContext.Cities.ToList());
+            this.dbContext.Districts.RemoveRange(this.dbContext.Districts.ToList());
+            this.dbContext.Barbers.RemoveRange(this.dbContext.Barbers.ToList());
+            this.dbContext.Users.RemoveRange(this.dbContext.Users.ToList());
+            this.dbContext.SaveChanges();
             this.dbContext.Dispose();
         }
     }

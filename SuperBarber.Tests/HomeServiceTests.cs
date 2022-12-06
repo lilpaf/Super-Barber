@@ -11,10 +11,10 @@ namespace SuperBarber.Tests
     {
         private IHomeService service;
 
-        [OneTimeSetUp]
+        [SetUp]
         public void TestInitialize()
         {
-            service = new HomeService(dbContextWithSeededData);
+            service = new HomeService(base.dbContextWithSeededData);
         }
 
         [Test]
@@ -22,10 +22,10 @@ namespace SuperBarber.Tests
         {
             var dbBarberShops = testDb.BarberShops.ToList();
             
-            var testInput = dbBarberShops.First();
+            var testBarberShop = dbBarberShops.First(b => !b.IsDeleted);
             var testUser = testDb.Users.First(u => u.Id == GuestUserId.ToString());
 
-            var barberShops = await service.SearchAvalibleBarbershopsAsync(testInput.City.Name, testInput.District.Name, "2022-12-03", "12:00", testUser.Id);
+            var barberShops = await service.SearchAvalibleBarbershopsAsync(testBarberShop.City.Name, testBarberShop.District.Name, "2022-12-03", "12:00", testUser.Id);
     
             Assert.True(barberShops.Count() == 1);
 
@@ -51,10 +51,10 @@ namespace SuperBarber.Tests
         {
             var dbBarberShops = testDb.BarberShops.ToList();
 
-            var testInput = dbBarberShops.First();
+            var testBarberShop = dbBarberShops.First(b => !b.IsDeleted);
             var testUser = testDb.Users.First(u => u.Id == BarberShopOwnerUserId.ToString());
 
-            var barberShops = await service.SearchAvalibleBarbershopsAsync(testInput.City.Name, "All", "2022-12-03", "12:00", testUser.Id);
+            var barberShops = await service.SearchAvalibleBarbershopsAsync(testBarberShop.City.Name, "All", "2022-12-03", "12:00", testUser.Id);
      
             Assert.True(barberShops.Count() == 2);
 
@@ -80,7 +80,7 @@ namespace SuperBarber.Tests
         {
             var testUser = testDb.Users.First(u => u.Id == GuestUserId.ToString());
 
-            var dbBarberShop = testDb.BarberShops.First();
+            var dbBarberShop = testDb.BarberShops.First(b => !b.IsDeleted);
 
             Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.SearchAvalibleBarbershopsAsync(dbBarberShop.City.Name, "All", "2022-12-03", "8:00", testUser.Id), "Right now we do not have any avalible barbershops matching your criteria.");
         }
@@ -90,7 +90,7 @@ namespace SuperBarber.Tests
         {
             var testUser = testDb.Users.First(u => u.Id == GuestUserId.ToString());
 
-            var dbBarberShop = testDb.BarberShops.First();
+            var dbBarberShop = testDb.BarberShops.First(b => !b.IsDeleted);
 
             Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.SearchAvalibleBarbershopsAsync("Varna", "All", "2022-12-03", "12:00", testUser.Id), "Invalid city.");
         }
@@ -100,7 +100,7 @@ namespace SuperBarber.Tests
         {
             var testUser = testDb.Users.First(u => u.Id == GuestUserId.ToString());
 
-            var dbBarberShop = testDb.BarberShops.First();
+            var dbBarberShop = testDb.BarberShops.First(b => !b.IsDeleted);
 
             Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.SearchAvalibleBarbershopsAsync(dbBarberShop.City.Name, "Mladost", "2022-12-03", "12:00", testUser.Id), "Invalid district.");
         }
@@ -110,7 +110,7 @@ namespace SuperBarber.Tests
         {
             var testUser = testDb.Users.First(u => u.Id == GuestUserId.ToString());
 
-            var dbBarberShop = testDb.BarberShops.First();
+            var dbBarberShop = testDb.BarberShops.First(b => !b.IsDeleted);
 
             Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.SearchAvalibleBarbershopsAsync(dbBarberShop.City.Name, "All", "2022-12-03", "12-00", testUser.Id), "Invalid time input.");
         }
@@ -120,7 +120,7 @@ namespace SuperBarber.Tests
         {
             var testUser = testDb.Users.First(u => u.Id == GuestUserId.ToString());
 
-            var dbBarberShop = testDb.BarberShops.First();
+            var dbBarberShop = testDb.BarberShops.First(b => !b.IsDeleted);
 
             Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.SearchAvalibleBarbershopsAsync(dbBarberShop.City.Name, "All", "20221203", "12:00", testUser.Id), "Invalid date input.");
         }

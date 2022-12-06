@@ -11,7 +11,7 @@ namespace SuperBarber.Tests
         protected UserManager<User> userManager;
         protected SignInManager<User> signInManager;
 
-        [OneTimeSetUp]
+        [SetUp]
         public void TestDbInitialize()
         {
             this.testDb = new CreateTestDb();
@@ -20,7 +20,7 @@ namespace SuperBarber.Tests
             this.signInManager = testDb.SignInManager;
         }
 
-        [OneTimeTearDown]
+        [TearDown]
         public void TestDbTearDown()
         {
             this.testDb.DisposeTestDb();
