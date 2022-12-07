@@ -27,6 +27,7 @@ namespace SuperBarber.Tests
         private IEnumerable<BarberShop> barberShops;
         private IEnumerable<District> districts;
         private City city;
+        private Category category;
         private IEnumerable<Barber> barbers;
         private IEnumerable<User> users;
         private Mock<UserManager<User>> userManager;
@@ -58,6 +59,8 @@ namespace SuperBarber.Tests
             };
 
             this.city = new City() { Id = 1, Name = "Sofia" };
+            
+            this.category = new Category() { Id = 1, Name = "Hair" };
 
             this.barberShops = new List<BarberShop>()
             {
@@ -98,7 +101,9 @@ namespace SuperBarber.Tests
                             BarberId = 1,
                             Date = new DateTime(2022,12,03,11,0,0).ToUniversalTime(),
                             ServiceId = 1,
-                            UserId = GuestUserId.ToString()
+                            UserId = GuestUserId.ToString(),
+                            IsDeleted = false,
+                            DeleteDate = null
                         }
                     },
                     Services = new HashSet<BarberShopServices>()
@@ -109,6 +114,7 @@ namespace SuperBarber.Tests
                             {
                                 Id = 1,
                                 Name = "Hair cut",
+                                Category = this.category,
                                 CategoryId = 1,
                                 IsDeleted = false
                             },
@@ -160,6 +166,7 @@ namespace SuperBarber.Tests
         {
             this.dbContext.Orders.RemoveRange(this.dbContext.Orders.ToList());
             this.dbContext.Services.RemoveRange(this.dbContext.Services.ToList());
+            this.dbContext.Categories.RemoveRange(this.dbContext.Categories.ToList());
             this.dbContext.BarberShops.RemoveRange(this.dbContext.BarberShops.ToList());
             this.dbContext.Cities.RemoveRange(this.dbContext.Cities.ToList());
             this.dbContext.Districts.RemoveRange(this.dbContext.Districts.ToList());
