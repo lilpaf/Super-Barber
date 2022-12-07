@@ -54,7 +54,7 @@ namespace SuperBarber.Controllers
 
             try
             {
-                servicePrice = await cartService.BarberShopServicePrice(barbershopId, serviceId);
+                servicePrice = await cartService.BarberShopServicePriceAsync(barbershopId, serviceId);
             }
             catch (ModelStateCustomException ex)
             {

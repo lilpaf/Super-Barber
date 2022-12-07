@@ -157,7 +157,6 @@ namespace SuperBarber.Services.BarberShops
                 .OrderBy(d => d)
                 .ToListAsync();
 
-
         /// <summary>
         /// This method allows barbers to add barbershops and checks if the barbershop to add was deleted.
         /// If it was deleted then it will update it and it will not create a new barbershop in the DB.
@@ -271,19 +270,13 @@ namespace SuperBarber.Services.BarberShops
         }
 
         private static string GetStreetNameAndNumberCaseInsensitive(string streetNameAndNumber)
-            => streetNameAndNumber.ToLower().Trim().Replace("st", "").Replace("ul", "").Replace(".", "");
-
+            => streetNameAndNumber.ToLower().Replace("st", "").Replace("ul", "").Replace(".", "").Trim();
+  
         /// <summary>
         /// This method gets all the barbershops that the user barber is employee or is a owner of.
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        /*var totalBarberShops = barberShops.Count;
-
-            var barberShopsPaged = barberShops
-                    .Skip((query.CurrentPage - 1) * AllBarberShopQueryModel.BarberShopsPerPage)
-                    .Take(AllBarberShopQueryModel.BarberShopsPerPage);*/
-
         public async Task<MineBarberShopViewModel> MineBarberShopsAsync(string userId, int currentPage)
         {
             var userBarbershopsOwned = await this.data.BarberShops
@@ -383,13 +376,28 @@ namespace SuperBarber.Services.BarberShops
 
                 if (barber == null)
                 {
-                    throw new ModelStateCustomException("", "You have to be a owner to do this action");
+                    throw new ModelStateCustomException("", $"You have to be a owner of ${barberShop.Name} to do this action");
                 }
+            }
 
-                if (!barberShop.Barbers.Any(b => b.BarberId == barber.Id))
-                {
-                    throw new ModelStateCustomException("", "You can not delete this barbershop");
-                }
+            if (!CheckIfTimeIsCorrect(model.StartHour))
+            {
+                throw new ModelStateCustomException("", "Start hour input is incorect.");
+            }
+            if (!CheckIfTimeIsCorrect(model.FinishHour))
+            {
+                throw new ModelStateCustomException("", "Finish hour input is incorect.");
+            }
+
+            var hoursParsed = ParseHours(model.StartHour, model.FinishHour);
+
+            var startHour = hoursParsed.Item1;
+
+            var finishHour = hoursParsed.Item2;
+
+            if (startHour >= finishHour)
+            {
+                throw new ModelStateCustomException(nameof(model.StartHour), "Opening hour must be smaller that the closing hour. And can not be the same as the closing hour");
             }
 
             await CityExists(model.City);
@@ -418,26 +426,6 @@ namespace SuperBarber.Services.BarberShops
                     .First(d => d.Name.ToLower().Trim() == model.District.ToLower().Trim()).Id;
 
                 districtChanged = true;
-            }
-
-            if (!CheckIfTimeIsCorrect(model.StartHour))
-            {
-                throw new ModelStateCustomException("", "Start hour input is incorect.");
-            }
-            if (!CheckIfTimeIsCorrect(model.FinishHour))
-            {
-                throw new ModelStateCustomException("", "Finish hour input is incorect.");
-            }
-
-            var hoursParsed = ParseHours(model.StartHour, model.FinishHour);
-
-            var startHour = hoursParsed.Item1;
-
-            var finishHour = hoursParsed.Item2;
-
-            if (startHour >= finishHour)
-            {
-                throw new ModelStateCustomException(nameof(model.StartHour), "Opening hour must be smaller that the closing hour. And can not be the same as the closing hour");
             }
 
             barberShop.StartHour = startHour;
@@ -497,12 +485,7 @@ namespace SuperBarber.Services.BarberShops
 
                 if (barber == null)
                 {
-                    throw new ModelStateCustomException("", "You have to be owner to do this action");
-                }
-
-                if (!barberShop.Barbers.Any(b => b.BarberId == barber.Id))
-                {
-                    throw new ModelStateCustomException("", "You can not delete this barbershop");
+                    throw new ModelStateCustomException("", $"You have to be owner of {barberShop.Name} to do this action");
                 }
 
                 barber.BarberShops
@@ -634,7 +617,7 @@ namespace SuperBarber.Services.BarberShops
         public async Task<ManageBarberShopViewModel> BarberShopInformationAsync(string userId, int barberShopId)
         {
             if (!this.data.BarberShops.Any(bs => bs.Id == barberShopId && !bs.IsDeleted
-                    && bs.Barbers.Any(b => b.IsOwner && b.Barber.UserId == userId)))
+                    && bs.Barbers.Any(b => b.IsOwner && !b.Barber.IsDeleted && b.Barber.UserId == userId)))
             {
                 throw new ModelStateCustomException("", "You have to be owner to do this action");
             }

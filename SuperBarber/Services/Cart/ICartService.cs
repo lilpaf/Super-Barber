@@ -7,7 +7,7 @@ namespace SuperBarber.Services.Cart
     {
         Task<Data.Models.Service> GetServiceAsync(int serviceId);
 
-        Task<decimal> BarberShopServicePrice(int barberShopId, int serviceId);
+        Task<decimal> BarberShopServicePriceAsync(int barberShopId, int serviceId);
 
         Task AddOrderAsync(BookServiceFormModel model, List<ServiceListingViewModel> cartList, string userId);
 

@@ -24,7 +24,7 @@ namespace SuperBarber.Services.Cart
                    .Any(b => b.Id == barberShopId && !b.IsDeleted 
                    && b.Services.Any(s => s.ServiceId == serviceId && !s.Service.IsDeleted));
 
-        public async Task<decimal> BarberShopServicePrice(int barberShopId, int serviceId)
+        public async Task<decimal> BarberShopServicePriceAsync(int barberShopId, int serviceId)
         {
             if (!BarberShopHasService(barberShopId, serviceId))
             {
