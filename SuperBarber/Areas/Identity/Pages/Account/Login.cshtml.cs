@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using SuperBarber.Data.Models;
+using SuperBarber.Infrastructure.Data.Models;
 
 namespace SuperBarber.Areas.Identity.Pages.Account
 {

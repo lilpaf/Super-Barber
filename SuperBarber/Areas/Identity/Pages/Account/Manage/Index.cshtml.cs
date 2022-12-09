@@ -6,9 +6,9 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using SuperBarber.Areas.Identity.Services.Account;
-using SuperBarber.Data.Models;
-using static SuperBarber.Data.DataConstraints;
+using SuperBarber.Core.Services.Account;
+using SuperBarber.Infrastructure.Data.Models;
+using static SuperBarber.Infrastructure.Data.DataConstraints;
 
 namespace SuperBarber.Areas.Identity.Pages.Account.Manage
 {

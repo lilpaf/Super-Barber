@@ -1,17 +1,18 @@
-using CarRentingSystem.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SuperBarber.Areas.Identity.Services.Account;
-using SuperBarber.Data;
-using SuperBarber.Data.Models;
-using SuperBarber.Services.Barbers;
-using SuperBarber.Services.BarberShops;
-using SuperBarber.Services.Cart;
-using SuperBarber.Services.Home;
-using SuperBarber.Services.Order;
+using SuperBarber.Core.Services.Account;
+using SuperBarber.Core.Services.Barbers;
+using SuperBarber.Core.Services.BarberShops;
+using SuperBarber.Core.Services.Cart;
+using SuperBarber.Core.Services.Home;
+using SuperBarber.Core.Services.Order;
+using SuperBarber.Core.Services.Service;
+using SuperBarber.Extensions;
+using SuperBarber.Infrastructure.Data;
+using SuperBarber.Infrastructure.Data.Models;
 using SuperBarber.Services.Service;
-using static SuperBarber.Infrastructure.ApplicationBuilderExtensions;
+using static SuperBarber.Extensions.ApplicationBuilderExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,6 +64,7 @@ app.PrepareDataBase();
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
+    app.UseDeveloperExceptionPage();
 }
 else
 {

@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SuperBarber.Infrastructure;
-using SuperBarber.Models.Order;
-using SuperBarber.Services.Barbers;
-using static SuperBarber.Infrastructure.CustomRoles;
-using static SuperBarber.Infrastructure.WebConstants;
+using SuperBarber.Core.Extensions;
+using SuperBarber.Core.Models.Order;
+using SuperBarber.Core.Services.Barbers;
+using SuperBarber.Extensions;
+using static SuperBarber.Core.Extensions.CustomRoles;
+using static SuperBarber.Extensions.WebConstants;
 
 namespace SuperBarber.Controllers
 {

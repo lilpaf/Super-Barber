@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using SuperBarber.Infrastructure;
+using SuperBarber.Core.Extensions;
+using SuperBarber.Core.Models.Home;
+using SuperBarber.Core.Services.Home;
+using SuperBarber.Extensions;
 using SuperBarber.Models;
-using SuperBarber.Models.Home;
-using SuperBarber.Services.Home;
 using System.Diagnostics;
 
 namespace SuperBarber.Controllers

@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SuperBarber.Infrastructure;
-using SuperBarber.Models.BarberShop;
-using SuperBarber.Services.BarberShops;
-using static SuperBarber.Infrastructure.WebConstants;
+using SuperBarber.Core.Extensions;
+using SuperBarber.Core.Models.BarberShop;
+using SuperBarber.Core.Services.BarberShops;
+using SuperBarber.Extensions;
+using static SuperBarber.Extensions.WebConstants;
 
 namespace SuperBarber.Areas.Admin.Controllers
 {

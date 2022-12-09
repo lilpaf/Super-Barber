@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SuperBarber.Infrastructure;
-using SuperBarber.Models.Cart;
-using SuperBarber.Models.Service;
-using SuperBarber.Services.Cart;
-using static SuperBarber.Infrastructure.SessionExtensions;
-using static SuperBarber.Infrastructure.WebConstants;
+using SuperBarber.Core.Extensions;
+using SuperBarber.Core.Models.Cart;
+using SuperBarber.Core.Models.Service;
+using SuperBarber.Core.Services.Cart;
+using SuperBarber.Extensions;
+using static SuperBarber.Extensions.SessionExtensions;
+using static SuperBarber.Extensions.WebConstants;
 
 namespace SuperBarber.Controllers
 {

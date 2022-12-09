@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using SuperBarber.Infrastructure;
-using SuperBarber.Models.BarberShop;
-using SuperBarber.Services.BarberShops;
-using static SuperBarber.Infrastructure.CustomRoles;
-using static SuperBarber.Infrastructure.WebConstants;
+using SuperBarber.Core.Extensions;
+using SuperBarber.Core.Models.BarberShop;
+using SuperBarber.Core.Services.BarberShops;
+using SuperBarber.Extensions;
+using static SuperBarber.Core.Extensions.CustomRoles;
+using static SuperBarber.Extensions.WebConstants;
 
 namespace SuperBarber.Controllers
 {
