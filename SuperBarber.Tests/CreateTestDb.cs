@@ -6,6 +6,8 @@ using Moq;
 using static SuperBarber.Tests.Mocks.SignInManegerMock;
 using static SuperBarber.Tests.Mocks.UserManegerMock;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using System.Globalization;
+using System.Threading;
 
 namespace SuperBarber.Tests
 {
@@ -62,6 +64,12 @@ namespace SuperBarber.Tests
             
             this.category = new Category() { Id = 1, Name = "Hair" };
 
+            var dateParsed = DateTime.Parse(DateTime.UtcNow.AddDays(1).ToString("yyyy'-'MM'-'dd", CultureInfo.InvariantCulture));
+
+            var ts = new TimeSpan(12, 00, 0);
+
+            dateParsed = dateParsed.Date + ts;
+
             this.barberShops = new List<BarberShop>()
             {
                  new BarberShop()
@@ -99,7 +107,7 @@ namespace SuperBarber.Tests
                         {
                             Id = OrderId,
                             BarberId = 1,
-                            Date = new DateTime(2022,12,03,11,0,0).ToUniversalTime(),
+                            Date = dateParsed.ToUniversalTime(),
                             ServiceId = 1,
                             UserId = GuestUserId.ToString(),
                             IsDeleted = false,
@@ -142,7 +150,6 @@ namespace SuperBarber.Tests
                     DeleteDate = DateTime.UtcNow
                 }
             };
-
 
             var options = new DbContextOptionsBuilder<SuperBarberDbContext>()
                     .UseInMemoryDatabase(databaseName: "SuperBarberInMemoryDb")
