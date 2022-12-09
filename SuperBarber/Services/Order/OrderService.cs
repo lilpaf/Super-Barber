@@ -12,7 +12,7 @@ namespace SuperBarber.Services.Order
         public OrderService(SuperBarberDbContext data)
             => this.data = data;
 
-        public async Task RemoveOrder(string orderId, int barberId, string userId)
+        public async Task RemoveOrderAsync(string orderId, int barberId, string userId)
         {
             var order = await this.data.Orders
                 .Include(o => o.Barber)
@@ -40,7 +40,7 @@ namespace SuperBarber.Services.Order
             await this.data.SaveChangesAsync();
         }
         
-        public async Task RemoveYourOrder(string orderId, string userId)
+        public async Task RemoveYourOrderAsync(string orderId, string userId)
         {
             var order = await this.data.Orders
                 .Include(o => o.Barber)

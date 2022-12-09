@@ -4,10 +4,10 @@ namespace SuperBarber.Services.Order
 {
     public interface IOrderService
     {
-        Task RemoveOrder(string orderId, int barberId, string userId);
+        Task RemoveOrderAsync(string orderId, int barberId, string userId);
 
         Task<OrderViewModel> GetMyOrdersAsync(string userId, int currentPage);
 
-        Task RemoveYourOrder(string orderId, string userId);
+        Task RemoveYourOrderAsync(string orderId, string userId);
     }
 }

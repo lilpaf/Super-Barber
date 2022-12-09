@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SuperBarber.Data;
+using SuperBarber.Data.Models;
 using SuperBarber.Infrastructure;
 using SuperBarber.Models.Cart;
 using SuperBarber.Models.Service;
@@ -21,7 +22,7 @@ namespace SuperBarber.Services.Cart
 
         private bool BarberShopHasService(int barberShopId, int serviceId)
                 => this.data.BarberShops
-                   .Any(b => b.Id == barberShopId && !b.IsDeleted 
+                   .Any(b => b.Id == barberShopId && !b.IsDeleted
                    && b.Services.Any(s => s.ServiceId == serviceId && !s.Service.IsDeleted));
 
         public async Task<decimal> BarberShopServicePriceAsync(int barberShopId, int serviceId)
@@ -44,7 +45,14 @@ namespace SuperBarber.Services.Cart
 
             foreach (var item in cartList)
             {
-                var dateParsed = DateTime.Parse(model.Date);
+                DateTime dateParsed;
+
+                var dateParsedResult = DateTime.TryParse(model.Date, out dateParsed);
+
+                if (!dateParsedResult)
+                {
+                    throw new ModelStateCustomException("", "Date input is incorect.", newCartList);
+                }
 
                 if (!CheckIfTimeIsCorrect(model.Time))
                 {
@@ -67,26 +75,40 @@ namespace SuperBarber.Services.Cart
                 && bs.StartHour <= ts
                 && bs.FinishHour >= ts);
 
-
                 if (barberShop == null)
                 {
-                    throw new ModelStateCustomException("", $"Your desired book hour for {item.ServiceName} at {item.BarberShopName} is out of the working time of {item.BarberShopName}. Remove {item.ServiceName} at {item.BarberShopName} from the cart to continue.", newCartList);
+                    throw new ModelStateCustomException("",
+                        $"Your desired book hour for {item.ServiceName} at {item.BarberShopName} is out of the working time of {item.BarberShopName}. If you had any previous orders in your cart and they are gone they are already proccesed you can find all the orders that you have made in the menu 'My orders'. Remove {item.ServiceName} at {item.BarberShopName} from the cart to continue.",
+                        newCartList);
+                }
+
+                if (!BarberShopHasService(barberShop.Id, item.ServiceId))
+                {
+                    throw new ModelStateCustomException("",
+                        $"{item.BarberShopName} dose not contain service {item.ServiceName}. If you had any previous orders in your cart and they are gone they are already proccesed you can find all the orders that you have made in the menu 'My orders'.",
+                        newCartList);
                 }
 
                 var minimumBookDate = DateTime.UtcNow.AddMinutes(15);
 
                 if (dateParsed.ToUniversalTime() < minimumBookDate)
                 {
-                    throw new ModelStateCustomException("", $"Your desired book hour must be at least at {minimumBookDate.ToLocalTime().Hour}:{minimumBookDate.ToLocalTime().Minute}", newCartList);
+                    throw new ModelStateCustomException("",
+                        $"Your desired book hour must be at least at {minimumBookDate.ToLocalTime().Hour}:{minimumBookDate.ToLocalTime().Minute}.  If you had any previous orders in your cart and they are gone they are already proccesed you can find all the orders that you have made in the menu 'My orders'.",
+                        newCartList);
                 }
 
                 var barber = barberShop.Barbers
-                    .Where(b => b.Barber.Orders.All(o => o.Date != dateParsed.ToUniversalTime()) && b.IsAvailable)
+                    .Where(b => b.Barber.Orders.All(o => o.Date != dateParsed.ToUniversalTime())
+                            && b.IsAvailable
+                            && !b.Barber.IsDeleted)
                     .FirstOrDefault();
 
                 if (barber == null)
                 {
-                    throw new ModelStateCustomException("", $"There are no avalible barbers at {barberShop.Name} for the desired time right now. Remove {item.ServiceName} at {item.BarberShopName} from the cart to continue.", newCartList);
+                    throw new ModelStateCustomException("",
+                        $"There are no avalible barbers at {barberShop.Name} for the desired time right now. If you had any previous orders in your cart and they are gone they are already proccesed you can find all the orders that you have made in the menu 'My orders'. Remove {item.ServiceName} at {item.BarberShopName} from the cart to continue.",
+                        newCartList);
                 }
 
                 var order = new Data.Models.Order
@@ -110,8 +132,8 @@ namespace SuperBarber.Services.Cart
         }
 
         public async Task<string> GetBarberShopNameAsync(int id)
-            => await this.data.BarberShops.Where(bs => bs.Id == id).Select(bs => bs.Name).FirstOrDefaultAsync(); 
-        
+            => await this.data.BarberShops.Where(bs => bs.Id == id && !bs.IsDeleted).Select(bs => bs.Name).FirstOrDefaultAsync();
+
         public string GetBarberShopNameToFriendlyUrl(string name)
             => name.Replace(' ', '-');
     }

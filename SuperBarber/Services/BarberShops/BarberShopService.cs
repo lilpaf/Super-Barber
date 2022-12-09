@@ -48,8 +48,8 @@ namespace SuperBarber.Services.BarberShops
             if (!string.IsNullOrEmpty(query.SearchTerm))
             {
                 barberShopQuery = barberShopQuery
-                .Where(b => b.Name.ToLower().Trim()
-                    .Contains(query.SearchTerm.ToLower().Trim()));
+                .Where(b => b.Name.ToLower().Replace(" ", "")
+                    .Contains(query.SearchTerm.ToLower().Replace(" ", "")));
             }
 
             if (!string.IsNullOrEmpty(query.City))
@@ -135,13 +135,13 @@ namespace SuperBarber.Services.BarberShops
 
         private async Task<int> GetCityIdAsync(string name)
            => await this.data.Cities
-               .Where(c => c.Name.ToLower().Trim() == name.ToLower().Trim())
+               .Where(c => c.Name.ToLower().Replace(" ", "") == name.ToLower().Replace(" ", ""))
                .Select(c => c.Id)
                .FirstOrDefaultAsync();
 
         private async Task<int> GetDistrictIdAsync(string name)
            => await this.data.Districts
-               .Where(d => d.Name.ToLower().Trim() == name.ToLower().Trim())
+               .Where(d => d.Name.ToLower().Replace(" ", "") == name.ToLower().Replace(" ", ""))
                .Select(d => d.Id)
                .FirstOrDefaultAsync();
 
@@ -195,9 +195,9 @@ namespace SuperBarber.Services.BarberShops
             {
                 Name = model.Name,
                 CityId = this.data.Cities
-                .First(c => c.Name.ToLower().Trim() == model.City.ToLower().Trim()).Id,
+                .First(c => c.Name.ToLower().Replace(" ", "") == model.City.ToLower().Replace(" ", "")).Id,
                 DistrictId = this.data.Districts
-                .First(d => d.Name.ToLower().Trim() == model.District.ToLower().Trim()).Id,
+                .First(d => d.Name.ToLower().Replace(" ", "") == model.District.ToLower().Replace(" ", "")).Id,
                 Street = model.Street,
                 StartHour = startHour,
                 FinishHour = finishHour,
@@ -208,7 +208,7 @@ namespace SuperBarber.Services.BarberShops
             };
 
             var existingBarberShop = await this.data.BarberShops.FirstOrDefaultAsync
-                (b => b.Name.ToLower().Trim() == barberShop.Name.ToLower().Trim()
+                (b => b.Name.ToLower().Replace(" ", "") == barberShop.Name.ToLower().Replace(" ", "")
                 && b.CityId == barberShop.CityId
                 && b.DistrictId == barberShop.DistrictId
                 && !b.IsDeleted);
@@ -246,7 +246,7 @@ namespace SuperBarber.Services.BarberShops
             await userManager.AddToRoleAsync(user, BarberShopOwnerRoleName);
 
             var deletedBarbershop = await this.data.BarberShops
-                .FirstOrDefaultAsync(b => b.Name.ToLower().Trim() == barberShop.Name.ToLower().Trim()
+                .FirstOrDefaultAsync(b => b.Name.ToLower().Replace(" ", "") == barberShop.Name.ToLower().Replace(" ", "")
                     && b.CityId == barberShop.CityId
                     && b.DistrictId == barberShop.DistrictId
                     && b.IsDeleted);
@@ -270,7 +270,7 @@ namespace SuperBarber.Services.BarberShops
         }
 
         private static string GetStreetNameAndNumberCaseInsensitive(string streetNameAndNumber)
-            => streetNameAndNumber.ToLower().Replace("st", "").Replace("ul", "").Replace(".", "").Trim();
+            => streetNameAndNumber.ToLower().Replace("st", "").Replace("ul", "").Replace(".", "").Replace(" ", "");
   
         /// <summary>
         /// This method gets all the barbershops that the user barber is employee or is a owner of.
@@ -409,7 +409,7 @@ namespace SuperBarber.Services.BarberShops
             if (barberShop.City.Name != model.City)
             {
                 barberShop.CityId = this.data.Cities
-                .First(c => c.Name.ToLower().Trim() == model.City.ToLower().Trim()).Id;
+                .First(c => c.Name.ToLower().Replace(" ", "") == model.City.ToLower().Replace(" ", "")).Id;
 
                 cityChanged = true;
             }
@@ -423,7 +423,7 @@ namespace SuperBarber.Services.BarberShops
             if (barberShop.District.Name != model.District)
             {
                 barberShop.DistrictId = this.data.Districts
-                    .First(d => d.Name.ToLower().Trim() == model.District.ToLower().Trim()).Id;
+                    .First(d => d.Name.ToLower().Replace(" ", "") == model.District.ToLower().Replace(" ", "")).Id;
 
                 districtChanged = true;
             }
@@ -535,7 +535,7 @@ namespace SuperBarber.Services.BarberShops
         private async Task CityExists(string city)
         {
             if (!this.data.Cities
-                .Any(c => c.Name.ToLower().Trim() == city.ToLower().Trim()))
+                .Any(c => c.Name.ToLower().Replace(" ", "") == city.ToLower().Replace(" ", "")))
             {
                 string cityName = city;
                 
@@ -553,7 +553,7 @@ namespace SuperBarber.Services.BarberShops
         private async Task DistrictExists(string district)
         {
             if (!this.data.Districts
-                .Any(d => d.Name.ToLower().Trim() == district.ToLower().Trim()))
+                .Any(d => d.Name.ToLower().Replace(" ", "") == district.ToLower().Replace(" ", "")))
             {
                 string districtName = district;
 

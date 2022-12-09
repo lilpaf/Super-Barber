@@ -34,7 +34,7 @@ namespace SuperBarber.Controllers
 
                     var userId = User.Id();
 
-                    await this.orderService.RemoveOrder(orderId, (int)barberId, userId);
+                    await this.orderService.RemoveOrderAsync(orderId, (int)barberId, userId);
 
                     TempData[GlobalMessageKey] = "Order was canceled!";
 
@@ -53,7 +53,7 @@ namespace SuperBarber.Controllers
                 {
                     var userId = User.Id();
 
-                    await this.orderService.RemoveYourOrder(orderId, userId);
+                    await this.orderService.RemoveYourOrderAsync(orderId, userId);
 
                     TempData[GlobalMessageKey] = "Order was canceled!";
 

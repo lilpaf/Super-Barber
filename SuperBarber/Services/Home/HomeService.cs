@@ -112,13 +112,13 @@ namespace SuperBarber.Services.Home
 
         private async Task<int> GetCityIdAsync(string name)
            => await this.data.Cities
-               .Where(c => c.Name.ToLower().Trim() == name.ToLower().Trim())
+               .Where(c => c.Name.ToLower().Replace(" ", "") == name.ToLower().Replace(" ", ""))
                .Select(c => c.Id)
                .FirstOrDefaultAsync();
         
         private async Task<int> GetDistrictIdAsync(string name)
            => await this.data.Districts
-               .Where(d => d.Name.ToLower().Trim() == name.ToLower().Trim())
+               .Where(d => d.Name.ToLower().Replace(" ", "") == name.ToLower().Replace(" ", ""))
                .Select(d => d.Id)
                .FirstOrDefaultAsync();
 

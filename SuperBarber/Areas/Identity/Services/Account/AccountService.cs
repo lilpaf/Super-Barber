@@ -41,7 +41,7 @@ namespace SuperBarber.Areas.Identity.Services.Account
 
                 await _data.SaveChangesAsync();
             }
-            else if (lastName != user.LastName)
+            if (lastName != user.LastName)
             {
                 user.LastName = lastName;
 
@@ -92,11 +92,6 @@ namespace SuperBarber.Areas.Identity.Services.Account
                     }
                 }
             }
-
-            /*var barberShopsEmployed = await _data.BarberShops
-               .Where(bs => bs.Barbers.Any(b => b.BarberId == barber.Id))
-               .Include(bs => bs.Barbers)
-               .ToListAsync();*/
 
             //Letter check if the barber is only employee at any barbershop
             if (_data.BarberShops.Any(bs => bs.Barbers.Any(b => b.BarberId == barber.Id)))

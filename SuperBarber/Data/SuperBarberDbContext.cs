@@ -36,24 +36,7 @@ namespace SuperBarber.Data
                 .WithMany(b => b.Orders)
                 .OnDelete(DeleteBehavior.Restrict);
              
-            /*modelBuilder.Entity<BarberShop>()
-                .HasMany(bs => bs.Barbers)
-                .WithOne(b => b.BarberShop)
-                .OnDelete(DeleteBehavior.Restrict);*/
-
             base.OnModelCreating(modelBuilder);
-
-            /*
-             modelBuilder.Entity<User>()
-                 .Property(u => u.Email)
-                 .HasMaxLength(EmailMaxLength)
-                 .IsRequired();
-            
-            modelBuilder.Entity<User>()
-                 .Property(u => u.UserName)
-                 .HasMaxLength(FullNameMaxLength)
-                 .IsRequired();
-            */
         }
     }
 }
