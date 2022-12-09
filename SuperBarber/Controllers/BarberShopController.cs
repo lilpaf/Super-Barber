@@ -14,9 +14,13 @@ namespace SuperBarber.Controllers
     public class BarberShopController : Controller
     {
         private readonly IBarberShopService barberShopService;
+        private readonly IWebHostEnvironment hostEnvironment;
 
-        public BarberShopController(IBarberShopService barberShopService)
-            => this.barberShopService = barberShopService;
+        public BarberShopController(IBarberShopService barberShopService, IWebHostEnvironment hostEnvironment)
+        { 
+            this.barberShopService = barberShopService;
+            this.hostEnvironment = hostEnvironment;
+        }
 
         [AllowAnonymous]
         [RestoreModelStateFromTempData]
@@ -39,7 +43,7 @@ namespace SuperBarber.Controllers
 
         [HttpPost]
         [Authorize(Roles = BarberRoleName)]
-        public async Task<IActionResult> Add(BarberShopFormModel model)
+        public async Task<IActionResult> Add(BarberShopAddFormModel model)
         {
             try
             {
@@ -48,8 +52,11 @@ namespace SuperBarber.Controllers
                     return View(model);
                 }
 
+                var wwwRootPath = hostEnvironment.WebRootPath;
+
                 var userId = User.Id();
-                await barberShopService.AddBarberShopAsync(model, userId);
+
+                await barberShopService.AddBarberShopAsync(model, userId, wwwRootPath);
                 
                 TempData[GlobalMessageKey] = $"Your barbershop was added and is waiting for approval!";
 
@@ -78,7 +85,7 @@ namespace SuperBarber.Controllers
 
         [HttpPost]
         [Authorize(Roles = BarberShopOwnerOrAdmin)]
-        public async Task<IActionResult> Edit(int barberShopId, string information, BarberShopFormModel model)
+        public async Task<IActionResult> Edit(int barberShopId, string information, BarberShopEditFormModel model)
         {
             try
             {
@@ -92,11 +99,13 @@ namespace SuperBarber.Controllers
                     return BadRequest();
                 }
 
+                var wwwRootPath = hostEnvironment.WebRootPath;
+
                 var userId = User.Id();
 
                 var userIsAdmin = User.IsAdmin();
 
-                await barberShopService.EditBarberShopAsync(model, barberShopId, userId, userIsAdmin);
+                await barberShopService.EditBarberShopAsync(model, barberShopId, userId, userIsAdmin, wwwRootPath);
 
                 TempData[GlobalMessageKey] = $"{information.Replace('-', ' ')} was edited and is waiting for approval!";
 
@@ -126,11 +135,13 @@ namespace SuperBarber.Controllers
                     return BadRequest();
                 }
 
+                var wwwRootPath = hostEnvironment.WebRootPath;
+
                 var userId = User.Id();
 
                 var userIsAdmin = User.IsAdmin();
 
-                await barberShopService.DeleteBarberShopAsync(barberShopId, userId, userIsAdmin);
+                await barberShopService.DeleteBarberShopAsync(barberShopId, userId, userIsAdmin, wwwRootPath);
 
                 TempData[GlobalMessageKey] = $"{information.Replace('-', ' ')} was deleted!";
 

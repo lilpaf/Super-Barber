@@ -9,16 +9,16 @@ namespace SuperBarber.Infrastructure.Data.Models
         public int Id { get; set; }
         
         [MaxLength(FirstNameMaxLength)]
-        public string FirstName { get; set; }
+        public string? FirstName { get; set; }
         
         [MaxLength(LastNameMaxLength)]
-        public string LastName { get; set; }
+        public string? LastName { get; set; }
 
         [MaxLength(PhoneNumberMaxLength)]
-        public string PhoneNumber { get; set; }
+        public string? PhoneNumber { get; set; }
 
         [MaxLength(EmailMaxLength)]
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         [Required]
         public string UserId { get; set; }

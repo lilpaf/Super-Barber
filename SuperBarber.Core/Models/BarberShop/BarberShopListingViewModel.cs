@@ -17,8 +17,8 @@ namespace SuperBarber.Core.Models.BarberShop
         public string StartHour { get; init; }
 
         public string FinishHour { get; init; }
-
-        public string ImageUrl { get; set; }
+        
+        public string ImageName { get; init; }
 
         public bool UserIsEmployee { get; init; }
         

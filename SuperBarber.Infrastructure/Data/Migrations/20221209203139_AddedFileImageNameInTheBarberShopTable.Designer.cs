@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SuperBarber.Infrastructure.Data;
 
@@ -11,9 +12,10 @@ using SuperBarber.Infrastructure.Data;
 namespace SuperBarber.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(SuperBarberDbContext))]
-    partial class SuperBarberDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221209203139_AddedFileImageNameInTheBarberShopTable")]
+    partial class AddedFileImageNameInTheBarberShopTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Hosting;
 using SuperBarber.Core.Extensions;
 using SuperBarber.Core.Services.Account;
 using SuperBarber.Extensions;
@@ -13,13 +14,16 @@ namespace SuperBarber.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<User> _userManager;
         private readonly IAccountService _accountService;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
         public DeleteBarberModel(
             UserManager<User> userManager,
-            IAccountService accountService)
+            IAccountService accountService,
+            IWebHostEnvironment hostEnvironment)
         {
             _userManager = userManager;
             _accountService = accountService;
+            _hostEnvironment = hostEnvironment;
         }
 
         [BindProperty]
@@ -71,7 +75,9 @@ namespace SuperBarber.Areas.Identity.Pages.Account.Manage
                     return NotFound("User in not a barber.");
                 }
 
-                await _accountService.DeleteBarberAsync(user, false);
+                var wwwRootPath = _hostEnvironment.WebRootPath;
+
+                await _accountService.DeleteBarberAsync(user, false, wwwRootPath);
 
                 return RedirectToPage("PersonalData");
             }

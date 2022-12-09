@@ -6,15 +6,15 @@ namespace SuperBarber.Core.Services.BarberShops
     {
         Task<AllBarberShopQueryModel> AllBarberShopsAsync(AllBarberShopQueryModel query, string userId, List<BarberShopListingViewModel>? barberShops = null, bool publicOnly = true);
 
-        Task AddBarberShopAsync(BarberShopFormModel model, string userId);
+        Task AddBarberShopAsync(BarberShopAddFormModel model, string userId, string wwwRootPath);
 
         Task<MineBarberShopViewModel> MineBarberShopsAsync(string userId, int currentPage);
 
-        Task EditBarberShopAsync(BarberShopFormModel model, int barberShopId, string userId, bool userIsAdmin);
+        Task EditBarberShopAsync(BarberShopEditFormModel model, int barberShopId, string userId, bool userIsAdmin, string wwwRootPath);
 
-        Task DeleteBarberShopAsync(int barberShopId, string userId, bool userIsAdmin);
+        Task DeleteBarberShopAsync(int barberShopId, string userId, bool userIsAdmin, string wwwRootPath);
 
-        Task<BarberShopFormModel> DisplayBarberShopInfoAsync(int barberShopId);
+        Task<BarberShopEditFormModel> DisplayBarberShopInfoAsync(int barberShopId);
 
         Task<ManageBarberShopViewModel> BarberShopInformationAsync(string userId, int barberShopId);
 

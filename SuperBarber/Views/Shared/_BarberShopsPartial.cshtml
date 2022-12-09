@@ -9,7 +9,7 @@
 
         <div class="col-md-6 col-lg-4 mb-4">
             <div class="card h-100" style="width: 20rem;">
-                <img src="@barbershop.ImageUrl" class="card-img-top" alt="Barbershop image">
+                <img src="@("~/image/"+barbershop.ImageName)" asp-append-version="true" class="card-img-top" alt="Barbershop image">
                 <div class="card-body">
                     <h5 class="card-title">@barbershop.BarberShopName</h5>
                     <p class="card-text">@barbershop.City, @barbershop.District</p>

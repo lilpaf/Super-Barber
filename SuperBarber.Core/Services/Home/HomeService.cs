@@ -87,7 +87,7 @@ namespace SuperBarber.Core.Services.Home
                     Street = bs.Street,
                     StartHour = bs.StartHour.ToString(@"hh\:mm"),
                     FinishHour = bs.FinishHour.ToString(@"hh\:mm"),
-                    ImageUrl = bs.ImageUrl,
+                    ImageName = bs.ImageName,
                     UserIsEmployee = bs.Barbers.Any(b => b.Barber.UserId == userId),
                     UserIsOwner = bs.Barbers.Any(b => b.IsOwner && b.Barber.UserId == userId),
                     OwnersInfo = bs.Barbers.Where(b => b.IsOwner)

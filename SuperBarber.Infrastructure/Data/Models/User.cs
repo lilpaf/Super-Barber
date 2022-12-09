@@ -7,10 +7,10 @@ namespace SuperBarber.Infrastructure.Data.Models
     public class User : IdentityUser
     {
         [MaxLength(FirstNameMaxLength)]
-        public string FirstName { get; set; }
+        public string? FirstName { get; set; }
 
         [MaxLength(LastNameMaxLength)]
-        public string LastName { get; set; }
+        public string? LastName { get; set; }
 
         public bool IsDeleted { get; set; }
 

@@ -6,7 +6,7 @@ namespace SuperBarber.Core.Services.Account
     {
         Task SetFirstAndLastNameAsync(User user, string firstName, string lastName);
 
-        Task DeleteBarberAsync(User user, bool userIsDeleted);
+        Task DeleteBarberAsync(User user, bool userIsDeleted, string wwwRootPath);
 
         Task DeleteUserAsync(User user);
 

@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SuperBarber.Infrastructure.Data;
-using SuperBarber.Infrastructure.Data.Models;
 using SuperBarber.Core.Models.Cart;
 using SuperBarber.Core.Models.Service;
 using static SuperBarber.Core.Services.Common.TimeCheck;

@@ -19,17 +19,20 @@ namespace SuperBarber.Areas.Identity.Pages.Account.Manage
         private readonly SignInManager<User> _signInManager;
         private readonly ILogger<DeletePersonalDataModel> _logger;
         private readonly IAccountService _accountService;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
         public DeletePersonalDataModel(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
             IAccountService accountService,
-            ILogger<DeletePersonalDataModel> logger)
+            ILogger<DeletePersonalDataModel> logger,
+            IWebHostEnvironment hostEnvironment)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _accountService = accountService;
             _logger = logger;
+            _hostEnvironment = hostEnvironment;
         }
 
         [BindProperty]
@@ -78,7 +81,9 @@ namespace SuperBarber.Areas.Identity.Pages.Account.Manage
 
                 if (User.IsBarber())
                 {
-                    await _accountService.DeleteBarberAsync(user, true);
+                    var wwwRootPath = _hostEnvironment.WebRootPath;
+
+                    await _accountService.DeleteBarberAsync(user, true, wwwRootPath);
                 }
 
                 await _accountService.DeleteUserAsync(user);

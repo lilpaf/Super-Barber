@@ -1,16 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
 using static SuperBarber.Infrastructure.Data.DataConstraints;
 
 namespace SuperBarber.Core.Models.BarberShop
 {
-    public class BarberShopFormModel
+    public class BarberShopEditFormModel
     {
         [Required]
         [StringLength(
-            ShopNameMaxLength,
-            MinimumLength = DefaultMinLength,
-            ErrorMessage = "{0} should have a length between {2} and {1}"
-            )]
+           ShopNameMaxLength,
+           MinimumLength = DefaultMinLength,
+           ErrorMessage = "{0} should have a length between {2} and {1}"
+           )]
         public string Name { get; init; }
 
         [Required]
@@ -44,9 +45,7 @@ namespace SuperBarber.Core.Models.BarberShop
         [Required]
         public string FinishHour { get; init; }
 
-        [Required]
-        [Display(Name = "Image URL")]
-        [Url]
-        public string ImageUrl { get; init; }
+        [Display(Name = "Image")]
+        public IFormFile? ImageFile { get; init; }
     }
 }

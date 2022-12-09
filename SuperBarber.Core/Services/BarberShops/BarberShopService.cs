@@ -7,6 +7,7 @@ using SuperBarber.Core.Extensions;
 using SuperBarber.Core.Models.Barber;
 using static SuperBarber.Core.Services.Common.TimeCheck;
 using static SuperBarber.Core.Extensions.CustomRoles;
+using Microsoft.AspNetCore.Http;
 
 namespace SuperBarber.Core.Services.BarberShops
 {
@@ -93,7 +94,7 @@ namespace SuperBarber.Core.Services.BarberShops
                         Street = bs.Street,
                         StartHour = bs.StartHour.ToString(@"hh\:mm"),
                         FinishHour = bs.FinishHour.ToString(@"hh\:mm"),
-                        ImageUrl = bs.ImageUrl,
+                        ImageName = bs.ImageName,
                         UserIsEmployee = bs.Barbers.Any(b => b.Barber.UserId == userId),
                         UserIsOwner = bs.Barbers.Any(b => b.IsOwner && b.Barber.UserId == userId),
                         OwnersInfo = bs.Barbers.Where(b => b.IsOwner)
@@ -163,7 +164,7 @@ namespace SuperBarber.Core.Services.BarberShops
         /// <param name="userId"></param>
         /// <returns></returns>
         /// <exception cref="ModelStateCustomException"></exception>
-        public async Task AddBarberShopAsync(BarberShopFormModel model, string userId)
+        public async Task AddBarberShopAsync(BarberShopAddFormModel model, string userId, string wwwRootPath)
         {
             if (!CheckIfTimeIsCorrect(model.StartHour))
             {
@@ -199,7 +200,6 @@ namespace SuperBarber.Core.Services.BarberShops
                 Street = model.Street,
                 StartHour = startHour,
                 FinishHour = finishHour,
-                ImageUrl = model.ImageUrl,
                 IsPublic = false,
                 IsDeleted = false,
                 DeleteDate = null
@@ -243,6 +243,8 @@ namespace SuperBarber.Core.Services.BarberShops
 
             await userManager.AddToRoleAsync(user, BarberShopOwnerRoleName);
 
+            var imageName = await CreateImage(model.ImageFile, wwwRootPath);
+            
             var deletedBarbershop = await this.data.BarberShops
                 .FirstOrDefaultAsync(b => b.Name.ToLower().Replace(" ", "") == barberShop.Name.ToLower().Replace(" ", "")
                     && b.CityId == barberShop.CityId
@@ -256,9 +258,16 @@ namespace SuperBarber.Core.Services.BarberShops
                 deletedBarbershop.IsDeleted = false;
                 deletedBarbershop.DeleteDate = null;
                 deletedBarbershop.Barbers = barberShop.Barbers;
+                deletedBarbershop.StartHour = barberShop.StartHour;
+                deletedBarbershop.FinishHour = barberShop.FinishHour;
+                deletedBarbershop.IsPublic = barberShop.IsPublic;
+                deletedBarbershop.Street = barberShop.Street;
+                deletedBarbershop.ImageName = imageName;
             }
             else
             {
+                barberShop.ImageName = imageName;
+
                 await this.data.BarberShops.AddAsync(barberShop);
             }
 
@@ -269,6 +278,35 @@ namespace SuperBarber.Core.Services.BarberShops
 
         private static string GetStreetNameAndNumberCaseInsensitive(string streetNameAndNumber)
             => streetNameAndNumber.ToLower().Replace("st", "").Replace("ul", "").Replace(".", "").Replace(" ", "");
+
+        private async Task<string> CreateImage(IFormFile imageFile, string wwwRootPath)
+        {
+            var fileName = Path.GetFileNameWithoutExtension(imageFile.FileName);
+            var extension = Path.GetExtension(imageFile.FileName);
+            fileName = fileName + DateTime.UtcNow.ToString("yyymmssfff") + extension;
+
+            string path = Path.Combine(wwwRootPath + "/Image/", fileName);
+
+            using (var fileStream = new FileStream(path, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(fileStream);
+            }
+
+            return fileName;
+        }
+        
+        private bool DeleteImage(string imageName, string wwwRootPath)
+        {
+            var imagePath = Path.Combine(wwwRootPath, "image", imageName);
+            
+            if (System.IO.File.Exists(imagePath))
+            {
+                System.IO.File.Delete(imagePath);
+                return true;
+            }
+
+            return false;
+        }
   
         /// <summary>
         /// This method gets all the barbershops that the user barber is employee or is a owner of.
@@ -288,7 +326,7 @@ namespace SuperBarber.Core.Services.BarberShops
                Street = bs.Street,
                StartHour = bs.StartHour.ToString(@"hh\:mm"),
                FinishHour = bs.FinishHour.ToString(@"hh\:mm"),
-               ImageUrl = bs.ImageUrl,
+               ImageName = bs.ImageName,
                UserIsEmployee = true,
                UserIsOwner = bs.Barbers.Any(b => b.IsOwner && b.Barber.UserId == userId),
                OwnersInfo = bs.Barbers.Where(b => b.IsOwner)
@@ -322,17 +360,16 @@ namespace SuperBarber.Core.Services.BarberShops
         /// <param name="barberShopId"></param>
         /// <returns></returns>
         /// <exception cref="ModelStateCustomException"></exception>
-        public async Task<BarberShopFormModel> DisplayBarberShopInfoAsync(int barberShopId)
+        public async Task<BarberShopEditFormModel> DisplayBarberShopInfoAsync(int barberShopId)
         {
             var formModel = await this.data.BarberShops
                 .Where(bs => bs.Id == barberShopId && !bs.IsDeleted)
-                .Select(bs => new BarberShopFormModel
+                .Select(bs => new BarberShopEditFormModel
                 {
                     Name = bs.Name,
                     City = bs.City.Name,
                     District = bs.District.Name,
                     Street = bs.Street,
-                    ImageUrl = bs.ImageUrl,
                     StartHour = bs.StartHour.ToString(@"hh\:mm"),
                     FinishHour = bs.FinishHour.ToString(@"hh\:mm"),
                 })
@@ -355,10 +392,12 @@ namespace SuperBarber.Core.Services.BarberShops
         /// <param name="userIsAdmin"></param>
         /// <returns></returns>
         /// <exception cref="ModelStateCustomException"></exception>
-        public async Task EditBarberShopAsync(BarberShopFormModel model, int barberShopId, string userId, bool userIsAdmin)
+        public async Task EditBarberShopAsync(BarberShopEditFormModel model, int barberShopId, string userId, bool userIsAdmin, string wwwRootPath)
         {
             var barberShop = await this.data.BarberShops
                 .Include(bs => bs.Barbers)
+                .Include(bs => bs.City)
+                .Include(bs => bs.District)
                 .FirstOrDefaultAsync(bs => bs.Id == barberShopId && !bs.IsDeleted);
 
             if (barberShop == null)
@@ -426,10 +465,23 @@ namespace SuperBarber.Core.Services.BarberShops
                 districtChanged = true;
             }
 
+            if (model.ImageFile != null)
+            {
+                var result = DeleteImage(barberShop.ImageName, wwwRootPath);
+                
+                if (!result)
+                {
+                    throw new ModelStateCustomException("", "Something went wrong with deleteing the old image");
+                }
+
+                var imageName = await CreateImage(model.ImageFile, wwwRootPath);
+
+                barberShop.ImageName = imageName;
+            }
+
             barberShop.StartHour = startHour;
             barberShop.FinishHour = finishHour;
             barberShop.Name = model.Name;
-            barberShop.ImageUrl = model.ImageUrl;
             barberShop.IsPublic = false;
 
             await this.data.SaveChangesAsync();
@@ -453,7 +505,7 @@ namespace SuperBarber.Core.Services.BarberShops
         /// <param name="userIsAdmin"></param>
         /// <returns></returns>
         /// <exception cref="ModelStateCustomException"></exception>
-        public async Task DeleteBarberShopAsync(int barberShopId, string userId, bool userIsAdmin)
+        public async Task DeleteBarberShopAsync(int barberShopId, string userId, bool userIsAdmin, string wwwRootPath)
         {
             var barberShop = await this.data.BarberShops
                 .Include(bs => bs.Barbers)
@@ -496,6 +548,15 @@ namespace SuperBarber.Core.Services.BarberShops
                     await userManager.RemoveFromRoleAsync(user, BarberShopOwnerRoleName);
                 }
             }
+
+            var result = DeleteImage(barberShop.ImageName, wwwRootPath);
+
+            if (!result)
+            {
+                throw new ModelStateCustomException("", "Something went wrong with deleteing the old image");
+            }
+
+            barberShop.ImageName = null;
 
             if (barberShop.Orders.Any())
             {

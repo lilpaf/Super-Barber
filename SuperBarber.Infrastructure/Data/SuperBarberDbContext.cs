@@ -18,6 +18,7 @@ namespace SuperBarber.Infrastructure.Data
         public DbSet<City> Cities { get; set; }
         public DbSet<District> Districts { get; set; }
 
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<BarberShopServices>()

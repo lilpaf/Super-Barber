@@ -30,9 +30,9 @@ namespace SuperBarber.Infrastructure.Data.Models
 
         public TimeSpan FinishHour { get; set; }
 
-        [Required]
-        public string ImageUrl { get; set; }
-        
+        [MaxLength(ImageNameMaxLength)]
+        public string? ImageName { get; set; }
+
         public bool IsPublic { get; set; }
         
         public bool IsDeleted { get; set; }

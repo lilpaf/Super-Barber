@@ -56,7 +56,7 @@ namespace SuperBarber.Core.Services.Account
             }
         }
 
-        public async Task DeleteBarberAsync(User user, bool userIsDeleted)
+        public async Task DeleteBarberAsync(User user, bool userIsDeleted, string wwwRootPath)
         {
             var barber = await _data.Barbers.FirstOrDefaultAsync(b => b.UserId == user.Id);
 
@@ -84,7 +84,7 @@ namespace SuperBarber.Core.Services.Account
                 {
                     try
                     {
-                        await _barberShopService.DeleteBarberShopAsync(barberShop.Id, user.Id, false);
+                        await _barberShopService.DeleteBarberShopAsync(barberShop.Id, user.Id, false, wwwRootPath);
                     }
                     catch (ModelStateCustomException ex)
                     {
