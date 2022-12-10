@@ -244,6 +244,11 @@ namespace SuperBarber.Core.Services.BarberShops
             await userManager.AddToRoleAsync(user, BarberShopOwnerRoleName);
 
             var imageName = await CreateImage(model.ImageFile, wwwRootPath);
+
+            if (imageName == null)
+            {
+                throw new ModelStateCustomException("", "Something went wrong with saveing the image");
+            }
             
             var deletedBarbershop = await this.data.BarberShops
                 .FirstOrDefaultAsync(b => b.Name.ToLower().Replace(" ", "") == barberShop.Name.ToLower().Replace(" ", "")
@@ -287,12 +292,17 @@ namespace SuperBarber.Core.Services.BarberShops
 
             string path = Path.Combine(wwwRootPath + "/Image/", fileName);
 
-            using (var fileStream = new FileStream(path, FileMode.Create))
+            if (!System.IO.File.Exists(path))
             {
-                await imageFile.CopyToAsync(fileStream);
+                using (var fileStream = new FileStream(path, FileMode.Create))
+                {
+                    await imageFile.CopyToAsync(fileStream);
+                }
+
+                return fileName;
             }
 
-            return fileName;
+            return null;
         }
         
         private bool DeleteImage(string imageName, string wwwRootPath)
@@ -475,6 +485,11 @@ namespace SuperBarber.Core.Services.BarberShops
                 }
 
                 var imageName = await CreateImage(model.ImageFile, wwwRootPath);
+
+                if (imageName == null)
+                {
+                    throw new ModelStateCustomException("", "Something went wrong with saveing the image");
+                }
 
                 barberShop.ImageName = imageName;
             }
