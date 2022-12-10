@@ -2,7 +2,7 @@
 using SuperBarber.Core.Services.Order;
 using SuperBarber.Infrastructure.Data.Models;
 using SuperBarber.Tests.Common;
-using static SuperBarber.Tests.Services.CreateTestDb;
+using static SuperBarber.Tests.Common.CreateTestDb;
 
 namespace SuperBarber.Tests.Services
 {

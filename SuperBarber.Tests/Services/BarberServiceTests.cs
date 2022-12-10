@@ -1,4 +1,4 @@
-﻿using static SuperBarber.Tests.Services.CreateTestDb;
+﻿using static SuperBarber.Tests.Common.CreateTestDb;
 using SuperBarber.Core.Services.Barbers;
 using SuperBarber.Core.Extensions;
 using SuperBarber.Infrastructure.Data.Models;
@@ -294,7 +294,7 @@ namespace SuperBarber.Tests.Services
         }
 
         [Test]
-        public async Task TestAddOwnerToBarberShop_ShouldThrowModelStateCustomExceptionWhenBarberIsNotOwnerOrNotWorkingAtTheBarberShopAtAll()
+        public void TestAddOwnerToBarberShop_ShouldThrowModelStateCustomExceptionWhenBarberIsNotOwnerOrNotWorkingAtTheBarberShopAtAll()
         {
             var barberNotOwnerUserId = BarberUserId.ToString();
 

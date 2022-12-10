@@ -1,7 +1,7 @@
 using SuperBarber.Core.Extensions;
 using SuperBarber.Core.Services.Home;
 using SuperBarber.Tests.Common;
-using static SuperBarber.Tests.Services.CreateTestDb;
+using static SuperBarber.Tests.Common.CreateTestDb;
 
 
 namespace SuperBarber.Tests.Services
@@ -37,8 +37,7 @@ namespace SuperBarber.Tests.Services
                 Assert.True(dbBarberShop.StartHour.ToString(@"hh\:mm") == barberShop.StartHour);
                 Assert.True(dbBarberShop.FinishHour.ToString(@"hh\:mm") == barberShop.FinishHour);
                 Assert.True(dbBarberShop.Street == barberShop.Street);
-                Assert.True(dbBarberShop.ImageUrl == barberShop.ImageUrl);
-                Assert.True(dbBarberShop.ImageUrl == barberShop.ImageUrl);
+                Assert.True(dbBarberShop.ImageName == barberShop.ImageName);
                 Assert.True(dbBarberShop.City.Name == barberShop.City);
                 Assert.True(dbBarberShop.District.Name == barberShop.District);
                 Assert.True(barberShop.UserIsEmployee == false);
@@ -66,9 +65,8 @@ namespace SuperBarber.Tests.Services
                 Assert.True(dbBarberShop.StartHour.ToString(@"hh\:mm") == barberShop.StartHour);
                 Assert.True(dbBarberShop.FinishHour.ToString(@"hh\:mm") == barberShop.FinishHour);
                 Assert.True(dbBarberShop.Street == barberShop.Street);
-                Assert.True(dbBarberShop.ImageUrl == barberShop.ImageUrl);
-                Assert.True(dbBarberShop.ImageUrl == barberShop.ImageUrl);
                 Assert.True(dbBarberShop.City.Name == barberShop.City);
+                Assert.True(dbBarberShop.ImageName == barberShop.ImageName);
                 Assert.True(dbBarberShop.District.Name == barberShop.District);
                 Assert.True(barberShop.UserIsEmployee == true);
                 Assert.True(barberShop.UserIsOwner == true);

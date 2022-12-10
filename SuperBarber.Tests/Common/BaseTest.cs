@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using SuperBarber.Infrastructure.Data;
 using SuperBarber.Infrastructure.Data.Models;
-using SuperBarber.Tests.Services;
 
 namespace SuperBarber.Tests.Common
 {
@@ -11,6 +11,7 @@ namespace SuperBarber.Tests.Common
         protected CreateTestDb testDb;
         protected UserManager<User> userManager;
         protected SignInManager<User> signInManager;
+        protected IWebHostEnvironment webHostEnvironment;
 
         [SetUp]
         public void TestDbInitialize()
@@ -19,6 +20,7 @@ namespace SuperBarber.Tests.Common
             dbContextWithSeededData = testDb.SeedDataInDb();
             userManager = testDb.UserManager;
             signInManager = testDb.SignInManager;
+            webHostEnvironment = testDb.WebHostEnvironment;
         }
 
         [TearDown]

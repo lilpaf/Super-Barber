@@ -1,9 +1,10 @@
-﻿using SuperBarber.Core.Extensions;
+﻿using Microsoft.AspNetCore.Hosting;
+using SuperBarber.Core.Extensions;
 using SuperBarber.Core.Services.Account;
 using SuperBarber.Core.Services.BarberShops;
 using SuperBarber.Infrastructure.Data.Models;
 using SuperBarber.Tests.Common;
-using static SuperBarber.Tests.Services.CreateTestDb;
+using static SuperBarber.Tests.Common.CreateTestDb;
 
 namespace SuperBarber.Tests.Services
 {
@@ -11,8 +12,8 @@ namespace SuperBarber.Tests.Services
     {
         private IAccountService service;
         private IBarberShopService barberShopService;
-        private const int FakeId = 100;
         private User user;
+        private string wwwRootPath;
 
         [SetUp]
         public void TestInitialize()
@@ -20,6 +21,7 @@ namespace SuperBarber.Tests.Services
             barberShopService = new BarberShopService(dbContextWithSeededData, userManager, signInManager);
             service = new AccountService(dbContextWithSeededData, userManager, signInManager, barberShopService);
             user = dbContextWithSeededData.Users.Find(BarberShopOwnerUserId.ToString());
+            wwwRootPath = webHostEnvironment.WebRootPath;
         }
 
         [Test]
@@ -35,19 +37,19 @@ namespace SuperBarber.Tests.Services
             Assert.True(barber.LastName == "New last name");
         }
 
-
+        
         [Test]
         public void TestDeleteBarber_ShouldThrowModelStateCustomExceptionWhenBarberIsNonExistent()
         {
             user = dbContextWithSeededData.Users.Find(GuestUserId.ToString());
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.DeleteBarberAsync(user, false), "This barber does not exist!");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.DeleteBarberAsync(user, false, wwwRootPath), "This barber does not exist!");
         }
 
         [Test]
         public async Task TestDeleteBarber_ShouldMarkTheBarberAsDeltedButSaveHisPersonalInformation()
         {
-            await service.DeleteBarberAsync(user, false);
+            await service.DeleteBarberAsync(user, false, wwwRootPath);
 
             var barber = dbContextWithSeededData.Barbers.First(b => b.UserId == user.Id.ToString());
             Assert.IsNotNull(barber.FirstName);
@@ -63,7 +65,7 @@ namespace SuperBarber.Tests.Services
         [Test]
         public async Task TestDeleteBarber_ShouldMarkTheBarberAsDeltedAndDeleteHisPersonalInformation()
         {
-            await service.DeleteBarberAsync(user, true);
+            await service.DeleteBarberAsync(user, true, wwwRootPath);
 
             var barber = dbContextWithSeededData.Barbers.First(b => b.UserId == user.Id.ToString());
             Assert.Null(barber.FirstName);

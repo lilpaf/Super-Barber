@@ -4,7 +4,7 @@ using SuperBarber.Core.Services.Service;
 using SuperBarber.Infrastructure.Data.Models;
 using SuperBarber.Services.Service;
 using SuperBarber.Tests.Common;
-using static SuperBarber.Tests.Services.CreateTestDb;
+using static SuperBarber.Tests.Common.CreateTestDb;
 
 namespace SuperBarber.Tests.Services
 {

@@ -5,7 +5,7 @@ using SuperBarber.Core.Services.Cart;
 using SuperBarber.Infrastructure.Data.Models;
 using SuperBarber.Tests.Common;
 using System.Globalization;
-using static SuperBarber.Tests.Services.CreateTestDb;
+using static SuperBarber.Tests.Common.CreateTestDb;
 
 namespace SuperBarber.Tests.Services
 {
@@ -477,7 +477,7 @@ namespace SuperBarber.Tests.Services
         }
 
         [Test]
-        public async Task TestGetBarberShopNameToFriendlyUrl_ShouldReturnNameOfTheBarberShopToFriendlyUrl()
+        public void TestGetBarberShopNameToFriendlyUrl_ShouldReturnNameOfTheBarberShopToFriendlyUrl()
         {
             var barberShop = dbContextWithSeededData.BarberShops.First(b => !b.IsDeleted);
 
