@@ -6,6 +6,7 @@ using SuperBarber.Core.Services.Barbers;
 using SuperBarber.Core.Services.BarberShops;
 using SuperBarber.Core.Services.Cart;
 using SuperBarber.Core.Services.Home;
+using SuperBarber.Core.Services.Mail;
 using SuperBarber.Core.Services.Order;
 using SuperBarber.Core.Services.Service;
 using SuperBarber.Extensions;
@@ -29,6 +30,7 @@ builder.Services.AddSession();
 
 builder.Services.AddDefaultIdentity<User>(options =>
     {
+        //Uncomment this when you want to use the mailing service
         //options.SignIn.RequireConfirmedAccount = true;
         options.User.RequireUniqueEmail = true;
         options.Password.RequireDigit = false;
@@ -55,6 +57,7 @@ builder.Services.AddTransient<IHomeService, HomeService>();
 builder.Services.AddTransient<ICartService, CartService>();
 builder.Services.AddTransient<IAccountService, AccountService>();
 builder.Services.AddTransient<IOrderService, OrderService>();
+builder.Services.AddTransient<IMailService, MailService>();
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();

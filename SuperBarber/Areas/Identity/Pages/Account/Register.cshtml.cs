@@ -1,11 +1,16 @@
 ﻿#nullable disable
 
 using System.ComponentModel.DataAnnotations;
+using System.Text.Encodings.Web;
+using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.WebUtilities;
+using SuperBarber.Core.Services.Mail;
 using SuperBarber.Infrastructure.Data.Models;
 using static SuperBarber.Infrastructure.Data.DataConstraints;
+using static SuperBarber.Extensions.WebConstants;
 
 namespace SuperBarber.Areas.Identity.Pages.Account
 {
@@ -14,16 +19,18 @@ namespace SuperBarber.Areas.Identity.Pages.Account
         private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
         private readonly ILogger<RegisterModel> _logger;
-        //private readonly IEmailSender _emailSender;
+        private readonly IMailService _emailSender;
 
         public RegisterModel(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
-            ILogger<RegisterModel> logger)
+            ILogger<RegisterModel> logger,
+            IMailService emailSender)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            _emailSender = emailSender;
         }
 
         [BindProperty]
@@ -96,9 +103,29 @@ namespace SuperBarber.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    var userId = await _userManager.GetUserIdAsync(user);
+                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                    var callbackUrl = Url.Page(
+                        "/Account/ConfirmEmail",
+                        pageHandler: null,
+                        values: new { area = "Identity", userId = userId, code = code },
+                        protocol: Request.Scheme);
 
-                    return RedirectToAction("Index", "Home", new { area = "" });
+                    await _emailSender.SendEmailAsync(Input.Email, "Confirm Your Email Address",
+                        $"<h1>Confirm Your Email Address</h1>Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    if (_userManager.Options.SignIn.RequireConfirmedAccount)
+                    {
+                        TempData[GlobalMessageKey] = $"Welcome to SuperBarber, {Input.FirstName}! Before we get started, please check your email to confirm your account.";
+
+                        return RedirectToAction("Index", "Home", new { area = "" });
+                    }
+                    else
+                    {
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+
+                        return RedirectToAction("Index", "Home", new { area = "" });
+                    }
                 }
                 foreach (var error in result.Errors)
                 {

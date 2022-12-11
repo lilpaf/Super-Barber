@@ -1,0 +1,13 @@
+﻿@page
+@model ConfirmEmailModel
+@{
+    ViewData["Title"] = "Confirm email";
+}
+
+
+<partial name="_StatusMessage" model="Model.StatusMessage" />
+<h1>@ViewData["Title"]</h1>
+<p>
+    Thank you for confirming your email address.
+</p>
+<a class="btn btn-outline-primary" asp-controller="Home" asp-area="" asp-action="Index">Go back to home page</a>
