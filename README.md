@@ -7,7 +7,6 @@
 
  **ABOUT my web project:**
 
-------------
 - SuperBarber is a web application where you can make service appointments at barbershops. You can be regular user or barber.
 ------------
 **Regular users at SuperBarber:**
