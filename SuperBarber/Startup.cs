@@ -31,7 +31,7 @@ builder.Services.AddSession();
 builder.Services.AddDefaultIdentity<User>(options =>
     {
         //Uncomment this when you want to use the mailing service
-        //options.SignIn.RequireConfirmedAccount = true;
+        options.SignIn.RequireConfirmedAccount = true;
         options.User.RequireUniqueEmail = true;
         options.Password.RequireDigit = false;
         options.Password.RequireLowercase = false;

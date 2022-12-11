@@ -18,9 +18,10 @@ namespace SuperBarber.Core.Services.Mail
             this.configuration = configuration;
         }
 
+        //I have generated new api key if you havent got the email you can contact me via the socials in my profile
         public async Task SendEmailAsync(string toEmail, string subject, string content)
         {
-            var apiKey = configuration["SendGridAPIKey"];
+            var apiKey = Environment.GetEnvironmentVariable("SENDGRID_API_KEY");
             var client = new SendGridClient(apiKey);
             var from = new EmailAddress("fokervt19@gmail.com", "SuperBarber");
             var to = new EmailAddress(toEmail);
