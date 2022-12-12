@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Moq;
 using SuperBarber.Infrastructure.Data.Models;
 
-namespace SuperBarber.Tests.Mocks
+namespace SuperBarber.UnitTests.Mocks
 {
     public static class SignInManegerMock
     {

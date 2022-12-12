@@ -3,7 +3,7 @@ using Moq;
 using SuperBarber.Infrastructure.Data.Models;
 using System.Security.Claims;
 
-namespace SuperBarber.Tests.Mocks
+namespace SuperBarber.UnitTests.Mocks
 {
     public static class UserManegerMock
     {

@@ -2,7 +2,7 @@
 using Moq;
 
 
-namespace SuperBarber.Tests.Mocks
+namespace SuperBarber.UnitTests.Mocks
 {
     public static class IWebHostEnviromentMock
     {

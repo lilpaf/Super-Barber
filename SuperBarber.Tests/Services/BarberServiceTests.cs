@@ -1,10 +1,10 @@
-﻿using static SuperBarber.Tests.Common.CreateTestDb;
-using SuperBarber.Core.Services.Barbers;
+﻿using SuperBarber.Core.Services.Barbers;
 using SuperBarber.Core.Extensions;
 using SuperBarber.Infrastructure.Data.Models;
-using SuperBarber.Tests.Common;
+using SuperBarber.UnitTests.Common;
+using static SuperBarber.UnitTests.Common.CreateTestDb;
 
-namespace SuperBarber.Tests.Services
+namespace SuperBarber.UnitTests.Services
 {
     [TestFixture]
     public class BarberServiceTests : BaseTest

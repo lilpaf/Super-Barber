@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using SuperBarber.Infrastructure.Data;
 using SuperBarber.Infrastructure.Data.Models;
 
-namespace SuperBarber.Tests.Common
+namespace SuperBarber.UnitTests.Common
 {
     public abstract class BaseTest
     {

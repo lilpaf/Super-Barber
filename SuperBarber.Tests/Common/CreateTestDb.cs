@@ -5,11 +5,11 @@ using System.Globalization;
 using SuperBarber.Infrastructure.Data.Models;
 using SuperBarber.Infrastructure.Data;
 using Microsoft.AspNetCore.Hosting;
-using static SuperBarber.Tests.Mocks.SignInManegerMock;
-using static SuperBarber.Tests.Mocks.UserManegerMock;
-using static SuperBarber.Tests.Mocks.IWebHostEnviromentMock;
+using static SuperBarber.UnitTests.Mocks.SignInManegerMock;
+using static SuperBarber.UnitTests.Mocks.UserManegerMock;
+using static SuperBarber.UnitTests.Mocks.IWebHostEnviromentMock;
 
-namespace SuperBarber.Tests.Common
+namespace SuperBarber.UnitTests.Common
 {
     public class CreateTestDb
     {

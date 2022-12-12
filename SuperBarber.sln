@@ -5,7 +5,7 @@ VisualStudioVersion = 17.3.32922.545
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperBarber", "SuperBarber\SuperBarber.csproj", "{F3FB5BB2-3FF6-4458-93DC-BC05DA851F54}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperBarber.Tests", "SuperBarber.Tests\SuperBarber.Tests.csproj", "{6F0ACA48-9C49-4CDA-BE45-AE6F5D40323E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperBarber.UnitTests", "SuperBarber.Tests\SuperBarber.UnitTests.csproj", "{6F0ACA48-9C49-4CDA-BE45-AE6F5D40323E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperBarber.Infrastructure", "SuperBarber.Infrastructure\SuperBarber.Infrastructure.csproj", "{F353ED62-87A0-495A-AC03-71926A89C1EB}"
 EndProject

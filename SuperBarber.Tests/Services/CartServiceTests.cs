@@ -3,9 +3,9 @@ using SuperBarber.Core.Models.Cart;
 using SuperBarber.Core.Models.Service;
 using SuperBarber.Core.Services.Cart;
 using SuperBarber.Infrastructure.Data.Models;
-using SuperBarber.Tests.Common;
+using SuperBarber.UnitTests.Common;
 using System.Globalization;
-using static SuperBarber.Tests.Common.CreateTestDb;
+using static SuperBarber.UnitTests.Common.CreateTestDb;
 
 namespace SuperBarber.Tests.Services
 {

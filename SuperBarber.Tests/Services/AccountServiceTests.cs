@@ -3,10 +3,10 @@ using SuperBarber.Core.Extensions;
 using SuperBarber.Core.Services.Account;
 using SuperBarber.Core.Services.BarberShops;
 using SuperBarber.Infrastructure.Data.Models;
-using SuperBarber.Tests.Common;
-using static SuperBarber.Tests.Common.CreateTestDb;
+using SuperBarber.UnitTests.Common;
+using static SuperBarber.UnitTests.Common.CreateTestDb;
 
-namespace SuperBarber.Tests.Services
+namespace SuperBarber.UnitTests.Services
 {
     public class AccountServiceTests : BaseTest
     {
