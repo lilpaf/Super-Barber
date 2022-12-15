@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Newtonsoft.Json;
 using SuperBarber.Core.Extensions;
 using SuperBarber.Core.Models.Home;
@@ -13,8 +14,13 @@ namespace SuperBarber.Controllers
     {
         private readonly IHomeService homeService;
 
-        public HomeController(IHomeService homeService)
-            => this.homeService = homeService;
+        private readonly ILogger logger;
+
+        public HomeController(IHomeService homeService, ILogger logger)
+        {
+            this.homeService = homeService;
+            this.logger = logger;
+        }
 
         [RestoreModelStateFromTempData]
         public async Task<IActionResult> Index(string city, string district, string date, string time)
@@ -51,6 +57,12 @@ namespace SuperBarber.Controllers
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error() => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        public IActionResult Error()
+        {
+            var feature = this.HttpContext.Features.Get<IExceptionHandlerFilter>();
+
+
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
     }
 }
