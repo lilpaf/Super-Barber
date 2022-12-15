@@ -2,7 +2,7 @@
 
 # Super-Barber
 
- ## C# Web Development Path at Software University, Bulgaria
+Defense project for [**ASP.NET Advanced**](https://softuni.bg/trainings/3854/asp-net-advanced-october-2022) course at [SoftUni](https://softuni.bg/ "SoftUni") (October 2022).
 ------------
 
   ## **ABOUT my web project:**
