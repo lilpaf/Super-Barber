@@ -222,15 +222,7 @@ namespace SuperBarber.UnitTests.Common
                     File.Delete(file);
                 }
             }
-            dbContext.Orders.RemoveRange(dbContext.Orders.ToList());
-            dbContext.Services.RemoveRange(dbContext.Services.ToList());
-            dbContext.Categories.RemoveRange(dbContext.Categories.ToList());
-            dbContext.BarberShops.RemoveRange(dbContext.BarberShops.ToList());
-            dbContext.Cities.RemoveRange(dbContext.Cities.ToList());
-            dbContext.Districts.RemoveRange(dbContext.Districts.ToList());
-            dbContext.Barbers.RemoveRange(dbContext.Barbers.ToList());
-            dbContext.Users.RemoveRange(dbContext.Users.ToList());
-            dbContext.SaveChanges();
+            dbContext.Database.EnsureDeleted();
             dbContext.Dispose();
         }
     }

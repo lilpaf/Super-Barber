@@ -133,7 +133,7 @@ namespace SuperBarber.Tests.Services
 
             model = new BookServiceFormModel()
             {
-                Date = "22:08:12",
+                Date = "22:08-12",
                 Time = "12:00"
             };
 
