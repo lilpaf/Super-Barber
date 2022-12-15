@@ -30,3 +30,6 @@
  - Can make barbershops private and public. 
  - Can edit and delete barbershops.
  - Can delete services
+ 
+ 
+ ![image]https://github.com/lilpaf/Images/blob/main/Screenshot%202022-12-15%20133213.png)
