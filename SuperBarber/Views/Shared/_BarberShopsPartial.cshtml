@@ -8,7 +8,7 @@
         var userIsOwner = User.IsOwner();
 
         <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card h-100" style="width: 20rem;">
+            <div class="card" style="width: 20rem;">
                 <img src="@("~/image/"+barbershop.ImageName)" asp-append-version="true" class="card-img-top" alt="Barbershop image">
                 <div class="card-body">
                     <h5 class="card-title">@barbershop.BarberShopName</h5>
@@ -18,12 +18,12 @@
                     <p class="card-text d-inline">@barbershop.StartHour</p>
                     <p class="card-text d-inline">- @barbershop.FinishHour</p>
                     <div class="accordion-item mt-2 mb-2">
-                        <h2 class="accordion-header" id="headingTwo">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                        <h2 class="accordion-header" id="@($"heading{barbershop.Id}")">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="@($"#collapse{barbershop.Id}")" aria-expanded="false" aria-controls="@($"collapse{barbershop.Id}")">
                                 Contacts
                             </button>
                         </h2>
-                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                        <div id="@($"collapse{barbershop.Id}")" class="accordion-collapse collapse" aria-labelledby="@($"heading{barbershop.Id}")">
                             <div class="accordion-body">
                                 @foreach (var owner in barbershop.OwnersInfo)
                                 {
