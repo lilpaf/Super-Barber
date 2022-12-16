@@ -1,5 +1,9 @@
 ﻿@model AllBarberShopQueryModel
 
+@{
+    ViewData["Title"] = "All barbershops";
+}
+
 @if (Model.BarberShops.Count() == 0)
 {
     <div class="container-fluid py-5 text-center">
