@@ -45,6 +45,7 @@ namespace SuperBarber.Core.Models.BarberShop
         [Required]
         public string FinishHour { get; init; }
 
+        [Required]
         [Display(Name = "Image")]
         public IFormFile ImageFile { get; init; }
     }
