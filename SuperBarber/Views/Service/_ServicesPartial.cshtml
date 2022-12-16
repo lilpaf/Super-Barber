@@ -35,5 +35,17 @@
                     <partial name="_ServicePartial" model="service" />
                 }
             </div>
+        } 
+        
+        @if (Model.Any(s => s.Category == "Mix"))
+        {
+            <div class="row mb-5">
+                <h4 class="text-center mb-3 fw-bold">Mix</h4>
+                <hr class="mb-5" />
+                @foreach (var service in Model.Where(s => s.Category == "Mix"))
+                {
+                    <partial name="_ServicePartial" model="service" />
+                }
+            </div>
         }
 </div>

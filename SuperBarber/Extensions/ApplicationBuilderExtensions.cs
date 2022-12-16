@@ -38,6 +38,7 @@ namespace SuperBarber.Extensions
                 new Category{ Name = "Hair" },
                 new Category{ Name = "Face" },
                 new Category{ Name = "Epilation" },
+                new Category{ Name = "Mix" }
             });
 
             data.SaveChanges();
