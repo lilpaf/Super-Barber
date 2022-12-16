@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Newtonsoft.Json;
 using SuperBarber.Core.Extensions;
@@ -14,9 +15,9 @@ namespace SuperBarber.Controllers
     {
         private readonly IHomeService homeService;
 
-        private readonly ILogger logger;
+        private readonly ILogger<HomeController> logger;
 
-        public HomeController(IHomeService homeService, ILogger logger)
+        public HomeController(IHomeService homeService, ILogger<HomeController> logger)
         {
             this.homeService = homeService;
             this.logger = logger;
@@ -59,9 +60,13 @@ namespace SuperBarber.Controllers
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            var feature = this.HttpContext.Features.Get<IExceptionHandlerFilter>();
+            var feature = this.HttpContext.Features.Get<IExceptionHandlerFeature>();
 
-
+            if (feature != null)
+            {
+                logger.LogError(feature.Error, "TraceIdentifier: {0}", Activity.Current?.Id ?? HttpContext.TraceIdentifier);
+            }
+            
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
