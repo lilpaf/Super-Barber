@@ -15,7 +15,7 @@ namespace SuperBarber.Controllers
     {
         private readonly IHomeService homeService;
 
-        private readonly ILogger<HomeController> logger;
+        private readonly ILogger logger;
 
         public HomeController(IHomeService homeService, ILogger<HomeController> logger)
         {
