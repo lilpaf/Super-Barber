@@ -2,6 +2,8 @@ using SuperBarber.Core.Extensions;
 using SuperBarber.Core.Services.Home;
 using SuperBarber.UnitTests.Common;
 using static SuperBarber.UnitTests.Common.CreateTestDb;
+using static SuperBarber.Core.Extensions.ExeptionErrors;
+using static SuperBarber.Core.Extensions.ExeptionErrors.HomeServiceErrors;
 
 
 namespace SuperBarber.Tests.Services
@@ -73,16 +75,7 @@ namespace SuperBarber.Tests.Services
             }
         }
 
-        [Test]
-        public void Test_ThrowModelStateCustomExceptionWhenThereIsNoMatchingBarberShops()
-        {
-            var testUser = testDb.Users.First(u => u.Id == GuestUserId.ToString());
-
-            var dbBarberShop = testDb.BarberShops.First(b => !b.IsDeleted);
-
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.SearchAvalibleBarbershopsAsync(dbBarberShop.City.Name, "All", "2022-12-03", "8:00", testUser.Id), "Right now we do not have any avalible barbershops matching your criteria.");
-        }
-
+        
         [Test]
         public void Test_ThrowModelStateCustomExceptionWhenThereIsNoCityFound()
         {
@@ -90,7 +83,7 @@ namespace SuperBarber.Tests.Services
 
             var dbBarberShop = testDb.BarberShops.First(b => !b.IsDeleted);
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.SearchAvalibleBarbershopsAsync("Varna", "All", "2022-12-03", "12:00", testUser.Id), "Invalid city.");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.SearchAvalibleBarbershopsAsync("Varna", "All", "2022-12-03", "12:00", testUser.Id), InvalidCity);
         }
 
         [Test]
@@ -100,7 +93,7 @@ namespace SuperBarber.Tests.Services
 
             var dbBarberShop = testDb.BarberShops.First(b => !b.IsDeleted);
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.SearchAvalibleBarbershopsAsync(dbBarberShop.City.Name, "Mladost", "2022-12-03", "12:00", testUser.Id), "Invalid district.");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.SearchAvalibleBarbershopsAsync(dbBarberShop.City.Name, "Mladost", "2022-12-03", "12:00", testUser.Id), InvalidDistrict);
         }
 
         [Test]
@@ -110,7 +103,7 @@ namespace SuperBarber.Tests.Services
 
             var dbBarberShop = testDb.BarberShops.First(b => !b.IsDeleted);
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.SearchAvalibleBarbershopsAsync(dbBarberShop.City.Name, "All", "2022-12-03", "12-00", testUser.Id), "Invalid time input.");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.SearchAvalibleBarbershopsAsync(dbBarberShop.City.Name, "All", "2022-12-03", "12-00", testUser.Id), InvalidHourInput);
         }
 
         [Test]
@@ -120,7 +113,17 @@ namespace SuperBarber.Tests.Services
 
             var dbBarberShop = testDb.BarberShops.First(b => !b.IsDeleted);
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.SearchAvalibleBarbershopsAsync(dbBarberShop.City.Name, "All", "20221203", "12:00", testUser.Id), "Invalid date input.");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.SearchAvalibleBarbershopsAsync(dbBarberShop.City.Name, "All", "20221203", "12:00", testUser.Id), InvalidDateInput);
+        }
+
+        [Test]
+        public void Test_ThrowModelStateCustomExceptionWhenThereIsNoMatchingBarberShops()
+        {
+            var testUser = testDb.Users.First(u => u.Id == GuestUserId.ToString());
+
+            var dbBarberShop = testDb.BarberShops.First(b => !b.IsDeleted);
+
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.SearchAvalibleBarbershopsAsync(dbBarberShop.City.Name, "All", "2022-12-03", "8:00", testUser.Id), NoneAvalibleBarberShops);
         }
 
         [Test]

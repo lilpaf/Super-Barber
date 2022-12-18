@@ -5,6 +5,7 @@ using SuperBarber.Core.Services.BarberShops;
 using SuperBarber.Infrastructure.Data;
 using SuperBarber.Infrastructure.Data.Models;
 using static SuperBarber.Core.Extensions.CustomRoles;
+using static SuperBarber.Core.Extensions.ExeptionErrors;
 
 namespace SuperBarber.Core.Services.Account
 {
@@ -62,7 +63,7 @@ namespace SuperBarber.Core.Services.Account
 
             if (barber == null)
             {
-                throw new ModelStateCustomException("", "This barber does not exist!");
+                throw new ModelStateCustomException("", BarberNonExistent);
             }
 
             var orders = await _data.Orders.Where(o => o.BarberId == barber.Id).ToListAsync();

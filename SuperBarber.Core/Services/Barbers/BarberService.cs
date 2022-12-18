@@ -5,6 +5,8 @@ using SuperBarber.Infrastructure.Data.Models;
 using SuperBarber.Core.Models.Order;
 using SuperBarber.Core.Extensions;
 using static SuperBarber.Core.Extensions.CustomRoles;
+using static SuperBarber.Core.Extensions.ExeptionErrors;
+using static SuperBarber.Core.Extensions.ExeptionErrors.BarberServiceErrors;
 
 namespace SuperBarber.Core.Services.Barbers
 {
@@ -34,7 +36,7 @@ namespace SuperBarber.Core.Services.Barbers
         {
             if (this.data.Barbers.Any(b => b.UserId == userId && !b.IsDeleted))
             {
-                throw new ModelStateCustomException("", "User is already a barber");
+                throw new ModelStateCustomException("", UserIsBarber);
             }
 
             var user = await this.data.Users.FindAsync(userId);
@@ -89,12 +91,12 @@ namespace SuperBarber.Core.Services.Barbers
 
             if (barberShop == null)
             {
-                throw new ModelStateCustomException("", "This barbershop does not exist");
+                throw new ModelStateCustomException("", BarberShopNonExistent);
             }
 
             if (this.data.Barbers.Any(b => b.UserId == userId && b.BarberShops.Any(bs => bs.BarberShopId == barberShopId)))
             {
-                throw new ModelStateCustomException("", "User is already asigned to this barbershop");
+                throw new ModelStateCustomException("", UserIsAsignedToBarberShop);
             }
 
             var barber = await this.data.Barbers.FirstOrDefaultAsync(b => b.UserId == userId);
@@ -129,13 +131,13 @@ namespace SuperBarber.Core.Services.Barbers
 
             if (barberShop == null)
             {
-                throw new ModelStateCustomException("", "This barbershop does not exist");
+                throw new ModelStateCustomException("", BarberShopNonExistent);
             }
 
             if (barberShop.Barbers.Any(b => b.Barber.UserId == userId && !b.IsOwner) ||
                 !barberShop.Barbers.Any(b => b.Barber.UserId == userId))
             {
-                throw new ModelStateCustomException("", $"You are not owner of {barberShop.Name}");
+                throw new ModelStateCustomException("", string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
             }
 
             var barber = await this.data.Barbers
@@ -144,12 +146,12 @@ namespace SuperBarber.Core.Services.Barbers
 
             if (barber == null)
             {
-                throw new ModelStateCustomException("", "This barber does not exist");
+                throw new ModelStateCustomException("", BarberNonExistent);
             }
 
             if (barberShop.Barbers.Count(b => b.IsOwner) == 1 && barberShop.Barbers.Any(b => b.BarberId == barber.Id && b.IsOwner))
             {
-                throw new ModelStateCustomException("", "You are the only owner of this barbershop. If you want to unassign yoursef as barber from this barbershop you have to transfer the ownership to someone else from the barbershop manegment or delete the barbershop from the button 'Delete'.");
+                throw new ModelStateCustomException("", string.Format(UserIsTheOnlyOwnerOfBarberShop, barberShop.Name));
             }
 
             barber.BarberShops
@@ -216,13 +218,13 @@ namespace SuperBarber.Core.Services.Barbers
 
             if (barberShop == null)
             {
-                throw new ModelStateCustomException("", "This barbershop does not exist");
+                throw new ModelStateCustomException("", BarberShopNonExistent);
             }
 
             if (barberShop.Barbers.Any(b => b.Barber.UserId == userId && !b.IsOwner) ||
                 !barberShop.Barbers.Any(b => b.Barber.UserId == userId))
             {
-                throw new ModelStateCustomException("", $"You are not owner of {barberShop.Name}");
+                throw new ModelStateCustomException("", string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
             }
 
             var barber = await this.data.Barbers
@@ -231,12 +233,12 @@ namespace SuperBarber.Core.Services.Barbers
 
             if (barber == null)
             {
-                throw new ModelStateCustomException("", "This barber does not exist");
+                throw new ModelStateCustomException("", BarberNonExistent);
             }
 
             if (barberShop.Barbers.Any(b => b.BarberId == barberId && b.IsOwner))
             {
-                throw new ModelStateCustomException("", $"This barber is already owner of {barberShop.Name}");
+                throw new ModelStateCustomException("", string.Format(UserIsAlreadyOwnerOfBarberShop, barberShop.Name));
             }
 
             var user = await this.data.Users.FirstAsync(u => u.Id == barber.UserId);
@@ -270,18 +272,18 @@ namespace SuperBarber.Core.Services.Barbers
 
             if (barberShop == null)
             {
-                throw new ModelStateCustomException("", "This barbershop does not exist");
+                throw new ModelStateCustomException("", BarberShopNonExistent);
             }
 
             if (barberShop.Barbers.Any(b => b.Barber.UserId == userId && !b.IsOwner) ||
                 !barberShop.Barbers.Any(b => b.Barber.UserId == userId))
             {
-                throw new ModelStateCustomException("", $"You are not owner of {barberShop.Name}");
+                throw new ModelStateCustomException("", string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
             }
 
             if (barberShop.Barbers.Count(b => b.IsOwner) == 1)
             {
-                throw new ModelStateCustomException("", "Every barbershop has to have at least one owner.");
+                throw new ModelStateCustomException("", BarberShopHasToHaveAtLeastOneOwner);
             }
 
             var barber = await this.data.Barbers
@@ -290,17 +292,17 @@ namespace SuperBarber.Core.Services.Barbers
 
             if (barber == null)
             {
-                throw new ModelStateCustomException("", "This barber does not exist");
+                throw new ModelStateCustomException("", BarberNonExistent);
             }
 
             if (barber.UserId == userId)
             {
-                throw new ModelStateCustomException("", $"Use the resign function next to your name in the {barberShop.Name} manegment menu");
+                throw new ModelStateCustomException("", string.Format(UserIsOwnerOfTheBarberShop, barberShop.Name));
             }
 
             if (barberShop.Barbers.Any(b => b.BarberId == barberId && !b.IsOwner))
             {
-                throw new ModelStateCustomException("", $"This barber is not an owner of {barberShop.Name}");
+                throw new ModelStateCustomException("", string.Format(BarberIsNotOwnerOfBarberShop, barberShop.Name));
             }
 
             var oldOwner = barberShop.Barbers.Where(b => b.BarberId == barber.Id).First();
@@ -334,7 +336,7 @@ namespace SuperBarber.Core.Services.Barbers
 
             if (barberShop == null)
             {
-                throw new ModelStateCustomException("", "This barbershop does not exist");
+                throw new ModelStateCustomException("", BarberShopNonExistent);
             }
 
             var barber = await this.data.Barbers
@@ -342,13 +344,13 @@ namespace SuperBarber.Core.Services.Barbers
 
             if (barber == null)
             {
-                throw new ModelStateCustomException("", "This barber does not exist");
+                throw new ModelStateCustomException("", BarberNonExistent);
             }
 
             if (barberShop.Barbers.Any(b => b.Barber.UserId == userId && !b.IsOwner) ||
                 !barberShop.Barbers.Any(b => b.Barber.UserId == userId))
             {
-                throw new ModelStateCustomException("", $"You are not owner of {barberShop.Name}");
+                throw new ModelStateCustomException("", string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
             }
 
             var unavailableBarber = barberShop.Barbers.Where(b => b.BarberId == barber.Id).First();
@@ -375,7 +377,7 @@ namespace SuperBarber.Core.Services.Barbers
 
             if (barberShop == null)
             {
-                throw new ModelStateCustomException("", "This barbershop does not exist");
+                throw new ModelStateCustomException("", BarberShopNonExistent);
             }
 
             var barber = await this.data.Barbers
@@ -383,13 +385,13 @@ namespace SuperBarber.Core.Services.Barbers
 
             if (barber == null)
             {
-                throw new ModelStateCustomException("", "This barber does not exist");
+                throw new ModelStateCustomException("", BarberNonExistent);
             }
 
             if (barberShop.Barbers.Any(b => b.Barber.UserId == userId && !b.IsOwner) ||
                 !barberShop.Barbers.Any(b => b.Barber.UserId == userId))
             {
-                throw new ModelStateCustomException("", $"You are not owner of {barberShop.Name}");
+                throw new ModelStateCustomException("", string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
             }
 
             var availableBarber = barberShop.Barbers.Where(b => b.BarberId == barber.Id).First();

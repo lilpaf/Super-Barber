@@ -3,6 +3,8 @@ using SuperBarber.Infrastructure.Data;
 using SuperBarber.Core.Models.BarberShop;
 using SuperBarber.Core.Extensions;
 using static SuperBarber.Core.Services.Common.TimeCheck;
+using static SuperBarber.Core.Extensions.ExeptionErrors;
+using static SuperBarber.Core.Extensions.ExeptionErrors.HomeServiceErrors;
 
 namespace SuperBarber.Core.Services.Home
 {
@@ -30,12 +32,12 @@ namespace SuperBarber.Core.Services.Home
 
             if (!dateWasParsed)
             {
-                throw new ModelStateCustomException("", "Invalid date input.");
+                throw new ModelStateCustomException("", InvalidDateInput);
             }
 
             if (!CheckIfTimeIsCorrect(time))
             {
-                throw new ModelStateCustomException("", "Invalid time input.");
+                throw new ModelStateCustomException("", InvalidHourInput);
             }
 
             var timeArr = time.Split(':');
@@ -48,7 +50,7 @@ namespace SuperBarber.Core.Services.Home
 
             if (cityId == 0)
             {
-                throw new ModelStateCustomException("", "Invalid city.");
+                throw new ModelStateCustomException("", InvalidCity);
             }
 
             if (district == "All")
@@ -66,14 +68,14 @@ namespace SuperBarber.Core.Services.Home
 
                 if (districtId == 0)
                 {
-                    throw new ModelStateCustomException("", "Invalid district.");
+                    throw new ModelStateCustomException("", InvalidDistrict);
                 }
 
                 barberShopQuery = barberShopQuery
                 .Where(bs => bs.CityId == cityId &&
                 bs.District.Id == districtId &&
-                bs.StartHour <= dateParsed.TimeOfDay &&
-                bs.FinishHour >= dateParsed.TimeOfDay &&
+                bs.StartHour <= ts &&
+                bs.FinishHour >= ts &&
                 bs.Orders.All(o => o.Date != dateParsed.ToUniversalTime()) &&
                 bs.Barbers.Any(b => b.IsAvailable));
             }
@@ -103,7 +105,7 @@ namespace SuperBarber.Core.Services.Home
 
             if (barberShopsData.Count() == 0)
             {
-                throw new ModelStateCustomException("", "Right now we do not have any avalible barbershops matching your criteria.");
+                throw new ModelStateCustomException("", NoneAvalibleBarberShops);
             }
 
             return barberShopsData;

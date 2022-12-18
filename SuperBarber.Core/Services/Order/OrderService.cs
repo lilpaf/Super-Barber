@@ -2,6 +2,8 @@
 using SuperBarber.Core.Extensions;
 using SuperBarber.Core.Models.Order;
 using SuperBarber.Infrastructure.Data;
+using static SuperBarber.Core.Extensions.ExeptionErrors;
+using static SuperBarber.Core.Extensions.ExeptionErrors.OrderServiceErrors;
 
 namespace SuperBarber.Core.Services.Order
 {
@@ -20,17 +22,17 @@ namespace SuperBarber.Core.Services.Order
 
             if (order == null)
             {
-                throw new ModelStateCustomException("", "Invalid order");
+                throw new ModelStateCustomException("", OrderNonExistent);
             }
 
             if (order.BarberId != barberId || order.Barber.UserId != userId)
             {
-                throw new ModelStateCustomException("", "You are not authorized to preform this action");
+                throw new ModelStateCustomException("", UserIsNotTheAssignedBarber);
             }
 
             if (DateTime.UtcNow > order.Date || order.IsDeleted)
             {
-                throw new ModelStateCustomException("", "You can no longer cancel this order");
+                throw new ModelStateCustomException("", CancelOrderCanNoLongerBeDone);
             }
 
             order.IsDeleted = true;
@@ -48,17 +50,17 @@ namespace SuperBarber.Core.Services.Order
 
             if (order == null)
             {
-                throw new ModelStateCustomException("", "Invalid order");
+                throw new ModelStateCustomException("", OrderNonExistent);
             }
 
             if (order.UserId != userId)
             {
-                throw new ModelStateCustomException("", "You are not authorized to preform this action");
+                throw new ModelStateCustomException("", UserDidNotMakeTheOrder);
             }
 
             if (DateTime.UtcNow.AddMinutes(30) > order.Date || order.IsDeleted)
             {
-                throw new ModelStateCustomException("", "You can no longer cancel this order");
+                throw new ModelStateCustomException("", CancelOrderCanNoLongerBeDone);
             }
 
             order.IsDeleted = true;

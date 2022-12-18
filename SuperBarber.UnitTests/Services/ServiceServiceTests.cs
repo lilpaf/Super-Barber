@@ -5,6 +5,8 @@ using SuperBarber.Infrastructure.Data.Models;
 using SuperBarber.Services.Service;
 using SuperBarber.UnitTests.Common;
 using static SuperBarber.UnitTests.Common.CreateTestDb;
+using static SuperBarber.Core.Extensions.ExeptionErrors;
+using static SuperBarber.Core.Extensions.ExeptionErrors.ServiceServiceErrors;
 
 namespace SuperBarber.UnitTests.Services
 {
@@ -43,7 +45,7 @@ namespace SuperBarber.UnitTests.Services
         {
             var model = new AddServiceFormModel() { Name = "Hair cut test", CategoryId = FakeId, Price = 20 };
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddServiceAsync(model, userId, barberShop.Id), "Category does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddServiceAsync(model, userId, barberShop.Id), CategoryNonExistent);
         }
 
         [Test]
@@ -51,7 +53,7 @@ namespace SuperBarber.UnitTests.Services
         {
             var model = new AddServiceFormModel() { Name = "Hair cut test", CategoryId = 1, Price = 20 };
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddServiceAsync(model, userId, FakeId), "You are not the owner of this barbershop");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddServiceAsync(model, userId, FakeId), string.Format(UserIsNotOwnerOfBarberShop, "this barbershop"));
         }
 
         [Test]
@@ -60,7 +62,7 @@ namespace SuperBarber.UnitTests.Services
             var model = new AddServiceFormModel() { Name = "Hair cut test", CategoryId = 1, Price = 20 };
 
             //Barber is not working at this shop
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddServiceAsync(model, BarberUserId.ToString(), barberShop.Id), "You are not the owner of this barbershop");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddServiceAsync(model, BarberUserId.ToString(), barberShop.Id), string.Format(UserIsNotOwnerOfBarberShop, "this barbershop"));
 
             //Barber is not owner
 
@@ -72,7 +74,7 @@ namespace SuperBarber.UnitTests.Services
 
             Assert.False(barberInShop.IsOwner);
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddServiceAsync(model, userId, barberShop.Id), "You are not the owner of this barbershop");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddServiceAsync(model, userId, barberShop.Id), string.Format(UserIsNotOwnerOfBarberShop, "this barbershop"));
 
             //Barber is deleted
             barberInShop.IsOwner = true;
@@ -86,7 +88,7 @@ namespace SuperBarber.UnitTests.Services
             Assert.True(barberInShop.IsOwner);
             Assert.True(barber.IsDeleted);
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddServiceAsync(model, userId, barberShop.Id), "You are not the owner of this barbershop");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddServiceAsync(model, userId, barberShop.Id), string.Format(UserIsNotOwnerOfBarberShop, "this barbershop"));
         }
 
         [Test]
@@ -94,7 +96,7 @@ namespace SuperBarber.UnitTests.Services
         {
             var model = new AddServiceFormModel() { Name = "hair Cut ", CategoryId = 1, Price = 20 };
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddServiceAsync(model, userId, barberShop.Id), "This service already exists in your barber shop");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddServiceAsync(model, userId, barberShop.Id), string.Format(ServiceAlreadyExistInBarberShop, barberShop.Name));
         }
 
         [Test]
@@ -135,7 +137,7 @@ namespace SuperBarber.UnitTests.Services
         [Test]
         public void TestShowServices_ShouldThrowModelStateCustomExceptionWhenServiceIsNonExistent()
         {
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.ShowServicesAsync(FakeId), "This barbershop does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.ShowServicesAsync(FakeId), BarberShopNonExistent);
         }
 
         [Test]
@@ -169,7 +171,7 @@ namespace SuperBarber.UnitTests.Services
         {
             var serviceId = barberShop.Services.First().ServiceId;
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveServiceAsync(FakeId, serviceId, userId, false), "This barbershop does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveServiceAsync(FakeId, serviceId, userId, false), BarberShopNonExistent);
         }
 
         [Test]
@@ -178,7 +180,7 @@ namespace SuperBarber.UnitTests.Services
             var serviceId = barberShop.Services.First().ServiceId;
 
             //Barber is not working at this shop
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveServiceAsync(barberShop.Id, serviceId, BarberUserId.ToString(), false), $"You have to be owner of {barberShop.Name} to perform this action");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveServiceAsync(barberShop.Id, serviceId, BarberUserId.ToString(), false), string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
 
             //Barber is not owner
 
@@ -190,7 +192,7 @@ namespace SuperBarber.UnitTests.Services
 
             Assert.False(barberInShop.IsOwner);
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveServiceAsync(barberShop.Id, serviceId, userId, false), $"You have to be owner of {barberShop.Name} to perform this action");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveServiceAsync(barberShop.Id, serviceId, userId, false), string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
 
             //Barber is deleted
             barberInShop.IsOwner = true;
@@ -204,13 +206,13 @@ namespace SuperBarber.UnitTests.Services
             Assert.True(barberInShop.IsOwner);
             Assert.True(barber.IsDeleted);
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveServiceAsync(barberShop.Id, serviceId, userId, false), $"You have to be owner of {barberShop.Name} to perform this action");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveServiceAsync(barberShop.Id, serviceId, userId, false), string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
         }
 
         [Test]
         public void TestRemoveService_ShouldThrowModelStateCustomExceptionWhenServiceIsNotExistentInBarberShop()
         {
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveServiceAsync(barberShop.Id, FakeId, userId, false), $"This service does not exist in {barberShop.Name}");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveServiceAsync(barberShop.Id, FakeId, userId, false), string.Format(ServiceNonExistentInBarberShop, barberShop.Name));
         }
 
 

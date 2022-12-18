@@ -3,6 +3,8 @@ using SuperBarber.Core.Extensions;
 using SuperBarber.Infrastructure.Data.Models;
 using SuperBarber.UnitTests.Common;
 using static SuperBarber.UnitTests.Common.CreateTestDb;
+using static SuperBarber.Core.Extensions.ExeptionErrors;
+using static SuperBarber.Core.Extensions.ExeptionErrors.BarberServiceErrors;
 
 namespace SuperBarber.UnitTests.Services
 {
@@ -31,7 +33,7 @@ namespace SuperBarber.UnitTests.Services
         [Test]
         public void TestAddBarber_ThrowModelStateCustomExceptionWhenThereIsExitingBarber()
         {
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddBarberAsync(BarberShopOwnerUserId.ToString()), "User is already a barber");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddBarberAsync(BarberShopOwnerUserId.ToString()), UserIsBarber);
         }
 
         [Test]
@@ -80,12 +82,12 @@ namespace SuperBarber.UnitTests.Services
             var userBabrberId = BarberUserId.ToString();
 
             //Ivalid Id
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AsignBarberToBarberShopAsync(FakeId, userBabrberId), "This barbershop does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AsignBarberToBarberShopAsync(FakeId, userBabrberId), BarberShopNonExistent);
 
             //Deleted BarberShop
             var deletedBarberShop = dbContextWithSeededData.BarberShops.First(b => b.IsDeleted);
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AsignBarberToBarberShopAsync(deletedBarberShop.Id, userBabrberId), "This barbershop does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AsignBarberToBarberShopAsync(deletedBarberShop.Id, userBabrberId), BarberShopNonExistent);
 
             //Private BarberShop
             var barberShop = dbContextWithSeededData.BarberShops.First();
@@ -94,7 +96,7 @@ namespace SuperBarber.UnitTests.Services
 
             dbContextWithSeededData.SaveChanges();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AsignBarberToBarberShopAsync(barberShop.Id, userBabrberId), "This barbershop does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AsignBarberToBarberShopAsync(barberShop.Id, userBabrberId), BarberShopNonExistent);
         }
 
         [Test]
@@ -108,7 +110,7 @@ namespace SuperBarber.UnitTests.Services
             await service.AsignBarberToBarberShopAsync(barberShopId, userBabrberId);
 
             //Try to add it again
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AsignBarberToBarberShopAsync(barberShopId, userBabrberId), "User is already asigned to this barbershop");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AsignBarberToBarberShopAsync(barberShopId, userBabrberId), UserIsAsignedToBarberShop);
         }
 
         [Test]
@@ -140,12 +142,12 @@ namespace SuperBarber.UnitTests.Services
             await service.AsignBarberToBarberShopAsync(barberShop.Id, barber.User.Id);
 
             // Try to remove barber from non existent barbershop
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.UnasignBarberFromBarberShopAsync(FakeId, barber.Id, barberShopOwnerUserId), "This barbershop does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.UnasignBarberFromBarberShopAsync(FakeId, barber.Id, barberShopOwnerUserId), BarberShopNonExistent);
 
             // Try to remove barber from deleted barbershop
             var deletedBarberShop = dbContextWithSeededData.BarberShops.First(b => b.IsDeleted);
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.UnasignBarberFromBarberShopAsync(deletedBarberShop.Id, barber.Id, barberShopOwnerUserId), "This barbershop does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.UnasignBarberFromBarberShopAsync(deletedBarberShop.Id, barber.Id, barberShopOwnerUserId), BarberShopNonExistent);
         }
 
         [Test]
@@ -158,13 +160,13 @@ namespace SuperBarber.UnitTests.Services
             var barberShop = dbContextWithSeededData.BarberShops.First(b => !b.IsDeleted);
 
             //Try to remove barber withought beeing a employee at the barbershop
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.UnasignBarberFromBarberShopAsync(barberShop.Id, barber.Id, barberNotOwnerUserId), $"You are not owner of {barberShop.Name}");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.UnasignBarberFromBarberShopAsync(barberShop.Id, barber.Id, barberNotOwnerUserId), string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
 
             // Add barberToBarberShop
             await service.AsignBarberToBarberShopAsync(barberShop.Id, barberNotOwnerUserId);
 
             // Try to remove barber as non owner user
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.UnasignBarberFromBarberShopAsync(barberShop.Id, barber.Id, barberNotOwnerUserId), $"You are not owner of {barberShop.Name}");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.UnasignBarberFromBarberShopAsync(barberShop.Id, barber.Id, barberNotOwnerUserId), string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
         }
 
         [Test]
@@ -177,10 +179,10 @@ namespace SuperBarber.UnitTests.Services
             var barberShop = dbContextWithSeededData.BarberShops.First(b => !b.IsDeleted);
 
             // Barber is non existent
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.UnasignBarberFromBarberShopAsync(barberShop.Id, FakeId, barberShopOwnerUserId), "This barber does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.UnasignBarberFromBarberShopAsync(barberShop.Id, FakeId, barberShopOwnerUserId), BarberNonExistent);
 
             // Try to remove barber that is not employee
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.UnasignBarberFromBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId), "This barber does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.UnasignBarberFromBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId), BarberNonExistent);
 
             // This is edge case test usually when a barber is deleted he is removed from all of his shops.
             // In this test we will only test to check if the barber is deleted
@@ -192,7 +194,7 @@ namespace SuperBarber.UnitTests.Services
 
             dbContextWithSeededData.SaveChanges();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.UnasignBarberFromBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId), "This barber does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.UnasignBarberFromBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId), BarberNonExistent);
         }
 
         [Test]
@@ -205,8 +207,7 @@ namespace SuperBarber.UnitTests.Services
             var barberShop = dbContextWithSeededData.BarberShops.First(b => !b.IsDeleted);
 
             // Barber that is resigning is the only owner
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.UnasignBarberFromBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId),
-                "You are the only owner of this barbershop. If you want to unassign yoursef as barber from this barbershop you have to transfer the ownership to someone else from the barbershop manegment or delete the barbershop from the button 'Delete'.");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.UnasignBarberFromBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId), string.Format(UserIsTheOnlyOwnerOfBarberShop, barberShop.Name));
         }
 
         [Test]
@@ -285,12 +286,12 @@ namespace SuperBarber.UnitTests.Services
             var barberShop = dbContextWithSeededData.BarberShops.First(b => !b.IsDeleted);
 
             // Try to accsess non existent barbershop
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOwnerToBarberShopAsync(FakeId, barber.Id, barberShopOwnerUserId), "This barbershop does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOwnerToBarberShopAsync(FakeId, barber.Id, barberShopOwnerUserId), BarberShopNonExistent);
 
             // Try to accsess deleted barbershop
             var deletedBarberShop = dbContextWithSeededData.BarberShops.First(b => b.IsDeleted);
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOwnerToBarberShopAsync(deletedBarberShop.Id, barber.Id, barberShopOwnerUserId), "This barbershop does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOwnerToBarberShopAsync(deletedBarberShop.Id, barber.Id, barberShopOwnerUserId), BarberShopNonExistent);
         }
 
         [Test]
@@ -303,10 +304,10 @@ namespace SuperBarber.UnitTests.Services
             var barberShop = dbContextWithSeededData.BarberShops.First(b => !b.IsDeleted);
 
             //User not owner of the shop tries to make owner employee
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOwnerToBarberShopAsync(barberShop.Id, barber.Id, barberNotOwnerUserId), $"You are not owner of {barberShop.Name}");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOwnerToBarberShopAsync(barberShop.Id, barber.Id, barberNotOwnerUserId), string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
 
             //Babrer is not owner and it is not working at the barbershop
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOwnerToBarberShopAsync(barberShop.Id, barber.Id, FakeId.ToString()), $"You are not owner of {barberShop.Name}");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOwnerToBarberShopAsync(barberShop.Id, barber.Id, FakeId.ToString()), string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
         }
 
         [Test]
@@ -319,10 +320,10 @@ namespace SuperBarber.UnitTests.Services
             var barberShop = dbContextWithSeededData.BarberShops.First(b => !b.IsDeleted);
 
             // Barber is non existent
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOwnerToBarberShopAsync(barberShop.Id, FakeId, barberShopOwnerUserId), "This barber does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOwnerToBarberShopAsync(barberShop.Id, FakeId, barberShopOwnerUserId), BarberNonExistent);
 
             // Try to remove barber that is not employee
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOwnerToBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId), "This barber does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOwnerToBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId), BarberNonExistent);
 
             // This is edge case test usually when a barber is deleted he is removed from all of his shops.
             // In this test we will only test to check if the barber is deleted
@@ -334,7 +335,7 @@ namespace SuperBarber.UnitTests.Services
 
             dbContextWithSeededData.SaveChanges();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOwnerToBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId), "This barber does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOwnerToBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId), BarberNonExistent);
         }
 
         [Test]
@@ -347,7 +348,7 @@ namespace SuperBarber.UnitTests.Services
             await service.AsignBarberToBarberShopAsync(barberShop.Id, BarberUserId.ToString());
 
             // Barber is not owner
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOwnerToBarberShopAsync(barberShop.Id, barber.Id, barber.User.Id), $"This barber is already owner of {barberShop.Name}");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOwnerToBarberShopAsync(barberShop.Id, barber.Id, barber.User.Id), string.Format(UserIsAlreadyOwnerOfBarberShop, barberShop.Name));
         }
 
         [Test]
@@ -378,12 +379,12 @@ namespace SuperBarber.UnitTests.Services
             var barberShop = dbContextWithSeededData.BarberShops.First(b => !b.IsDeleted);
 
             // Try to accsess non existent barbershop
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOwnerFromBarberShopAsync(FakeId, barber.Id, barberShopOwnerUserId), "This barbershop does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOwnerFromBarberShopAsync(FakeId, barber.Id, barberShopOwnerUserId), BarberShopNonExistent);
 
             // Try to accsess deleted barbershop
             var deletedBarberShop = dbContextWithSeededData.BarberShops.First(b => b.IsDeleted);
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOwnerFromBarberShopAsync(deletedBarberShop.Id, barber.Id, barberShopOwnerUserId), "This barbershop does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOwnerFromBarberShopAsync(deletedBarberShop.Id, barber.Id, barberShopOwnerUserId), BarberShopNonExistent);
         }
 
         [Test]
@@ -396,10 +397,10 @@ namespace SuperBarber.UnitTests.Services
             var barberShop = dbContextWithSeededData.BarberShops.First(b => !b.IsDeleted);
 
             //User not owner of the shop tries to make owner employee
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOwnerFromBarberShopAsync(barberShop.Id, barber.Id, barberNotOwnerUserId), $"You are not owner of {barberShop.Name}");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOwnerFromBarberShopAsync(barberShop.Id, barber.Id, barberNotOwnerUserId), string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
 
             //Babrer is not owner and it is not working at the barbershop
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOwnerFromBarberShopAsync(barberShop.Id, barber.Id, FakeId.ToString()), $"You are not owner of {barberShop.Name}");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOwnerFromBarberShopAsync(barberShop.Id, barber.Id, FakeId.ToString()), string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
         }
 
         [Test]
@@ -412,7 +413,7 @@ namespace SuperBarber.UnitTests.Services
             var barberShop = dbContextWithSeededData.BarberShops.First(b => !b.IsDeleted);
 
             //Deleteing the only owner
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOwnerFromBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId), "Every barbershop has to have at least one owner.");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOwnerFromBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId), BarberShopHasToHaveAtLeastOneOwner);
         }
 
         [Test]
@@ -425,10 +426,10 @@ namespace SuperBarber.UnitTests.Services
             var barberShop = dbContextWithSeededData.BarberShops.First(b => !b.IsDeleted);
 
             // Barber is non existent
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOwnerFromBarberShopAsync(barberShop.Id, FakeId, barberShopOwnerUserId), "This barber does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOwnerFromBarberShopAsync(barberShop.Id, FakeId, barberShopOwnerUserId), BarberNonExistent);
 
             // Try to remove barber that is not employee
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOwnerFromBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId), "This barber does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOwnerFromBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId), BarberNonExistent);
 
             // This is edge case test usually when a barber is deleted he is removed from all of his shops.
             // In this test we will only test to check if the barber is deleted
@@ -440,7 +441,7 @@ namespace SuperBarber.UnitTests.Services
 
             dbContextWithSeededData.SaveChanges();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOwnerFromBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId), "This barber does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOwnerFromBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId), BarberNonExistent);
         }
 
         [Test]
@@ -463,7 +464,7 @@ namespace SuperBarber.UnitTests.Services
 
             dbContextWithSeededData.SaveChanges();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOwnerFromBarberShopAsync(barberShop.Id, barberShopOwnerId, barberShopOwnerUserId), $"Use the resign function next to your name in the {barberShop.Name} manegment menu");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOwnerFromBarberShopAsync(barberShop.Id, barberShopOwnerId, barberShopOwnerUserId), string.Format(UserIsOwnerOfTheBarberShop, barberShop.Name));
         }
 
         [Test]
@@ -478,7 +479,7 @@ namespace SuperBarber.UnitTests.Services
             // Add barber to barbershop
             await service.AsignBarberToBarberShopAsync(barberShop.Id, BarberUserId.ToString());
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOwnerFromBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId), $"This barber is not an owner of {barberShop.Name}");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOwnerFromBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId), string.Format(BarberIsNotOwnerOfBarberShop, barberShop.Name));
         }
 
         [Test]
@@ -520,28 +521,12 @@ namespace SuperBarber.UnitTests.Services
             var barberShop = dbContextWithSeededData.BarberShops.First(b => !b.IsDeleted);
 
             // Try to accsess non existent barbershop
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberUnavailableAtBarberShopAsync(FakeId, barber.Id, barberShopOwnerUserId), "This barbershop does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberUnavailableAtBarberShopAsync(FakeId, barber.Id, barberShopOwnerUserId), BarberShopNonExistent);
 
             // Try to accsess deleted barbershop
             var deletedBarberShop = dbContextWithSeededData.BarberShops.First(b => b.IsDeleted);
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberUnavailableAtBarberShopAsync(deletedBarberShop.Id, barber.Id, barberShopOwnerUserId), "This barbershop does not exist");
-        }
-
-        [Test]
-        public void TestMakeBarberUnavailableAtBarberShop_ShouldThrowModelStateCustomExceptionWhenBarberIsNonExistentOrDeleted()
-        {
-            var barberNotOwnerUserId = BarberUserId.ToString();
-
-            var barber = dbContextWithSeededData.Barbers.First(b => b.UserId == barberNotOwnerUserId);
-
-            var barberShop = dbContextWithSeededData.BarberShops.First(b => !b.IsDeleted);
-
-            //User not owner of the shop tries to make employee unavailable
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberUnavailableAtBarberShopAsync(barberShop.Id, barber.Id, barberNotOwnerUserId), $"You are not owner of {barberShop.Name}");
-
-            //Babrer is not owner and it is not working at the barbershop
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberUnavailableAtBarberShopAsync(barberShop.Id, barber.Id, FakeId.ToString()), $"You are not owner of {barberShop.Name}");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberUnavailableAtBarberShopAsync(deletedBarberShop.Id, barber.Id, barberShopOwnerUserId), BarberShopNonExistent);
         }
 
         [Test]
@@ -554,10 +539,10 @@ namespace SuperBarber.UnitTests.Services
             var barberShop = dbContextWithSeededData.BarberShops.First(b => !b.IsDeleted);
 
             // Barber is non existent
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberUnavailableAtBarberShopAsync(barberShop.Id, FakeId, barberShopOwnerUserId), "This barber does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberUnavailableAtBarberShopAsync(barberShop.Id, FakeId, barberShopOwnerUserId), BarberNonExistent);
 
             // Try to remove barber that is not employee
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberUnavailableAtBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId), "This barber does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberUnavailableAtBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId), BarberNonExistent);
 
             // This is edge case test usually when a barber is deleted he is removed from all of his shops.
             // In this test we will only test to check if the barber is deleted
@@ -569,7 +554,23 @@ namespace SuperBarber.UnitTests.Services
 
             dbContextWithSeededData.SaveChanges();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberUnavailableAtBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId), "This barber does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberUnavailableAtBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId), BarberNonExistent);
+        }
+
+        [Test]
+        public void TestMakeBarberUnavailableAtBarberShop_ShouldThrowModelStateCustomExceptionWhenBarberIsNonExistentOrDeleted()
+        {
+            var barberNotOwnerUserId = BarberUserId.ToString();
+
+            var barber = dbContextWithSeededData.Barbers.First(b => b.UserId == barberNotOwnerUserId);
+
+            var barberShop = dbContextWithSeededData.BarberShops.First(b => !b.IsDeleted);
+
+            //User not owner of the shop tries to make employee unavailable
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberUnavailableAtBarberShopAsync(barberShop.Id, barber.Id, barberNotOwnerUserId), string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
+
+            //Babrer is not owner and it is not working at the barbershop
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberUnavailableAtBarberShopAsync(barberShop.Id, barber.Id, FakeId.ToString()), string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
         }
 
         [Test]
@@ -634,28 +635,12 @@ namespace SuperBarber.UnitTests.Services
             var barberShop = dbContextWithSeededData.BarberShops.First(b => !b.IsDeleted);
 
             // Try to accsess non existent barbershop
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberAvailableAtBarberShopAsync(FakeId, barber.Id, barberShopOwnerUserId), "This barbershop does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberAvailableAtBarberShopAsync(FakeId, barber.Id, barberShopOwnerUserId), BarberShopNonExistent);
 
             // Try to accsess deleted barbershop
             var deletedBarberShop = dbContextWithSeededData.BarberShops.First(b => b.IsDeleted);
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberAvailableAtBarberShopAsync(deletedBarberShop.Id, barber.Id, barberShopOwnerUserId), "This barbershop does not exist");
-        }
-
-        [Test]
-        public void TestMakeBarberAvailableAtBarberShop_ShouldThrowModelStateCustomExceptionWhenBarberIsNonExistentOrDeleted()
-        {
-            var barberNotOwnerUserId = BarberUserId.ToString();
-
-            var barber = dbContextWithSeededData.Barbers.First(b => b.UserId == barberNotOwnerUserId);
-
-            var barberShop = dbContextWithSeededData.BarberShops.First(b => !b.IsDeleted);
-
-            //User not owner of the shop tries to make employee unavailable
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberAvailableAtBarberShopAsync(barberShop.Id, barber.Id, barberNotOwnerUserId), $"You are not owner of {barberShop.Name}");
-
-            //Babrer is not owner and it is not working at the barbershop
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberAvailableAtBarberShopAsync(barberShop.Id, barber.Id, FakeId.ToString()), $"You are not owner of {barberShop.Name}");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberAvailableAtBarberShopAsync(deletedBarberShop.Id, barber.Id, barberShopOwnerUserId), BarberShopNonExistent);
         }
 
         [Test]
@@ -668,10 +653,10 @@ namespace SuperBarber.UnitTests.Services
             var barberShop = dbContextWithSeededData.BarberShops.First(b => !b.IsDeleted);
 
             // Barber is non existent
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberAvailableAtBarberShopAsync(barberShop.Id, FakeId, barberShopOwnerUserId), "This barber does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberAvailableAtBarberShopAsync(barberShop.Id, FakeId, barberShopOwnerUserId), BarberNonExistent);
 
             // Try to remove barber that is not employee
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberAvailableAtBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId), "This barber does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberAvailableAtBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId), BarberNonExistent);
 
             // This is edge case test usually when a barber is deleted he is removed from all of his shops.
             // In this test we will only test to check if the barber is deleted
@@ -683,7 +668,23 @@ namespace SuperBarber.UnitTests.Services
 
             dbContextWithSeededData.SaveChanges();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberAvailableAtBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId), "This barber does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberAvailableAtBarberShopAsync(barberShop.Id, barber.Id, barberShopOwnerUserId), BarberNonExistent);
+        }
+
+        [Test]
+        public void TestMakeBarberAvailableAtBarberShop_ShouldThrowModelStateCustomExceptionWhenBarberIsNonExistentOrDeleted()
+        {
+            var barberNotOwnerUserId = BarberUserId.ToString();
+
+            var barber = dbContextWithSeededData.Barbers.First(b => b.UserId == barberNotOwnerUserId);
+
+            var barberShop = dbContextWithSeededData.BarberShops.First(b => !b.IsDeleted);
+
+            //User not owner of the shop tries to make employee unavailable
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberAvailableAtBarberShopAsync(barberShop.Id, barber.Id, barberNotOwnerUserId), string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
+
+            //Babrer is not owner and it is not working at the barbershop
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberAvailableAtBarberShopAsync(barberShop.Id, barber.Id, FakeId.ToString()), string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
         }
 
         [Test]

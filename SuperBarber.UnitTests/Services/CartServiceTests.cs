@@ -6,6 +6,8 @@ using SuperBarber.Infrastructure.Data.Models;
 using SuperBarber.UnitTests.Common;
 using System.Globalization;
 using static SuperBarber.UnitTests.Common.CreateTestDb;
+using static SuperBarber.Core.Extensions.ExeptionErrors;
+using static SuperBarber.Core.Extensions.ExeptionErrors.CartServiceErrors;
 
 namespace SuperBarber.Tests.Services
 {
@@ -71,10 +73,10 @@ namespace SuperBarber.Tests.Services
             var model = await service.GetServiceAsync(serviceInDb.Id);
 
             //Deleted service
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.BarberShopServicePriceAsync(barbershop.Id, serviceInDb.Id), "This barbershop dose not contain this service");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.BarberShopServicePriceAsync(barbershop.Id, serviceInDb.Id), BarberShopNotContaingService);
 
             //Fake service id
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.BarberShopServicePriceAsync(barbershop.Id, FakeId), "This barbershop dose not contain this service");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.BarberShopServicePriceAsync(barbershop.Id, FakeId), BarberShopNotContaingService);
 
             //Service not in barbershop
             var newService = new Service()
@@ -84,7 +86,7 @@ namespace SuperBarber.Tests.Services
                 CategoryId = 1,
             };
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.BarberShopServicePriceAsync(barbershop.Id, newService.Id), "This barbershop dose not contain this service");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.BarberShopServicePriceAsync(barbershop.Id, newService.Id), BarberShopNotContaingService);
         }
 
         [Test]
@@ -129,7 +131,7 @@ namespace SuperBarber.Tests.Services
 
             var guestUserId = GuestUserId.ToString();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOrderAsync(model, cartList, guestUserId), "Hour input is incorect.");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOrderAsync(model, cartList, guestUserId), InvalidHourInput);
 
             model = new BookServiceFormModel()
             {
@@ -137,45 +139,7 @@ namespace SuperBarber.Tests.Services
                 Time = "12:00"
             };
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOrderAsync(model, cartList, guestUserId), "Date input is incorect.");
-        }
-
-        [Test]
-        public void TestAddOrder_ShouldThrowModelStateCustomExceptionWhenTimeIsOutOfTheWorkingDay()
-        {
-            var model = new BookServiceFormModel()
-            {
-                Date = DateTime.UtcNow.AddDays(1).ToString("yyyy'-'MM'-'dd", CultureInfo.InvariantCulture),
-                Time = "23:00"
-            };
-
-            var cartList = new List<ServiceListingViewModel>();
-
-            var barberShopService = dbContextWithSeededData.BarberShops
-                .First(b => !b.IsDeleted && b.IsPublic && b.Services.Any())
-                .Services.First();
-
-            cartList.Add(new ServiceListingViewModel()
-            {
-                BarberShopId = barberShopService.BarberShopId,
-                ServiceId = barberShopService.ServiceId,
-                Price = barberShopService.Price,
-                Category = barberShopService.Service.Category.Name,
-                BarberShopName = barberShopService.BarberShop.Name,
-                ServiceName = barberShopService.Service.Name
-            });
-
-            var guestUserId = GuestUserId.ToString();
-
-            var barberShop = dbContextWithSeededData.BarberShops.Find(barberShopService.BarberShopId);
-
-            var timeArr = model.Time.Split(':');
-
-            var ts = new TimeSpan(int.Parse(timeArr[0]), int.Parse(timeArr[1]), 0);
-
-            Assert.False(barberShop.StartHour <= ts && barberShop.FinishHour >= ts);
-
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOrderAsync(model, cartList, guestUserId));
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOrderAsync(model, cartList, guestUserId), InvalidDateInput);
         }
 
         [Test]
@@ -214,7 +178,7 @@ namespace SuperBarber.Tests.Services
 
             Assert.False(barberShop.IsPublic);
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOrderAsync(model, cartList, guestUserId));
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOrderAsync(model, cartList, guestUserId), BarberShopNonExistent);
 
             //Deleted Barbershop
 
@@ -226,7 +190,7 @@ namespace SuperBarber.Tests.Services
             Assert.True(barberShop.IsPublic);
             Assert.True(barberShop.IsDeleted);
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOrderAsync(model, cartList, guestUserId));
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOrderAsync(model, cartList, guestUserId), BarberShopNonExistent);
 
             //Fake barbershop
 
@@ -242,7 +206,43 @@ namespace SuperBarber.Tests.Services
                 ServiceName = barberShopService.Service.Name
             });
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOrderAsync(model, cartList, guestUserId));
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOrderAsync(model, cartList, guestUserId), BarberShopNonExistent);
+        }
+
+        [Test]
+        public void TestAddOrder_ShouldThrowModelStateCustomExceptionWhenTimeIsOutOfTheWorkingDay()
+        {
+            var model = new BookServiceFormModel()
+            {
+                Date = DateTime.UtcNow.AddDays(1).ToString("yyyy'-'MM'-'dd", CultureInfo.InvariantCulture),
+                Time = "23:00"
+            };
+
+            var cartList = new List<ServiceListingViewModel>();
+
+            var barberShopService = dbContextWithSeededData.BarberShops
+                .First(b => !b.IsDeleted && b.IsPublic && b.Services.Any())
+                .Services.First();
+
+            cartList.Add(new ServiceListingViewModel()
+            {
+                BarberShopId = barberShopService.BarberShopId,
+                ServiceId = barberShopService.ServiceId,
+                Price = barberShopService.Price,
+                Category = barberShopService.Service.Category.Name,
+                BarberShopName = barberShopService.BarberShop.Name,
+                ServiceName = barberShopService.Service.Name
+            });
+
+            var guestUserId = GuestUserId.ToString();
+
+            var barberShop = dbContextWithSeededData.BarberShops.Find(barberShopService.BarberShopId);
+
+            var timeArr = model.Time.Split(':');
+
+            var ts = new TimeSpan(int.Parse(timeArr[0]), int.Parse(timeArr[1]), 0);
+
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOrderAsync(model, cartList, guestUserId), string.Format(BookHourIsOutOfWorkingTime, cartList.First().ServiceName, barberShop.Name));
         }
 
         [Test]
@@ -273,7 +273,7 @@ namespace SuperBarber.Tests.Services
 
             var guestUserId = GuestUserId.ToString();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOrderAsync(model, cartList, guestUserId));
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOrderAsync(model, cartList, guestUserId), string.Format(BarberShopDoesNotContainService, cartList.First().ServiceName, cartList.First().BarberShopName));
 
             //Barshop has deleted the service
 
@@ -295,7 +295,7 @@ namespace SuperBarber.Tests.Services
                 ServiceName = barberShopService.Service.Name
             });
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOrderAsync(model, cartList, guestUserId));
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOrderAsync(model, cartList, guestUserId), string.Format(BarberShopDoesNotContainService, cartList.First().ServiceName, cartList.First().BarberShopName));
         }
 
         [Test]
@@ -325,7 +325,9 @@ namespace SuperBarber.Tests.Services
 
             var guestUserId = GuestUserId.ToString();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOrderAsync(model, cartList, guestUserId));
+            var minimumBookDate = DateTime.UtcNow.AddMinutes(15);
+
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOrderAsync(model, cartList, guestUserId), string.Format(BookHourMustBeBiggerOrEqualToTheMinimumHour, minimumBookDate.ToLocalTime().Hour, minimumBookDate.ToLocalTime().Minute));
         }
 
         [Test]
@@ -366,7 +368,7 @@ namespace SuperBarber.Tests.Services
 
             var guestUserId = GuestUserId.ToString();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOrderAsync(model, cartList, guestUserId));
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOrderAsync(model, cartList, guestUserId), string.Format(NoneAvalibleBarbers, cartList.First().ServiceName, barberShop.Name));
 
             barber.IsAvailable = true;
             barber.Barber.IsDeleted = true;
@@ -376,7 +378,7 @@ namespace SuperBarber.Tests.Services
             Assert.True(barber.IsAvailable);
             Assert.True(barber.Barber.IsDeleted);
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOrderAsync(model, cartList, guestUserId));
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOrderAsync(model, cartList, guestUserId), string.Format(NoneAvalibleBarbers, cartList.First().ServiceName, barberShop.Name));
         }
 
         [Test]
@@ -406,7 +408,7 @@ namespace SuperBarber.Tests.Services
 
             var guestUserId = GuestUserId.ToString();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOrderAsync(model, cartList, guestUserId));
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddOrderAsync(model, cartList, guestUserId), string.Format(NoneAvalibleBarbers, cartList.First().ServiceName, cartList.First().BarberShopName));
         }
 
         [Test]

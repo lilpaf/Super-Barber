@@ -5,9 +5,11 @@ using SuperBarber.Infrastructure.Data;
 using SuperBarber.Core.Models.BarberShop;
 using SuperBarber.Core.Extensions;
 using SuperBarber.Core.Models.Barber;
+using Microsoft.AspNetCore.Http;
 using static SuperBarber.Core.Services.Common.TimeCheck;
 using static SuperBarber.Core.Extensions.CustomRoles;
-using Microsoft.AspNetCore.Http;
+using static SuperBarber.Core.Extensions.ExeptionErrors;
+using static SuperBarber.Core.Extensions.ExeptionErrors.BarberShopServiceErrors;
 
 namespace SuperBarber.Core.Services.BarberShops
 {
@@ -57,7 +59,7 @@ namespace SuperBarber.Core.Services.BarberShops
 
                 if (cityId == 0)
                 {
-                    throw new ModelStateCustomException("", "Invalid city.");
+                    throw new ModelStateCustomException("", InvalidCity);
                 }
 
                 barberShopQuery = barberShopQuery
@@ -70,7 +72,7 @@ namespace SuperBarber.Core.Services.BarberShops
 
                 if (districtId == 0)
                 {
-                    throw new ModelStateCustomException("", "Invalid district.");
+                    throw new ModelStateCustomException("", InvalidDistrict);
                 }
 
                 barberShopQuery = barberShopQuery
@@ -168,11 +170,11 @@ namespace SuperBarber.Core.Services.BarberShops
         {
             if (!CheckIfTimeIsCorrect(model.StartHour))
             {
-                throw new ModelStateCustomException("", "Start hour input is incorrect.");
+                throw new ModelStateCustomException("", StartHourInputIsIncorrect);
             }
             if (!CheckIfTimeIsCorrect(model.FinishHour))
             {
-                throw new ModelStateCustomException("", "Finish hour input is incorrect.");
+                throw new ModelStateCustomException("", FinishHourInputIsIncorrect);
             }
 
             var hoursParsed = ParseHours(model.StartHour, model.FinishHour);
@@ -183,7 +185,7 @@ namespace SuperBarber.Core.Services.BarberShops
 
             if (startHour >= finishHour)
             {
-                throw new ModelStateCustomException(nameof(model.StartHour), "Opening hour must be smaller that the closing hour. And can not be the same as the closing hour.");
+                throw new ModelStateCustomException(nameof(model.StartHour), StartHourMustBeSmallerThanFinishHour);
             }
 
             await CityExists(model.City);
@@ -214,7 +216,7 @@ namespace SuperBarber.Core.Services.BarberShops
             if (existingBarberShop != null
                 && GetStreetNameAndNumberCaseInsensitive(existingBarberShop.Street) == GetStreetNameAndNumberCaseInsensitive(barberShop.Street))
             {
-                throw new ModelStateCustomException("", "This barbershop already exist.");
+                throw new ModelStateCustomException("", BarberShopAlreadyExist);
             }
 
 
@@ -223,7 +225,7 @@ namespace SuperBarber.Core.Services.BarberShops
 
             if (user == null)
             {
-                throw new ModelStateCustomException("", "User does not exist.");
+                throw new ModelStateCustomException("", UserNonExistent);
             }
 
             var barber = await data.Barbers
@@ -231,7 +233,7 @@ namespace SuperBarber.Core.Services.BarberShops
 
             if (barber == null)
             {
-                throw new ModelStateCustomException("", "You need to be a barber in order to do this action.");
+                throw new ModelStateCustomException("", UserMustBeABarber);
             }
 
             barberShop.Barbers.Add(new BarberShopBarbers
@@ -247,7 +249,7 @@ namespace SuperBarber.Core.Services.BarberShops
 
             if (imageName == null)
             {
-                throw new ModelStateCustomException("", "Something went wrong with saveing the image");
+                throw new ModelStateCustomException("", ErrorWhenSaveingImage);
             }
             
             var deletedBarbershop = await this.data.BarberShops
@@ -387,7 +389,7 @@ namespace SuperBarber.Core.Services.BarberShops
 
             if (formModel == null)
             {
-                throw new ModelStateCustomException("", "This barbershop does not exist");
+                throw new ModelStateCustomException("", BarberShopNonExistent);
             }
 
             return formModel;
@@ -412,7 +414,7 @@ namespace SuperBarber.Core.Services.BarberShops
 
             if (barberShop == null)
             {
-                throw new ModelStateCustomException("", "This barbershop does not exist");
+                throw new ModelStateCustomException("", BarberShopNonExistent);
             }
 
             if (!userIsAdmin)
@@ -423,17 +425,17 @@ namespace SuperBarber.Core.Services.BarberShops
 
                 if (barber == null)
                 {
-                    throw new ModelStateCustomException("", $"You have to be a owner of ${barberShop.Name} to do this action");
+                    throw new ModelStateCustomException("", string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
                 }
             }
 
             if (!CheckIfTimeIsCorrect(model.StartHour))
             {
-                throw new ModelStateCustomException("", "Start hour input is incorect.");
+                throw new ModelStateCustomException("", StartHourInputIsIncorrect);
             }
             if (!CheckIfTimeIsCorrect(model.FinishHour))
             {
-                throw new ModelStateCustomException("", "Finish hour input is incorect.");
+                throw new ModelStateCustomException("", FinishHourInputIsIncorrect);
             }
 
             var hoursParsed = ParseHours(model.StartHour, model.FinishHour);
@@ -444,7 +446,7 @@ namespace SuperBarber.Core.Services.BarberShops
 
             if (startHour >= finishHour)
             {
-                throw new ModelStateCustomException(nameof(model.StartHour), "Opening hour must be smaller that the closing hour. And can not be the same as the closing hour");
+                throw new ModelStateCustomException(nameof(model.StartHour), StartHourMustBeSmallerThanFinishHour);
             }
 
             await CityExists(model.City);
@@ -481,14 +483,14 @@ namespace SuperBarber.Core.Services.BarberShops
                 
                 if (!result)
                 {
-                    throw new ModelStateCustomException("", "Something went wrong with deleteing the old image");
+                    throw new ModelStateCustomException("", ErrorWhenDeleteingImage);
                 }
 
                 var imageName = await CreateImage(model.ImageFile, wwwRootPath);
 
                 if (imageName == null)
                 {
-                    throw new ModelStateCustomException("", "Something went wrong with saveing the image");
+                    throw new ModelStateCustomException("", ErrorWhenSaveingImage);
                 }
 
                 barberShop.ImageName = imageName;
@@ -531,7 +533,7 @@ namespace SuperBarber.Core.Services.BarberShops
 
             if (barberShop == null)
             {
-                throw new ModelStateCustomException("", "This barbershop does not exist");
+                throw new ModelStateCustomException("", BarberShopNonExistent);
             }
 
             var user = await this.data.Users.FirstAsync(u => u.Id == userId);
@@ -540,7 +542,7 @@ namespace SuperBarber.Core.Services.BarberShops
             {
                 if (barberShop.Barbers.Count(b => b.IsOwner) > 1)
                 {
-                    throw new ModelStateCustomException("", $"You are not the only owner of {barberShop.Name}. If you want to unasign only yourself as owner and barber from {barberShop.Name} press the 'resign' button in the barbershop manage menu. If you want to delete {barberShop.Name} you have to be the only owner.");
+                    throw new ModelStateCustomException("", string.Format(UserIsTheOnlyOwnerOfBarberShop, barberShop.Name));
                 }
 
                 var barber = await this.data.Barbers
@@ -550,7 +552,7 @@ namespace SuperBarber.Core.Services.BarberShops
 
                 if (barber == null)
                 {
-                    throw new ModelStateCustomException("", $"You have to be owner of {barberShop.Name} to do this action");
+                    throw new ModelStateCustomException("", string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
                 }
 
                 barber.BarberShops
@@ -568,7 +570,7 @@ namespace SuperBarber.Core.Services.BarberShops
 
             if (!result)
             {
-                throw new ModelStateCustomException("", "Something went wrong with deleteing the old image");
+                throw new ModelStateCustomException("", ErrorWhenDeleteingImage);
             }
 
             barberShop.ImageName = null;
@@ -693,7 +695,7 @@ namespace SuperBarber.Core.Services.BarberShops
             if (!this.data.BarberShops.Any(bs => bs.Id == barberShopId && !bs.IsDeleted
                     && bs.Barbers.Any(b => b.IsOwner && !b.Barber.IsDeleted && b.Barber.UserId == userId)))
             {
-                throw new ModelStateCustomException("", "You have to be owner to do this action");
+                throw new ModelStateCustomException("", BarberShopIsNonExistentOrUserIsNotOwner);
             }
 
             return await this.data.BarberShops
@@ -724,7 +726,7 @@ namespace SuperBarber.Core.Services.BarberShops
 
             if (barberShop == null)
             {
-                throw new ModelStateCustomException("", "This barbershop does not exist");
+                throw new ModelStateCustomException("", BarberShopNonExistent);
             }
 
             barberShop.IsPublic = true;
@@ -738,7 +740,7 @@ namespace SuperBarber.Core.Services.BarberShops
 
             if (barberShop == null)
             {
-                throw new ModelStateCustomException("", "This barbershop does not exist");
+                throw new ModelStateCustomException("", BarberShopNonExistent);
             }
 
             barberShop.IsPublic = false;

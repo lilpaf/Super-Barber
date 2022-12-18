@@ -3,6 +3,8 @@ using SuperBarber.Core.Services.Order;
 using SuperBarber.Infrastructure.Data.Models;
 using SuperBarber.UnitTests.Common;
 using static SuperBarber.UnitTests.Common.CreateTestDb;
+using static SuperBarber.Core.Extensions.ExeptionErrors;
+using static SuperBarber.Core.Extensions.ExeptionErrors.OrderServiceErrors;
 
 namespace SuperBarber.Tests.Services
 {
@@ -28,7 +30,7 @@ namespace SuperBarber.Tests.Services
         {
             var barberUserId = BarberShopOwnerUserId.ToString();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOrderAsync(FakeId.ToString(), barber.BarberId, barberUserId), "Invalid order");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOrderAsync(FakeId.ToString(), barber.BarberId, barberUserId), OrderNonExistent);
         }
 
         [Test]
@@ -36,9 +38,9 @@ namespace SuperBarber.Tests.Services
         {
             var barberUserId = BarberShopOwnerUserId.ToString();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOrderAsync(OrderId.ToString(), FakeId, barberUserId), "You are not authorized to preform this action");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOrderAsync(OrderId.ToString(), FakeId, barberUserId), UserIsNotTheAssignedBarber);
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOrderAsync(OrderId.ToString(), barber.BarberId, GuestUserId.ToString()), "You are not authorized to preform this action");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOrderAsync(OrderId.ToString(), barber.BarberId, GuestUserId.ToString()), UserIsNotTheAssignedBarber);
         }
 
         [Test]
@@ -70,7 +72,7 @@ namespace SuperBarber.Tests.Services
 
             dbContextWithSeededData.SaveChanges();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOrderAsync(OrderId.ToString(), barber.BarberId, barberUserId), "You can no longer cancel this order");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOrderAsync(OrderId.ToString(), barber.BarberId, barberUserId), CancelOrderCanNoLongerBeDone);
         }
 
         [Test]
@@ -84,7 +86,7 @@ namespace SuperBarber.Tests.Services
 
             dbContextWithSeededData.SaveChanges();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOrderAsync(OrderId.ToString(), barber.BarberId, barberUserId), "You can no longer cancel this order");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveOrderAsync(OrderId.ToString(), barber.BarberId, barberUserId), CancelOrderCanNoLongerBeDone);
         }
 
         [Test]
@@ -105,15 +107,15 @@ namespace SuperBarber.Tests.Services
         {
             var userId = GuestUserId.ToString();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveYourOrderAsync(FakeId.ToString(), userId), "Invalid order");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveYourOrderAsync(FakeId.ToString(), userId), OrderNonExistent);
         }
 
         [Test]
-        public void TestRemoveYourOrder_ShouldThrowModelStateCustomExceptionWhenOrderIsNotAssignedToTheCurrentUserBarber()
+        public void TestRemoveYourOrder_ShouldThrowModelStateCustomExceptionWhenOrderIsNotTheOneThatMadeTheOrder()
         {
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveYourOrderAsync(OrderId.ToString(), FakeId.ToString()), "You are not authorized to preform this action");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveYourOrderAsync(OrderId.ToString(), FakeId.ToString()), UserDidNotMakeTheOrder);
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveYourOrderAsync(OrderId.ToString(), BarberShopOwnerUserId.ToString()), "You are not authorized to preform this action");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveYourOrderAsync(OrderId.ToString(), BarberShopOwnerUserId.ToString()), UserDidNotMakeTheOrder);
         }
 
         [Test]
@@ -145,7 +147,7 @@ namespace SuperBarber.Tests.Services
 
             dbContextWithSeededData.SaveChanges();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveYourOrderAsync(OrderId.ToString(), userId), "You can no longer cancel this order");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveYourOrderAsync(OrderId.ToString(), userId), CancelOrderCanNoLongerBeDone);
         }
 
         [Test]
@@ -159,7 +161,7 @@ namespace SuperBarber.Tests.Services
 
             dbContextWithSeededData.SaveChanges();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveYourOrderAsync(OrderId.ToString(), userId), "You can no longer cancel this order");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.RemoveYourOrderAsync(OrderId.ToString(), userId), CancelOrderCanNoLongerBeDone);
         }
 
         [Test]

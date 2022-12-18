@@ -6,6 +6,8 @@ using SuperBarber.Core.Services.BarberShops;
 using SuperBarber.Infrastructure.Data.Models;
 using SuperBarber.UnitTests.Common;
 using static SuperBarber.UnitTests.Common.CreateTestDb;
+using static SuperBarber.Core.Extensions.ExeptionErrors;
+using static SuperBarber.Core.Extensions.ExeptionErrors.BarberShopServiceErrors;
 
 namespace SuperBarber.UnitTests.Services
 {
@@ -45,7 +47,16 @@ namespace SuperBarber.UnitTests.Services
             var searchModel = new AllBarberShopQueryModel() { City = "Fake" };
             var userId = GuestUserId.ToString();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AllBarberShopsAsync(searchModel, userId), "Invalid city.");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AllBarberShopsAsync(searchModel, userId), InvalidCity);
+        }
+
+        [Test]
+        public void TestAllBarberShops_ShouldThrowModelStateCustomExceptionWhenDistrictIsNonExistent()
+        {
+            var searchModel = new AllBarberShopQueryModel() { District = "Fake" };
+            var userId = GuestUserId.ToString();
+
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AllBarberShopsAsync(searchModel, userId), InvalidDistrict);
         }
 
         [Test]
@@ -81,15 +92,6 @@ namespace SuperBarber.UnitTests.Services
 
             Assert.True(model.BarberShops.All(bs => bs.City == "Sofia" && bs.District == "Lozenets"));
             Assert.True(model.TotalBarberShops == 1);
-        }
-
-        [Test]
-        public void TestAllBarberShops_ShouldThrowModelStateCustomExceptionWhenDistrictIsNonExistent()
-        {
-            var searchModel = new AllBarberShopQueryModel() { District = "Fake" };
-            var userId = GuestUserId.ToString();
-
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AllBarberShopsAsync(searchModel, userId), "Invalid district.");
         }
 
         [Test]
@@ -238,7 +240,7 @@ namespace SuperBarber.UnitTests.Services
                 ImageFile = file
             };
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddBarberShopAsync(formModel, userId, wwwRootPath), "Start hour input is incorrect.");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddBarberShopAsync(formModel, userId, wwwRootPath), StartHourInputIsIncorrect);
 
             formModel = new BarberShopAddFormModel()
             {
@@ -251,7 +253,7 @@ namespace SuperBarber.UnitTests.Services
                 ImageFile = file
             };
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddBarberShopAsync(formModel, userId, wwwRootPath), "Finish hour input is incorrect.");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddBarberShopAsync(formModel, userId, wwwRootPath), FinishHourInputIsIncorrect);
         }
 
         [Test]
@@ -270,7 +272,7 @@ namespace SuperBarber.UnitTests.Services
                 ImageFile = file
             };
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddBarberShopAsync(formModel, userId, wwwRootPath), "Opening hour must be smaller that the closing hour. And can not be the same as the closing hour.");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddBarberShopAsync(formModel, userId, wwwRootPath), StartHourMustBeSmallerThanFinishHour);
 
             formModel = new BarberShopAddFormModel()
             {
@@ -283,7 +285,7 @@ namespace SuperBarber.UnitTests.Services
                 ImageFile = file
             };
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddBarberShopAsync(formModel, userId, wwwRootPath), "Opening hour must be smaller that the closing hour. And can not be the same as the closing hour.");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddBarberShopAsync(formModel, userId, wwwRootPath), StartHourMustBeSmallerThanFinishHour);
         }
 
         [Test]
@@ -302,7 +304,7 @@ namespace SuperBarber.UnitTests.Services
                 ImageFile = file
             };
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddBarberShopAsync(formModel, userId, wwwRootPath), "This barbershop already exist.");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddBarberShopAsync(formModel, userId, wwwRootPath), BarberShopAlreadyExist);
         }
 
         [Test]
@@ -321,17 +323,17 @@ namespace SuperBarber.UnitTests.Services
                 ImageFile = file
             };
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddBarberShopAsync(formModel, userId, wwwRootPath), "You need to be a barber in order to do this action.");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddBarberShopAsync(formModel, userId, wwwRootPath), UserMustBeABarber);
 
             //User not existing shouldn't be possible by default in order to become a barber you should be registered user
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddBarberShopAsync(formModel, FakeId.ToString(), wwwRootPath), "User does not exist.");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddBarberShopAsync(formModel, FakeId.ToString(), wwwRootPath), UserNonExistent);
 
             var deletedUser = new User() { Id = "DeletedUser", FirstName = "", LastName = "", Email = "", PhoneNumber = "", IsDeleted = true, DeleteDate = DateTime.UtcNow };
 
             dbContextWithSeededData.Users.Add(deletedUser);
             dbContextWithSeededData.SaveChanges();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddBarberShopAsync(formModel, deletedUser.Id, wwwRootPath), "User does not exist.");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.AddBarberShopAsync(formModel, deletedUser.Id, wwwRootPath), UserNonExistent);
         }
 
         [Test]
@@ -462,7 +464,7 @@ namespace SuperBarber.UnitTests.Services
         [Test]
         public void TestDisplayBarberShopInfo_ShouldThrowModelStateCustomExceptionWhenBarberShopIsInvalid()
         {
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.DisplayBarberShopInfoAsync(FakeId), "This barbershop does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.DisplayBarberShopInfoAsync(FakeId), BarberShopNonExistent);
         }
 
         [Test]
@@ -476,8 +478,8 @@ namespace SuperBarber.UnitTests.Services
 
             var formModel = await service.DisplayBarberShopInfoAsync(barberShop.Id);
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.EditBarberShopAsync(formModel, FakeId, userId, false, wwwRootPath), "This barbershop does not exist");
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.EditBarberShopAsync(formModel, deletedBarberShop.Id, userId, false, wwwRootPath), "This barbershop does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.EditBarberShopAsync(formModel, FakeId, userId, false, wwwRootPath), BarberShopNonExistent);
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.EditBarberShopAsync(formModel, deletedBarberShop.Id, userId, false, wwwRootPath), BarberShopNonExistent);
         }
 
         [Test]
@@ -490,7 +492,7 @@ namespace SuperBarber.UnitTests.Services
             var formModel = await service.DisplayBarberShopInfoAsync(barberShop.Id);
 
             //Not employee at the shop
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.EditBarberShopAsync(formModel, barberShop.Id, userId, false, wwwRootPath), $"You have to be a owner of ${barberShop.Name} to do this action");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.EditBarberShopAsync(formModel, barberShop.Id, userId, false, wwwRootPath), string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
 
             //Not owner of the shop
             userId = BarberShopOwnerUserId.ToString();
@@ -502,7 +504,7 @@ namespace SuperBarber.UnitTests.Services
 
             dbContextWithSeededData.SaveChanges();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.EditBarberShopAsync(formModel, barberShop.Id, userId, false, wwwRootPath), $"You have to be a owner of ${barberShop.Name} to do this action");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.EditBarberShopAsync(formModel, barberShop.Id, userId, false, wwwRootPath), string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
 
             //Deleted barber
             barberInShop = barberShop.Barbers.First(b => !b.IsOwner && b.Barber.UserId == userId);
@@ -516,7 +518,7 @@ namespace SuperBarber.UnitTests.Services
 
             dbContextWithSeededData.SaveChanges();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.EditBarberShopAsync(formModel, barberShop.Id, userId, false, wwwRootPath), $"You have to be a owner of ${barberShop.Name} to do this action");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.EditBarberShopAsync(formModel, barberShop.Id, userId, false, wwwRootPath), string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
         }
 
         [Test]
@@ -536,7 +538,7 @@ namespace SuperBarber.UnitTests.Services
                 FinishHour = "19:00"
             };
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.EditBarberShopAsync(formModel, barberShop.Id, userId, false, wwwRootPath), "Start hour input is incorect.");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.EditBarberShopAsync(formModel, barberShop.Id, userId, false, wwwRootPath), StartHourInputIsIncorrect);
 
             formModel = new BarberShopEditFormModel()
             {
@@ -548,7 +550,7 @@ namespace SuperBarber.UnitTests.Services
                 FinishHour = "19-00"
             };
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.EditBarberShopAsync(formModel, barberShop.Id, userId, false, wwwRootPath), "Finish hour input is incorect.");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.EditBarberShopAsync(formModel, barberShop.Id, userId, false, wwwRootPath), FinishHourInputIsIncorrect);
         }
 
         [Test]
@@ -568,7 +570,7 @@ namespace SuperBarber.UnitTests.Services
                 FinishHour = "19:00"
             };
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.EditBarberShopAsync(formModel, barberShop.Id, userId, false, wwwRootPath), "Opening hour must be smaller that the closing hour. And can not be the same as the closing hour");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.EditBarberShopAsync(formModel, barberShop.Id, userId, false, wwwRootPath), StartHourMustBeSmallerThanFinishHour);
 
             formModel = new BarberShopEditFormModel()
             {
@@ -580,7 +582,7 @@ namespace SuperBarber.UnitTests.Services
                 FinishHour = "10:30"
             };
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.EditBarberShopAsync(formModel, barberShop.Id, userId, false, wwwRootPath), "Opening hour must be smaller that the closing hour. And can not be the same as the closing hour");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.EditBarberShopAsync(formModel, barberShop.Id, userId, false, wwwRootPath), StartHourMustBeSmallerThanFinishHour);
         }
 
         [Test]
@@ -634,10 +636,26 @@ namespace SuperBarber.UnitTests.Services
 
             var deletedBarberShop = dbContextWithSeededData.BarberShops.First(b => b.IsDeleted);
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.DeleteBarberShopAsync(FakeId, userId, false, wwwRootPath), "This barbershop does not exist");
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.DeleteBarberShopAsync(deletedBarberShop.Id, userId, false, wwwRootPath), "This barbershop does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.DeleteBarberShopAsync(FakeId, userId, false, wwwRootPath), BarberShopNonExistent);
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.DeleteBarberShopAsync(deletedBarberShop.Id, userId, false, wwwRootPath), BarberShopNonExistent);
         }
 
+        [Test]
+        public void TestDeleteBarberShop_ShouldThrowModelStateCustomExceptionWhenBarberShopHasMultipleOwners()
+        {
+            var userId = BarberUserId.ToString();
+
+            var barberShop = dbContextWithSeededData.BarberShops.First(b => !b.IsDeleted);
+
+            var barberToAdd = dbContextWithSeededData.Barbers.First(b => !b.BarberShops.Any());
+
+            barberShop.Barbers.Add(new BarberShopBarbers { BarberId = barberToAdd.Id, IsOwner = true });
+
+            dbContextWithSeededData.SaveChanges();
+
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.DeleteBarberShopAsync(barberShop.Id, userId, false, wwwRootPath), string.Format(UserIsTheOnlyOwnerOfBarberShop, barberShop.Name));
+        }
+        
         [Test]
         public void TestDeleteBarberShop_ShouldThrowModelStateCustomExceptionWhenBarberIsInvalidOrDeletedOrIsNotOwner()
         {
@@ -646,7 +664,7 @@ namespace SuperBarber.UnitTests.Services
             var barberShop = dbContextWithSeededData.BarberShops.First(b => !b.IsDeleted);
 
             //Not employee at the shop
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.DeleteBarberShopAsync(barberShop.Id, userId, false, wwwRootPath), $"You have to be a owner of ${barberShop.Name} to do this action");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.DeleteBarberShopAsync(barberShop.Id, userId, false, wwwRootPath), string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
 
             //Not owner of the shop
             userId = BarberShopOwnerUserId.ToString();
@@ -658,7 +676,7 @@ namespace SuperBarber.UnitTests.Services
 
             dbContextWithSeededData.SaveChanges();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.DeleteBarberShopAsync(barberShop.Id, userId, false, wwwRootPath), $"You have to be a owner of ${barberShop.Name} to do this action");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.DeleteBarberShopAsync(barberShop.Id, userId, false, wwwRootPath), string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
 
             //Deleted barber
             barberInShop = barberShop.Barbers.First(b => !b.IsOwner && b.Barber.UserId == userId);
@@ -672,7 +690,7 @@ namespace SuperBarber.UnitTests.Services
 
             dbContextWithSeededData.SaveChanges();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.DeleteBarberShopAsync(barberShop.Id, userId, false, wwwRootPath), $"You have to be a owner of ${barberShop.Name} to do this action");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.DeleteBarberShopAsync(barberShop.Id, userId, false, wwwRootPath), string.Format(UserIsNotOwnerOfBarberShop, barberShop.Name));
         }
 
         [Test]
@@ -708,8 +726,8 @@ namespace SuperBarber.UnitTests.Services
 
             var deletedBarberShop = dbContextWithSeededData.BarberShops.First(b => b.IsDeleted);
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.BarberShopInformationAsync(userId, FakeId), "You have to be owner to do this action");
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.BarberShopInformationAsync(userId, deletedBarberShop.Id), "You have to be owner to do this action");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.BarberShopInformationAsync(userId, FakeId), BarberShopIsNonExistentOrUserIsNotOwner);
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.BarberShopInformationAsync(userId, deletedBarberShop.Id), BarberShopIsNonExistentOrUserIsNotOwner);
         }
 
         [Test]
@@ -722,7 +740,7 @@ namespace SuperBarber.UnitTests.Services
             var formModel = await service.DisplayBarberShopInfoAsync(barberShop.Id);
 
             //Not employee at the shop
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.BarberShopInformationAsync(userId, barberShop.Id), "You have to be owner to do this action");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.BarberShopInformationAsync(userId, barberShop.Id), BarberShopIsNonExistentOrUserIsNotOwner);
 
             //Not owner of the shop
             userId = BarberShopOwnerUserId.ToString();
@@ -734,7 +752,7 @@ namespace SuperBarber.UnitTests.Services
 
             dbContextWithSeededData.SaveChanges();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.BarberShopInformationAsync(userId, barberShop.Id), "You have to be owner to do this action");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.BarberShopInformationAsync(userId, barberShop.Id), BarberShopIsNonExistentOrUserIsNotOwner);
 
             //Deleted barber
             barberInShop = barberShop.Barbers.First(b => !b.IsOwner && b.Barber.UserId == userId);
@@ -748,7 +766,7 @@ namespace SuperBarber.UnitTests.Services
 
             dbContextWithSeededData.SaveChanges();
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.BarberShopInformationAsync(userId, barberShop.Id), "You have to be owner to do this action");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.BarberShopInformationAsync(userId, barberShop.Id), BarberShopIsNonExistentOrUserIsNotOwner);
         }
 
         [Test]
@@ -786,7 +804,7 @@ namespace SuperBarber.UnitTests.Services
         [Test]
         public void TestMakeBarberShopPublic_ShouldThrowModelStateCustomExceptionWhenBabrberShopIsNonExistent()
         {
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberShopPublicAsync(FakeId), "This barbershop does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberShopPublicAsync(FakeId), BarberShopNonExistent);
         }
 
         [Test]
@@ -808,7 +826,7 @@ namespace SuperBarber.UnitTests.Services
         [Test]
         public void TestMakeBarberShopPrivate_ShouldThrowModelStateCustomExceptionWhenBabrberShopIsNonExistent()
         {
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberShopPrivateAsync(FakeId), "This barbershop does not exist");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.MakeBarberShopPrivateAsync(FakeId), BarberShopNonExistent);
         }
 
         [Test]

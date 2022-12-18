@@ -4,6 +4,8 @@ using SuperBarber.Core.Models.Cart;
 using SuperBarber.Core.Models.Service;
 using static SuperBarber.Core.Services.Common.TimeCheck;
 using SuperBarber.Core.Extensions;
+using static SuperBarber.Core.Extensions.ExeptionErrors;
+using static SuperBarber.Core.Extensions.ExeptionErrors.CartServiceErrors;
 
 namespace SuperBarber.Core.Services.Cart
 {
@@ -28,7 +30,7 @@ namespace SuperBarber.Core.Services.Cart
         {
             if (!BarberShopHasService(barberShopId, serviceId))
             {
-                throw new ModelStateCustomException("", "This barbershop dose not contain this service");
+                throw new ModelStateCustomException("", BarberShopNotContaingService);
             }
 
             var servicePrice = await this.data.BarberShops.Where(b => b.Id == barberShopId)
@@ -50,12 +52,12 @@ namespace SuperBarber.Core.Services.Cart
 
                 if (!dateParsedResult)
                 {
-                    throw new ModelStateCustomException("", "Date input is incorect.", newCartList);
+                    throw new ModelStateCustomException("", InvalidDateInput, newCartList);
                 }
 
                 if (!CheckIfTimeIsCorrect(model.Time))
                 {
-                    throw new ModelStateCustomException("", "Hour input is incorect.", newCartList);
+                    throw new ModelStateCustomException("", InvalidHourInput, newCartList);
                 }
 
                 var timeArr = model.Time.Split(':');
@@ -70,31 +72,28 @@ namespace SuperBarber.Core.Services.Cart
                 .ThenInclude(o => o.Orders)
                 .FirstOrDefaultAsync(bs => bs.Id == item.BarberShopId
                 && bs.IsPublic
-                && !bs.IsDeleted
-                && bs.StartHour <= ts
-                && bs.FinishHour >= ts);
+                && !bs.IsDeleted);
 
                 if (barberShop == null)
                 {
-                    throw new ModelStateCustomException("",
-                        $"Your desired book hour for {item.ServiceName} at {item.BarberShopName} is out of the working time of {item.BarberShopName}. If you had any previous orders in your cart and they are gone they are already proccesed you can find all the orders that you have made in the menu 'My orders'. Remove {item.ServiceName} at {item.BarberShopName} from the cart to continue.",
-                        newCartList);
+                    throw new ModelStateCustomException("", BarberShopNonExistent, newCartList);
+                }
+                
+                if (barberShop.StartHour > ts || barberShop.FinishHour < ts)
+                {
+                    throw new ModelStateCustomException("",string.Format(BookHourIsOutOfWorkingTime, item.ServiceName, barberShop.Name), newCartList);
                 }
 
                 if (!BarberShopHasService(barberShop.Id, item.ServiceId))
                 {
-                    throw new ModelStateCustomException("",
-                        $"{item.BarberShopName} dose not contain service {item.ServiceName}. If you had any previous orders in your cart and they are gone they are already proccesed you can find all the orders that you have made in the menu 'My orders'.",
-                        newCartList);
+                    throw new ModelStateCustomException("", string.Format(BarberShopDoesNotContainService, item.ServiceName, barberShop.Name), newCartList);
                 }
 
                 var minimumBookDate = DateTime.UtcNow.AddMinutes(15);
 
                 if (dateParsed.ToUniversalTime() < minimumBookDate)
                 {
-                    throw new ModelStateCustomException("",
-                        $"Your desired book hour must be at least at {minimumBookDate.ToLocalTime().Hour}:{minimumBookDate.ToLocalTime().Minute}.  If you had any previous orders in your cart and they are gone they are already proccesed you can find all the orders that you have made in the menu 'My orders'.",
-                        newCartList);
+                    throw new ModelStateCustomException("", string.Format(BookHourMustBeBiggerOrEqualToTheMinimumHour, minimumBookDate.ToLocalTime().Hour, minimumBookDate.ToLocalTime().Minute), newCartList);
                 }
 
                 var barber = barberShop.Barbers
@@ -105,9 +104,7 @@ namespace SuperBarber.Core.Services.Cart
 
                 if (barber == null)
                 {
-                    throw new ModelStateCustomException("",
-                        $"There are no avalible barbers at {barberShop.Name} for the desired time right now. If you had any previous orders in your cart and they are gone they are already proccesed you can find all the orders that you have made in the menu 'My orders'. Remove {item.ServiceName} at {item.BarberShopName} from the cart to continue.",
-                        newCartList);
+                    throw new ModelStateCustomException("", string.Format(NoneAvalibleBarbers, item.ServiceName, barberShop.Name), newCartList);
                 }
 
                 var order = new SuperBarber.Infrastructure.Data.Models.Order

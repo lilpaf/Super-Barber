@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using SuperBarber.Core.Extensions;
+﻿using SuperBarber.Core.Extensions;
 using SuperBarber.Core.Services.Account;
 using SuperBarber.Core.Services.BarberShops;
 using SuperBarber.Infrastructure.Data.Models;
 using SuperBarber.UnitTests.Common;
 using static SuperBarber.UnitTests.Common.CreateTestDb;
+using static SuperBarber.Core.Extensions.ExeptionErrors;
 
 namespace SuperBarber.UnitTests.Services
 {
@@ -43,7 +43,7 @@ namespace SuperBarber.UnitTests.Services
         {
             user = dbContextWithSeededData.Users.Find(GuestUserId.ToString());
 
-            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.DeleteBarberAsync(user, false, wwwRootPath), "This barber does not exist!");
+            Assert.ThrowsAsync<ModelStateCustomException>(async () => await service.DeleteBarberAsync(user, false, wwwRootPath), BarberNonExistent);
         }
 
         [Test]

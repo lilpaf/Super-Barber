@@ -7,6 +7,7 @@ using SuperBarber.Core.Services.Cart;
 using SuperBarber.Extensions;
 using static SuperBarber.Extensions.SessionExtensions;
 using static SuperBarber.Extensions.WebConstants;
+using static SuperBarber.Extensions.WebConstants.CartControllerConstants;
 
 namespace SuperBarber.Controllers
 {
@@ -46,7 +47,7 @@ namespace SuperBarber.Controllers
 
             if (service == null || barberShopName == null)
             {
-                SetTempDataModelStateExtension.SetTempData(this, "", "Invalid service or barbershop");
+                SetTempDataModelStateExtension.SetTempData(this, "", InvalidServiceOrBarbershop);
 
                 return RedirectToAction("All", "BarberShop");
             }
@@ -81,7 +82,7 @@ namespace SuperBarber.Controllers
 
                 HttpContext.Session.Set<List<ServiceListingViewModel>>(SessionName, cartList);
 
-                TempData[GlobalMessageKey] = "Item was added to the cart!";
+                TempData[GlobalMessageKey] = ItemAddedSuccsessMessege;
 
                 return RedirectToAction("All", "Service", new { barbershopId, information = cartService.GetBarberShopNameToFriendlyUrl(barberShopName) });
             }
@@ -101,7 +102,7 @@ namespace SuperBarber.Controllers
 
             HttpContext.Session.Set(SessionName, cartList);
 
-            TempData[GlobalMessageKey] = "Item was added to the cart!";
+            TempData[GlobalMessageKey] = ItemAddedSuccsessMessege;
 
             return RedirectToAction("All", "Service", new { barbershopId, information = cartService.GetBarberShopNameToFriendlyUrl(barberShopName) });
         }
@@ -119,7 +120,7 @@ namespace SuperBarber.Controllers
 
                 if (service == null)
                 {
-                    SetTempDataModelStateExtension.SetTempData(this, "", "Invalid service");
+                    SetTempDataModelStateExtension.SetTempData(this, "", InvalidService);
 
                     return RedirectToAction("All", "Cart");
                 }
@@ -128,7 +129,7 @@ namespace SuperBarber.Controllers
 
                 HttpContext.Session.Set<List<ServiceListingViewModel>>(SessionName, cartList);
 
-                TempData[GlobalMessageKey] = "Item was removed from the cart!";
+                TempData[GlobalMessageKey] = ItemRemovedSuccsessMessege;
             }
 
             return RedirectToAction("All", "Cart");
@@ -160,7 +161,7 @@ namespace SuperBarber.Controllers
 
                     HttpContext.Session.Set<List<ServiceListingViewModel>>(SessionName, cartList);
 
-                    TempData[GlobalMessageKey] = "Your order was booked! You can find all the orders you have made in the menu 'My Orders'";
+                    TempData[GlobalMessageKey] = OrderBookedSuccsessMessege;
                 }
 
                 return RedirectToAction("All", "BarberShop");

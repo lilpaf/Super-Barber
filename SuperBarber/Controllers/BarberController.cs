@@ -30,7 +30,7 @@ namespace SuperBarber.Controllers
 
                 await barberService.AddBarberAsync(userId);
 
-                TempData[GlobalMessageKey] = $"You are barber now!";
+                TempData[GlobalMessageKey] = "You are barber now!";
 
                 return RedirectToAction("All", "BarberShop");
             }
