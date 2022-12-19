@@ -7,6 +7,7 @@ using SuperBarber.Core.Services.BarberShops;
 using SuperBarber.Extensions;
 using static SuperBarber.Core.Extensions.CustomRoles;
 using static SuperBarber.Extensions.WebConstants;
+using static SuperBarber.Extensions.WebConstants.BarberShopControllerConstants;
 
 namespace SuperBarber.Controllers
 {
@@ -58,7 +59,7 @@ namespace SuperBarber.Controllers
 
                 await barberShopService.AddBarberShopAsync(model, userId, wwwRootPath);
                 
-                TempData[GlobalMessageKey] = $"Your barbershop was added and is waiting for approval!";
+                TempData[GlobalMessageKey] = AddSuccsessMessege;
 
                 return RedirectToAction(nameof(Mine));
             }
@@ -107,7 +108,7 @@ namespace SuperBarber.Controllers
 
                 await barberShopService.EditBarberShopAsync(model, barberShopId, userId, userIsAdmin, wwwRootPath);
 
-                TempData[GlobalMessageKey] = $"{information.Replace('-', ' ')} was edited and is waiting for approval!";
+                TempData[GlobalMessageKey] = string.Join(EditSuccsessMessege, information.Replace('-', ' '));
 
                 if (userIsAdmin)
                 {
@@ -143,7 +144,7 @@ namespace SuperBarber.Controllers
 
                 await barberShopService.DeleteBarberShopAsync(barberShopId, userId, userIsAdmin, wwwRootPath);
 
-                TempData[GlobalMessageKey] = $"{information.Replace('-', ' ')} was deleted!";
+                TempData[GlobalMessageKey] = string.Join(DeleteSuccsessMessege, information.Replace('-', ' '));
 
                 if (userIsAdmin)
                 {

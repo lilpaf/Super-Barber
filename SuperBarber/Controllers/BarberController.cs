@@ -6,6 +6,7 @@ using SuperBarber.Core.Services.Barbers;
 using SuperBarber.Extensions;
 using static SuperBarber.Core.Extensions.CustomRoles;
 using static SuperBarber.Extensions.WebConstants;
+using static SuperBarber.Extensions.WebConstants.BarberControllerConstants;
 
 namespace SuperBarber.Controllers
 {
@@ -30,7 +31,7 @@ namespace SuperBarber.Controllers
 
                 await barberService.AddBarberAsync(userId);
 
-                TempData[GlobalMessageKey] = "You are barber now!";
+                TempData[GlobalMessageKey] = AddBarberSuccsessMessege;
 
                 return RedirectToAction("All", "BarberShop");
             }
@@ -57,7 +58,7 @@ namespace SuperBarber.Controllers
 
                 await barberService.AsignBarberToBarberShopAsync(barberShopId, userId);
 
-                TempData[GlobalMessageKey] = $"You started working at {information.Replace('-', ' ')}!";
+                TempData[GlobalMessageKey] = string.Format(AssignBarberSuccsessMessege, information.Replace('-', ' '));
 
                 return RedirectToAction("Mine", "BarberShop");
             }
@@ -89,7 +90,7 @@ namespace SuperBarber.Controllers
                     return RedirectToAction("All", "BarberShop");
                 }
 
-                TempData[GlobalMessageKey] = $"{await barberService.GetBarberNameAsync(barberId)} stoped working at {information.Replace('-', ' ')}!";
+                TempData[GlobalMessageKey] = string.Format(UnassignBarberSuccsessMessege, information.Replace('-', ' '), await barberService.GetBarberNameAsync(barberId));
 
                 return RedirectToAction("Manage", "BarberShop", new { barberShopId, information });
             }
@@ -115,7 +116,7 @@ namespace SuperBarber.Controllers
 
                 await barberService.AddOwnerToBarberShopAsync(barberShopId, barberId, userId);
 
-                TempData[GlobalMessageKey] = $"{await barberService.GetBarberNameAsync(barberId)} is owner at {information.Replace('-', ' ')}!";
+                TempData[GlobalMessageKey] = string.Format(MakeOwnerSuccsessMessege, information.Replace('-', ' '), await barberService.GetBarberNameAsync(barberId));
 
                 return RedirectToAction("Manage", "BarberShop", new { barberShopId, information });
             }
@@ -142,7 +143,7 @@ namespace SuperBarber.Controllers
 
                 await barberService.RemoveOwnerFromBarberShopAsync(barberShopId, barberId, userId);
 
-                TempData[GlobalMessageKey] = $"{await barberService.GetBarberNameAsync(barberId)} is no longer owner at {information.Replace('-', ' ')}!";
+                TempData[GlobalMessageKey] = string.Format(RemoveOwnerSuccsessMessege, information.Replace('-', ' '), await barberService.GetBarberNameAsync(barberId));
 
                 return RedirectToAction("Manage", "BarberShop", new { barberShopId, information });
             }
@@ -169,7 +170,7 @@ namespace SuperBarber.Controllers
 
                 await barberService.MakeBarberUnavailableAtBarberShopAsync(barberShopId, barberId, userId);
 
-                TempData[GlobalMessageKey] = $"{await barberService.GetBarberNameAsync(barberId)} is unavailable at {information.Replace('-', ' ')}!";
+                TempData[GlobalMessageKey] = string.Format(MakeUnavailableSuccsessMessege, information.Replace('-', ' '), await barberService.GetBarberNameAsync(barberId));
 
                 return RedirectToAction("Manage", "BarberShop", new { barberShopId, information });
             }
@@ -196,7 +197,7 @@ namespace SuperBarber.Controllers
 
                 await barberService.MakeBarberAvailableAtBarberShopAsync(barberShopId, barberId, userId);
 
-                TempData[GlobalMessageKey] = $"{await barberService.GetBarberNameAsync(barberId)} is available at {information.Replace('-', ' ')}!";
+                TempData[GlobalMessageKey] = string.Format(MakeAvailableSuccsessMessege, information.Replace('-', ' '), await barberService.GetBarberNameAsync(barberId));
 
                 return RedirectToAction("Manage", "BarberShop", new { barberShopId, information });
             }

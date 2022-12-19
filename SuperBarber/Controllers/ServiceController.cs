@@ -6,6 +6,7 @@ using SuperBarber.Core.Services.Service;
 using SuperBarber.Extensions;
 using static SuperBarber.Core.Extensions.CustomRoles;
 using static SuperBarber.Extensions.WebConstants;
+using static SuperBarber.Extensions.WebConstants.ServiceControllerConstants;
 
 namespace SuperBarber.Controllers
 {
@@ -49,7 +50,7 @@ namespace SuperBarber.Controllers
 
                 await serviceService.AddServiceAsync(model, userId, barberShopId);
 
-                TempData[GlobalMessageKey] = $"Service was added to {information.Replace('-', ' ')}!";
+                TempData[GlobalMessageKey] = string.Join(AddSuccsessMessege, information.Replace('-', ' '));
 
                 return RedirectToAction(nameof(Manage), new {barberShopId, information});
             }
@@ -120,7 +121,7 @@ namespace SuperBarber.Controllers
 
                 await serviceService.RemoveServiceAsync(barberShopId, serviceId, userId, userIsAdmin);
 
-                TempData[GlobalMessageKey] = $"Service was removed from {information.Replace('-', ' ')}!";
+                TempData[GlobalMessageKey] = string.Join(RemoveSuccsessMessege, information.Replace('-', ' '));
 
                 return RedirectToAction(nameof(Manage), new { barberShopId, information });
             }

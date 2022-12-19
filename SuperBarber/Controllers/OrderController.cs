@@ -5,6 +5,7 @@ using SuperBarber.Core.Models.Order;
 using SuperBarber.Core.Services.Order;
 using SuperBarber.Extensions;
 using static SuperBarber.Extensions.WebConstants;
+using static SuperBarber.Extensions.WebConstants.OrderControllerConstants;
 
 namespace SuperBarber.Controllers
 {
@@ -37,7 +38,7 @@ namespace SuperBarber.Controllers
 
                     await this.orderService.RemoveOrderAsync(orderId, (int)barberId, userId);
 
-                    TempData[GlobalMessageKey] = "Order was canceled!";
+                    TempData[GlobalMessageKey] = RemoveSuccsessMessege;
 
                     return RedirectToAction("OrdersInfo", "Barber");
                 }
@@ -56,7 +57,7 @@ namespace SuperBarber.Controllers
 
                     await this.orderService.RemoveYourOrderAsync(orderId, userId);
 
-                    TempData[GlobalMessageKey] = "Order was canceled!";
+                    TempData[GlobalMessageKey] = RemoveSuccsessMessege;
 
                     return RedirectToAction(nameof(Mine));
                 }
